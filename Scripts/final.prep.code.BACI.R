@@ -156,7 +156,7 @@ annual.data = subset(all.data.ls, all.data.ls$local_lifespan == "ANNUAL")
 # 292 data points from 168 species
 
 perennial.data = subset(all.data.ls, all.data.ls$local_lifespan == "PERENNIAL") 
-# 692 data points of 500 species
+# 890 data points of 500 species
 
 table(all.data.ls$functional_group)
 # 675 forb, 47 graminoid, 392 grass, 120 legume
@@ -170,6 +170,9 @@ table(grass$local_lifespan)
 forb = subset(all.data.ls, all.data.ls$functional_group == "FORB")
 # 675 data points of 400 species
 
+table(forb$local_lifespan)
+# 194 annuals, 446 perennials
+
 # grass.annuals
 grass.annual = subset(grass, grass$local_lifespan == "ANNUAL")
 # 73 data points of 33 species
@@ -178,6 +181,14 @@ grass.annual = subset(grass, grass$local_lifespan == "ANNUAL")
 grass.perennial = subset(grass, grass$local_lifespan == "PERENNIAL")
 # 310 data points of 159 species
 
+# forb.annual
+forb.annual = subset(forb, forb$local_lifespan == "ANNUAL")
+# 194 data points of 123 species
+
+# forb.perennial
+forb.perennial = subset(forb, forb$local_lifespan == "PERENNIAL")
+# 446 data points of 260 species
+
 #### write out the files ####
 
 #write.csv(all.data, file = "./Formatted.Data/BACI.all.data.csv")
@@ -185,3 +196,7 @@ grass.perennial = subset(grass, grass$local_lifespan == "PERENNIAL")
 #write.csv(forb, file = "./Formatted.Data/BACI.forb.csv")
 #write.csv(grass, file = "./Formatted.Data/BACI.grass.csv")
 #write.csv(perennial.data, file = "./Formatted.Data/BACI.perennial.data.csv")
+#write.csv(forb.annual, file = "./Formatted.Data/BACI.forb.annual.csv")
+#write.csv(grass.annual, file = "./Formatted.Data/BACI.grass.annual.csv")
+#write.csv(forb.perennial, file = "./Formatted.Data/BACI.forb.perennial.csv")
+#write.csv(grass.perennial, file = "./Formatted.Data/BACI.grass.perennial.csv")

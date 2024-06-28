@@ -115,8 +115,8 @@ ggPD_boot_test <- function(gbm.object, predictor = NULL, n.plots = length(pred.n
                   axis.text.x = element_text(size = 12), axis.title.x = element_text(size = 15), 
                   axis.text.y = element_text(size = 12), axis.title.y = element_text(size = 15),
                   axis.line.y = element_line(size = 0.1), 
-                  axis.line.x = element_line(size = 0.1))
-            #xlim(c(-0.95, -0.35))
+                  axis.line.x = element_line(size = 0.1))+
+            xlim(c(-0.95, -0.35))
           if (common.scale == T) {
             ggPD[[i]] <- ggPD[[i]] + ylim(c(2, 2), xlim(c(-0.95, -0.35)))
           }

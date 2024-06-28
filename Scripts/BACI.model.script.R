@@ -14,6 +14,7 @@ library(treezy)
 
 # edited functions from ggBRT needed for plotting
 # ggPD_boot_edit.R
+# ggPD_boot_test_2.R, use because issues with xlim from ggPD_boot_edit.R
 # ggInfluence_edit.R
 # ggInteract_2D_edit.R
 
@@ -29,7 +30,14 @@ perennial.data = read.csv("./Formatted.Data/BACI.perennial.data.csv", row.names 
 grass = read.csv("./Formatted.Data/BACI.grass.csv", row.names = 1) # 392 data points
 # forbs
 forb = read.csv("./Formatted.Data/BACI.forb.csv", row.names = 1) # 675 data points
+# grass annual
+grass.annual = read.csv("./Formatted.Data/BACI.grass.annual.csv", row.names = 1) # 73 data points
 # grass perennial
+grass.perennial = read.csv("./Formatted.Data/BACI.grass.perennial.csv", row.names = 1) # 310 data points
+# forb annual
+forb.annual = read.csv("./Formatted.Data/BACI.forb.annual.csv", row.names = 1) # 194 data points
+# forb perennial
+forb.perennial = read.csv("./Formatted.Data/BACI.forb.perennial.csv", row.names = 1) # 446 data points
 
 #### Testing for outliers in all data ####
 
@@ -53,6 +61,15 @@ grass.data.otl.rm = subset(grass, grass$cover.change >-20.58333 & grass$cover.ch
 # lose 19 data points, lose 7 species
 forb.data.otl.rm = subset(forb, forb$cover.change >-20.58333 & forb$cover.change < 20.00000)
 # lose 9 data points, lose 4 species
+grass.annual.data.otl.rm = subset(grass.annual, grass.annual$cover.change >-20.58333 & grass.annual$cover.change < 20.00000)
+# lose 6 data points, lose 1 species
+grass.perennial.data.otl.rm = subset(grass.perennial, grass.perennial$cover.change >-20.58333 & grass.perennial$cover.change < 20.00000)
+# lose 13 data points, lose 6 species
+forb.annual.data.otl.rm = subset(forb.annual, forb.annual$cover.change >-20.58333 & forb.annual$cover.change < 20.00000)
+# lose 2 data points, lose 0 species
+forb.perennial.data.otl.rm = subset(forb.perennial, forb.perennial$cover.change >-20.58333 & forb.perennial$cover.change < 20.00000)
+# lose 6 data points, lose 3 species
+
 
 #### change site code to numeric, continuous vector ####
 all.data.otl.rm$site.id = as.numeric(as.factor(all.data.otl.rm$site_code))
@@ -60,6 +77,10 @@ annual.data.otl.rm$site.id = as.numeric(as.factor(annual.data.otl.rm$site_code))
 perennial.data.otl.rm$site.id = as.numeric(as.factor(perennial.data.otl.rm$site_code))
 grass.data.otl.rm$site.id = as.numeric(as.factor(grass.data.otl.rm$site_code))
 forb.data.otl.rm$site.id = as.numeric(as.factor(forb.data.otl.rm$site_code))
+grass.annual.data.otl.rm$site.id = as.numeric(as.factor(grass.annual.data.otl.rm$site_code))
+grass.perennial.data.otl.rm$site.id = as.numeric(as.factor(grass.perennial.data.otl.rm$site_code))
+forb.annual.data.otl.rm$site.id = as.numeric(as.factor(forb.annual.data.otl.rm$site_code))
+forb.perennial.data.otl.rm$site.id = as.numeric(as.factor(forb.perennial.data.otl.rm$site_code))
 
 #### merge with environmental data ####
 # mean annual precipitation data (MAP)
@@ -81,6 +102,10 @@ annual.data = left_join(annual.data.otl.rm, enviro.data, by="site_code")
 perennial.data = left_join(perennial.data.otl.rm, enviro.data, by="site_code")
 grass = left_join(grass.data.otl.rm, enviro.data, by="site_code")
 forb = left_join(forb.data.otl.rm, enviro.data, by="site_code")
+grass.annual = left_join(grass.annual.data.otl.rm, enviro.data, by="site_code")
+grass.perennial = left_join(grass.perennial.data.otl.rm, enviro.data, by="site_code")
+forb.annual = left_join(forb.annual.data.otl.rm, enviro.data, by="site_code")
+forb.perennial = left_join(forb.perennial.data.otl.rm, enviro.data, by="site_code")
 
 #### testing for correlation among traits ####
 
@@ -132,6 +157,42 @@ cor.mat.forb = cor(forb.2[,c(10:17,22,23)],use = "pairwise")
 corrplot(cor.mat.forb, method="number", tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
 
+grass.annual.2 = grass.annual
+colnames(grass.annual.2)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(grass.annual.2)[22] = "Precipitation"
+colnames(grass.annual.2)[23] = "DSI"
+
+cor.mat.grass.annual = cor(grass.annual.2[,c(10:17,22,23)],use = "pairwise") 
+corrplot(cor.mat.grass.annual, method="number", tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+
+grass.perennial.2 = grass.perennial
+colnames(grass.perennial.2)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(grass.perennial.2)[22] = "Precipitation"
+colnames(grass.perennial.2)[23] = "DSI"
+
+cor.mat.grass.perennial = cor(grass.perennial.2[,c(10:17,22,23)],use = "pairwise") 
+corrplot(cor.mat.grass.perennial, method="number", tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+
+forb.annual.2 = forb.annual
+colnames(forb.annual.2)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(forb.annual.2)[22] = "Precipitation"
+colnames(forb.annual.2)[23] = "DSI"
+
+cor.mat.forb.annual = cor(forb.annual.2[,c(10:17,22,23)],use = "pairwise") 
+corrplot(cor.mat.forb.annual, method="number", tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+
+forb.perennial.2 = forb.perennial
+colnames(forb.perennial.2)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(forb.perennial.2)[22] = "Precipitation"
+colnames(forb.perennial.2)[23] = "DSI"
+
+cor.mat.forb.perennial = cor(forb.perennial.2[,c(10:17,22,23)],use = "pairwise") 
+corrplot(cor.mat.forb.perennial, method="number", tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+
 #### determining best parameter combination to generate 1000 trees ####
 # bag fraction of 0.50 and 0.75, step.size of 25 and 50, tc = 10, 
 
@@ -160,6 +221,26 @@ forb.data.map.dsi=gbm.step(data=forb, gbm.x = c(10:17,22,23), gbm.y=9,
                            bag.fraction = 0.5, n.trees = 50, verbose = TRUE, step.size = 25)
 ggPerformance(forb.data.map.dsi)
 
+grass.annual.data.map.dsi=gbm.step(data=grass.annual, gbm.x = c(10:17,22,23), gbm.y=9,
+                            family = "gaussian", tree.complexity = 10, learning.rate = 0.00000001,
+                            bag.fraction = 0.5, n.trees = 50, verbose = TRUE, step.size = 25)
+ggPerformance(grass.annual.data.map.dsi)
+# won't build trees - low sample size
+
+grass.perennial.data.map.dsi=gbm.step(data=grass.perennial, gbm.x = c(10:17,22,23), gbm.y=9,
+                                   family = "gaussian", tree.complexity = 10, learning.rate = 0.0005,
+                                   bag.fraction = 0.5, n.trees = 50, verbose = TRUE, step.size = 50)
+ggPerformance(grass.perennial.data.map.dsi)
+
+forb.annual.data.map.dsi=gbm.step(data=forb.annual, gbm.x = c(10:17,22,23), gbm.y=9,
+                                  family = "gaussian", tree.complexity = 10, learning.rate = 0.001,
+                                  bag.fraction = 0.5, n.trees = 50, verbose = TRUE, step.size = 50)
+ggPerformance(forb.annual.data.map.dsi)
+
+forb.perennial.data.map.dsi=gbm.step(data=forb.perennial, gbm.x = c(10:17,22,23), gbm.y=9,
+                                     family = "gaussian", tree.complexity = 10, learning.rate = 0.000005,
+                                     bag.fraction = 0.5, n.trees = 50, verbose = TRUE, step.size = 50)
+ggPerformance(forb.perennial.data.map.dsi)
 
 #### determining best tree complexity to use ####
 
@@ -179,12 +260,12 @@ for (tcomp in 1:10) {
       cat(paste("Starting tc =", tcomp, "\n"))
     }
     
-    BRT.all.variables <- gbm.step(data=perennial.data,
+    BRT.all.variables <- gbm.step(data=forb.perennial,
                                   gbm.x = c(10:17,22,23),
                                   gbm.y = 9,
                                   family = "gaussian",
                                   tree.complexity = tcomp,
-                                  learning.rate = 0.0001,
+                                  learning.rate = 0.000005,
                                   bag.fraction = 0.75,
                                   n.trees = 50,
                                   step.size = 50,
@@ -226,6 +307,10 @@ TukeyLetters <- cld(TukeyModel)$mcletters$Letters
 # perennial tree tc = 10
 # grass tc = 6
 # forb tc = 7
+# grass.annual = NA, sample size too low
+# grass.perennial = 4
+# forb.annual = 2
+# forb.perennial = 8
 
 #### all data ####
 
@@ -677,6 +762,311 @@ ggInteract_boot_hist(data = Interact_boot_forb_dsi, column = 4,obs = 0.01) # non
 ggInteract_boot_hist(data = Interact_boot_forb_dsi, column = 5,obs = 0.01) # non-significant
 ggInteract_boot_hist(data = Interact_boot_forb_dsi, column = 6,obs = 0.01) # non-significant
 
+#### Grass Perennials ####
+grass.perennial.map.dsi=gbm.step(data=grass.perennial, gbm.x = c(10:17,22,23), gbm.y=9,
+                                 family = "gaussian", tree.complexity = 4, learning.rate = 0.0005,
+                                 bag.fraction = 0.75, n.trees = 50, verbose = TRUE, step.size = 25)
+ggPerformance(grass.perennial.map.dsi)
+# 1175 trees Per.Expl = 9.95%
+
+ggInfluence(grass.perennial.map.dsi)
+
+grass.perennial.map.dsi$contributions$var = c("LeafN", "Height", "Root Diameter",
+                                              "SLA", "Precipitation","DSI",
+                                              "SRL","RTD","RootN","Rooting Depth")
+
+grass.perennial.influence.plot = ggInfluence_test(grass.perennial.map.dsi, main = expression("Perennnial Grasses (n = 297), R"^2*" = 9.95%"), 
+                                        col.bar = c("#6089B5","#6089B5","#6089B5","#6089B5",
+                                                    "gray70","gray70","gray70","gray70","gray70","gray70"
+                                        ), col.signif = "#B50200")
+
+# saved as pdf from device (4 x 6)
+
+# get data to plot partial dependency plots
+
+grass.perennial.map.dsi$contributions$var = c("leafN.mg.g", "height.m","rootDiam.mm",
+                                    "SLA_m2.kg","precip","mean.drt.sev.index",
+                                    "SRL_m.g","RTD.g.cm3",
+                                    "rootN.mg.g","root.depth_m")
+                                    
+
+grass.perennial.dsi.prerun<- plot.gbm.4list(grass.perennial.map.dsi)
+
+grass.perennial.dsi.boot <- gbm.bootstrap.functions(grass.perennial.map.dsi, list.predictors=grass.perennial.dsi.prerun, n.reps=1000)
+
+grass.perennial.map.dsi$contributions$var = c("LeafN", "Height", "Root Diameter",
+                                    "SLA", "Precipitation","DSI",
+                                    "SRL","RTD","RootN","Rooting Depth")
+
+grass.perennial.map.dsi$gbm.call$predictor.names = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter","Precipitation","DSI")
+colnames(grass.perennial.map.dsi$gbm.call$dataframe)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(grass.perennial.map.dsi$gbm.call$dataframe)[22:23] = c("Precipitation","DSI")
+
+# significant for both: leafN, height, root diameter, SLA
+
+ggPD_boot_test_2(grass.perennial.map.dsi,predictor = "LeafN",list.4.preds=grass.perennial.dsi.prerun, col.line="#6089B5",
+               booted.preds=grass.perennial.dsi.boot$function.preds, cex.line=2, col.ci="#6089B5",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(grass.perennial.map.dsi,predictor = "Height",list.4.preds=grass.perennial.dsi.prerun, col.line="#6089B5",
+               booted.preds=grass.perennial.dsi.boot$function.preds, cex.line=2, col.ci="#6089B5",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(grass.perennial.map.dsi,predictor = "Root Diameter",list.4.preds=grass.perennial.dsi.prerun, col.line="#6089B5",
+               booted.preds=grass.perennial.dsi.boot$function.preds, cex.line=2, col.ci="#6089B5",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(grass.perennial.map.dsi,predictor = "SLA",list.4.preds=grass.perennial.dsi.prerun, col.line="#6089B5",
+               booted.preds=grass.perennial.dsi.boot$function.preds, cex.line=2, col.ci="#6089B5",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+
+# output individual plots as 3x3
+
+ggPD(grass.perennial.map.dsi, col.line="#6089B5", common.scale = FALSE, y.label = "Percent Cover Change")
+
+# output all plots as one 6x6
+
+# investigation of interactions
+
+grass.perennial.map.dsi$contributions$var = c("leafN.mg.g", "height.m","rootDiam.mm",
+                                              "SLA_m2.kg","precip","mean.drt.sev.index",
+                                              "SRL_m.g","RTD.g.cm3",
+                                              "rootN.mg.g","root.depth_m")
+
+grass.perennial.map.dsi$gbm.call$predictor.names = c("leafN.mg.g","height.m","rootN.mg.g","SLA_m2.kg","root.depth_m","RTD.g.cm3","SRL_m.g","rootDiam.mm","precip","mean.drt.sev.index")
+colnames(grass.perennial.map.dsi$gbm.call$dataframe)[10:17] = c("leafN.mg.g","height.m","rootN.mg.g","SLA_m2.kg","root.depth_m","RTD.g.cm3","SRL_m.g","rootDiam.mm")
+colnames(grass.perennial.map.dsi$gbm.call$dataframe)[22:23] = c("precip","mean.drt.sev.index")
+
+gbm.interactions(grass.perennial.map.dsi)$interactions
+ggInteract_list(grass.perennial.map.dsi, index = T)
+# 8 rootDiam x 1 leafN 12.11
+# 10 DSI x 2 height 5.52
+# 2 height x 1 leafN 3.89
+# 9 precip x 6 RTD 0.97
+# 7 SRL x 1 leafN 0.49
+
+# Randomization of the response to test significance of the three strongest interactions. Note, the parameters need to be the same as your BRT model
+Interact_boot_dsi.grass.perennial<-ggInteract_boot(c('rootDiam.mm','leafN.mg.g'),c('mean.drt.sev.index','height.m'),
+                                         c('height.m','leafN.mg.g  '),c('precip ','RTD.g.cm3'),
+                                         c('SRL_m.g ','leafN.mg.g'),
+                                         nboots = 500, data=grass.perennial, predictors =  c(10:17,22,23), 
+                                         response="cover.change",
+                                         family = "gaussian", tc = 4, lr = 0.0005, bf= 0.75, global.env=F)
+# Significance histogram p-value<0.05)
+ggInteract_boot_hist(data = Interact_boot_dsi.grass.perennial, column = 2,obs = 12.11) # significant
+ggInteract_boot_hist(data = Interact_boot_dsi.grass.perennial, column = 3,obs = 5.52) # non-significant
+ggInteract_boot_hist(data = Interact_boot_dsi.grass.perennial, column = 4,obs = 3.89) # non-significant
+ggInteract_boot_hist(data = Interact_boot_dsi.grass.perennial, column = 5,obs = 0.97) # non-significant
+ggInteract_boot_hist(data = Interact_boot_dsi.grass.perennial, column = 6,obs = 0.49) # non-significant
+
+ggInteract_2D_test(gbm.object = grass.perennial.map.dsi, x="rootDiam.mm",y="leafN.mg.g",col.gradient = c("white","#6089B5"),
+                   show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
+                   col.contour = "#254376",show.axis = T,legend = T, x.label = "Root Diameter", y.label = "LeafN",
+                   z.range = c(-1.1473751, 0.2116688), z.label = "% Cover Change", smooth = "average")
+
+# range of z determined by making graph an object and taking range of predicted values from data$value
+# exported as 4 x 6 pdf
+
+#### Forb Annual ####
+forb.annual.map.dsi = gbm.step(data=forb.annual, gbm.x = c(10:17,22,23), gbm.y=9,
+                             family = "gaussian", tree.complexity = 2, learning.rate = 0.005,
+                             bag.fraction = 0.50, n.trees = 50, verbose = TRUE, step.size = 50)
+
+ggPerformance(forb.annual.map.dsi)
+# 1100 trees Per.Expl = 32.82%
+
+forb.annual.map.dsi$contributions$var = c("DSI","LeafN","Height",
+                                          "SLA","Precipitation","Rooting Depth",
+                                          "RTD","SRL",
+                                          "Root Diameter",
+                                           "RootN")
+
+forb.annual.influence.plot = ggInfluence_test(forb.annual.map.dsi, main = expression("Annual Forbs (n = 192), R"^2*" = 32.82%"),
+                                              col.bar = c("#E9988C","#E9988C","#E9988C","#E9988C",
+                                                          "#E9988C","gray70","gray70","gray70","gray70","gray70"
+                                              ), col.signif = "#B50200")
+
+# get data to plot partial dependency plots
+
+forb.annual.map.dsi$contributions$var = c("mean.drt.sev.index","leafN.mg.g","height.m",
+                                          "SLA_m2.kg","precip","root.depth_m",
+                                          "RTD.g.cm3", "SRL_m.g",
+                                          "rootDiam.mm",
+                                          "rootN.mg.g")
+
+forb.annual.dsi.prerun<- plot.gbm.4list(forb.annual.map.dsi)
+
+forb.annual.dsi.boot <- gbm.bootstrap.functions(forb.annual.map.dsi, list.predictors=forb.annual.dsi.prerun, n.reps=1000)
+
+forb.annual.map.dsi$contributions$var = c("DSI","LeafN","Height",
+                                          "SLA","Precipitation","Rooting Depth",
+                                          "RTD","SRL",
+                                          "Root Diameter",
+                                          "RootN")
+
+forb.annual.map.dsi$gbm.call$predictor.names = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter","Precipitation","DSI")
+colnames(forb.annual.map.dsi$gbm.call$dataframe)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(forb.annual.map.dsi$gbm.call$dataframe)[22:23] = c("Precipitation","DSI")
+
+# significant for DSI: DSI, leafN, Height, SLA, Precip
+
+ggPD_boot_test_2(forb.annual.map.dsi,predictor = "DSI",list.4.preds=forb.annual.dsi.prerun, col.line="#E9988C",
+               booted.preds=forb.annual.dsi.boot$function.preds, cex.line=2, col.ci="#E9988C",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(forb.annual.map.dsi,predictor = "LeafN",list.4.preds=forb.annual.dsi.prerun, col.line="#E9988C",
+               booted.preds=forb.annual.dsi.boot$function.preds, cex.line=2, col.ci="#E9988C",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(forb.annual.map.dsi,predictor = "Height",list.4.preds=forb.annual.dsi.prerun, col.line="#E9988C",
+               booted.preds=forb.annual.dsi.boot$function.preds, cex.line=2, col.ci="#E9988C",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(forb.annual.map.dsi,predictor = "SLA",list.4.preds=forb.annual.dsi.prerun, col.line="#E9988C",
+               booted.preds=forb.annual.dsi.boot$function.preds, cex.line=2, col.ci="#E9988C",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+ggPD_boot_test_2(forb.annual.map.dsi,predictor = "Precipitation",list.4.preds=forb.annual.dsi.prerun, col.line="#E9988C",
+               booted.preds=forb.annual.dsi.boot$function.preds, cex.line=2, col.ci="#E9988C",
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+               y.label = "Percent Cover Change")
+
+ggPD(forb.annual.map.dsi, col.line="#E9988C", common.scale = FALSE, y.label = "Percent Cover Change")
+
+# output all plots as one 6x6
+
+# investigation of interactions
+
+forb.annual.map.dsi$contributions$var = c("mean.drt.sev.index","leafN.mg.g","height.m",
+                                          "SLA_m2.kg","precip","root.depth_m",
+                                          "RTD.g.cm3", "SRL_m.g",
+                                          "rootDiam.mm",
+                                          "rootN.mg.g")
+
+forb.annual.map.dsi$gbm.call$predictor.names = c("leafN.mg.g","height.m","rootN.mg.g","SLA_m2.kg","root.depth_m","RTD.g.cm3","SRL_m.g","rootDiam.mm","precip","mean.drt.sev.index")
+colnames(forb.annual.map.dsi$gbm.call$dataframe)[10:17] = c("leafN.mg.g","height.m","rootN.mg.g","SLA_m2.kg","root.depth_m","RTD.g.cm3","SRL_m.g","rootDiam.mm")
+colnames(forb.annual.map.dsi$gbm.call$dataframe)[22:23] = c("precip","mean.drt.sev.index")
+
+gbm.interactions(forb.annual.map.dsi)$interactions
+ggInteract_list(forb.annual.map.dsi, index = T)
+# 9 precip x 4 SLA 19.54
+# 10 DSI x 4 SLA 5.36
+# 9 precip x 2 height 4.88
+# 4 SLA x 2 height 3.29
+# 10 DSI x 2 height 3.10
+
+# Randomization of the response to test significance of the three strongest interactions. Note, the parameters need to be the same as your BRT model
+
+Interact_boot_forb_annual_dsi<-ggInteract_boot(c('precip','SLA_m2.kg'),c('mean.drt.sev.index','SLA_m2.kg'),
+                                        c('precip','height.m'),c('SLA_m2.kg','height.m'),
+                                        c('mean.drt.sev.index','height.m'),
+                                        nboots = 500, data=forb.annual, predictors =  c(10:17,22,23), 
+                                        response="cover.change",
+                                        family = "gaussian", tc = 2, lr = 0.005, bf= 0.50, global.env=F)
+
+# Significance histogram p-value<0.05)
+ggInteract_boot_hist(data = Interact_boot_forb_annual_dsi, column = 2,obs = 19.54) # significant
+ggInteract_boot_hist(data = Interact_boot_forb_annual_dsi, column = 3,obs = 5.36) # significant
+ggInteract_boot_hist(data = Interact_boot_forb_annual_dsi, column = 4,obs = 4.88) # significant
+ggInteract_boot_hist(data = Interact_boot_forb_annual_dsi, column = 5,obs = 3.29) # non-significant
+ggInteract_boot_hist(data = Interact_boot_forb_annual_dsi, column = 6,obs = 3.10) # non-significant
+
+ggInteract_2D_test(gbm.object = forb.annual.map.dsi, x="precip",y="SLA_m2.kg",col.gradient = c("white","#E9988C"),
+                   show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
+                   col.contour = "#254376",show.axis = T,legend = T, x.label = "Precipitation", y.label = "SLA",
+                   z.range = c(-2.7471462, -0.4514415), z.label = "% Cover Change", smooth = "average")
+
+ggInteract_2D_test(gbm.object = forb.annual.map.dsi, x="mean.drt.sev.index",y="SLA_m2.kg",col.gradient = c("white","#E9988C"),
+                   show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
+                   col.contour = "#254376",show.axis = T,legend = T, x.label = "DSI", y.label = "SLA",
+                   z.range = c(-2.5593027, -0.2893101), z.label = "% Cover Change", smooth = "average")
+
+ggInteract_2D_test(gbm.object = forb.annual.map.dsi, x="precip",y="height.m",col.gradient = c("white","#E9988C"),
+                   show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
+                   col.contour = "#254376",show.axis = T,legend = T, x.label = "Precipitation", y.label = "Height",
+                   z.range = c(-2.4194597, -0.2869734), z.label = "% Cover Change", smooth = "average")
+
+# range of z determined by making graph an object and taking range of predicted values from data$value
+# exported as 4 x 6 pdf
+
+#### Forb Perennial ####
+forb.perennial.map.dsi = gbm.step(data=forb.perennial, gbm.x = c(10:17,22,23), gbm.y=9,
+                                  family = "gaussian", tree.complexity = 8, learning.rate = 0.000005,
+                                  bag.fraction = 0.75, n.trees = 50, verbose = TRUE, step.size = 50)
+
+ggPerformance(forb.perennial.map.dsi)
+# 1000 trees Per.Expl = 0.11%
+
+forb.perennial.map.dsi$contributions$var = c("LeafN","SLA","DSI",
+                                             "Height","SRL","Root Diameter",
+                                             "Rooting Depth",
+                                             "RTD","Precipitation",
+                                             "RootN")
+
+forb.perennial.influence.plot = ggInfluence_test(forb.perennial.map.dsi, main = expression("Perennial Forbs (n = 440), R"^2*" = 0.11%"),
+                                                 col.bar = c("black","black","black","gray70",
+                                                             "gray70","gray70","gray70","gray70","gray70","gray70"
+                                                 ), col.signif = "#B50200")
+
+# get data to plot partial dependency plots
+
+forb.perennial.map.dsi$contributions$var = c("leafN.mg.g","SLA_m2.kg","mean.drt.sev.index",
+                                             "height.m","SRL_m.g","rootDiam.mm",
+                                             "root.depth_m",
+                                             "RTD.g.cm3", "precip",
+                                             "rootN.mg.g")
+
+forb.perennial.dsi.prerun<- plot.gbm.4list(forb.perennial.map.dsi)
+
+forb.perennial.dsi.boot <- gbm.bootstrap.functions(forb.perennial.map.dsi, list.predictors=forb.perennial.dsi.prerun, n.reps=1000)
+
+forb.perennial.map.dsi$contributions$var = c("LeafN","SLA","DSI",
+                                             "Height","SRL","Root Diameter",
+                                             "Rooting Depth",
+                                             "RTD","Precipitation",
+                                             "RootN")
+
+forb.perennial.map.dsi$gbm.call$predictor.names = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter","Precipitation","DSI")
+colnames(forb.perennial.map.dsi$gbm.call$dataframe)[10:17] = c("LeafN","Height","RootN","SLA","Rooting Depth","RTD","SRL","Root Diameter")
+colnames(forb.perennial.map.dsi$gbm.call$dataframe)[22:23] = c("Precipitation","DSI")
+
+# significant for DSI: leafN, SLA, DSI
+
+ggPD_boot_test_2(forb.perennial.map.dsi,predictor = "LeafN",list.4.preds=forb.perennial.dsi.prerun, col.line="black",
+                 booted.preds=forb.perennial.dsi.boot$function.preds, cex.line=2, col.ci="black",
+                 alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+                 y.label = "Percent Cover Change")
+ggPD_boot_test_2(forb.perennial.map.dsi,predictor = "SLA",list.4.preds=forb.perennial.dsi.prerun, col.line="black",
+                 booted.preds=forb.perennial.dsi.boot$function.preds, cex.line=2, col.ci="black",
+                 alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+                 y.label = "Percent Cover Change")
+ggPD_boot_test_2(forb.perennial.map.dsi,predictor = "DSI",list.4.preds=forb.perennial.dsi.prerun, col.line="black",
+                 booted.preds=forb.perennial.dsi.boot$function.preds, cex.line=2, col.ci="black",
+                 alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
+                 y.label = "Percent Cover Change")
+
+ggPD(forb.perennial.map.dsi, col.line="black", common.scale = FALSE, y.label = "Percent Cover Change")
+
+# output all plots as one 6x6
+
+# investigation of interactions
+
+forb.perennial.map.dsi$contributions$var = c("leafN.mg.g","SLA_m2.kg","mean.drt.sev.index",
+                                             "height.m","SRL_m.g","rootDiam.mm",
+                                             "root.depth_m",
+                                             "RTD.g.cm3", "precip",
+                                             "rootN.mg.g")
+
+forb.perennial.map.dsi$gbm.call$predictor.names = c("leafN.mg.g","height.m","rootN.mg.g","SLA_m2.kg","root.depth_m","RTD.g.cm3","SRL_m.g","rootDiam.mm","precip","mean.drt.sev.index")
+colnames(forb.perennial.map.dsi$gbm.call$dataframe)[10:17] = c("leafN.mg.g","height.m","rootN.mg.g","SLA_m2.kg","root.depth_m","RTD.g.cm3","SRL_m.g","rootDiam.mm")
+colnames(forb.perennial.map.dsi$gbm.call$dataframe)[22:23] = c("precip","mean.drt.sev.index")
+
+gbm.interactions(forb.perennial.map.dsi)$interactions
+ggInteract_list(forb.perennial.map.dsi, index = T)
+# no significant interactions
+
+
 #### Table S1 ####
 mean(all.data$leafN.mg.g, na.rm = TRUE)
 mean(all.data$height.m, na.rm = TRUE)
@@ -869,6 +1259,151 @@ range(forb$rootDiam.mm, na.rm = TRUE)
 range(forb$precip, na.rm = TRUE)
 range(forb$mean.drt.sev.index, na.rm = TRUE)
 range(forb$cover.change, na.rm = TRUE)
+
+mean(grass.annual$leafN.mg.g, na.rm = TRUE)
+mean(grass.annual$height.m, na.rm = TRUE)
+mean(grass.annual$rootN.mg.g, na.rm = TRUE)
+mean(grass.annual$SLA_m2.kg, na.rm = TRUE)
+mean(grass.annual$root.depth_m, na.rm = TRUE)
+mean(grass.annual$RTD.g.cm3, na.rm = TRUE)
+mean(grass.annual$SRL_m.g, na.rm = TRUE)
+mean(grass.annual$rootDiam.mm, na.rm = TRUE)
+mean(grass.annual$precip, na.rm = TRUE)
+mean(grass.annual$mean.drt.sev.index, na.rm = TRUE)
+mean(grass.annual$cover.change)
+
+sd(grass.annual$leafN.mg.g, na.rm = TRUE)
+sd(grass.annual$height.m, na.rm = TRUE)
+sd(grass.annual$rootN.mg.g, na.rm = TRUE)
+sd(grass.annual$SLA_m2.kg, na.rm = TRUE)
+sd(grass.annual$root.depth_m, na.rm = TRUE)
+sd(grass.annual$RTD.g.cm3, na.rm = TRUE)
+sd(grass.annual$SRL_m.g, na.rm = TRUE)
+sd(grass.annual$rootDiam.mm, na.rm = TRUE)
+sd(grass.annual$precip, na.rm = TRUE)
+sd(grass.annual$mean.drt.sev.index, na.rm = TRUE)
+sd(grass.annual$cover.change)
+
+range(grass.annual$leafN.mg.g, na.rm = TRUE)
+range(grass.annual$height.m, na.rm = TRUE)
+range(grass.annual$rootN.mg.g, na.rm = TRUE)
+range(grass.annual$SLA_m2.kg, na.rm = TRUE)
+range(grass.annual$root.depth_m, na.rm = TRUE)
+range(grass.annual$RTD.g.cm3, na.rm = TRUE)
+range(grass.annual$SRL_m.g, na.rm = TRUE)
+range(grass.annual$rootDiam.mm, na.rm = TRUE)
+range(grass.annual$precip, na.rm = TRUE)
+range(grass.annual$mean.drt.sev.index, na.rm = TRUE)
+range(grass.annual$cover.change)
+
+mean(grass.perennial$leafN.mg.g, na.rm = TRUE)
+mean(grass.perennial$height.m, na.rm = TRUE)
+mean(grass.perennial$rootN.mg.g, na.rm = TRUE)
+mean(grass.perennial$SLA_m2.kg, na.rm = TRUE)
+mean(grass.perennial$root.depth_m, na.rm = TRUE)
+mean(grass.perennial$RTD.g.cm3, na.rm = TRUE)
+mean(grass.perennial$SRL_m.g, na.rm = TRUE)
+mean(grass.perennial$rootDiam.mm, na.rm = TRUE)
+mean(grass.perennial$precip, na.rm = TRUE)
+mean(grass.perennial$mean.drt.sev.index, na.rm = TRUE)
+mean(grass.perennial$cover.change)
+
+sd(grass.perennial$leafN.mg.g, na.rm = TRUE)
+sd(grass.perennial$height.m, na.rm = TRUE)
+sd(grass.perennial$rootN.mg.g, na.rm = TRUE)
+sd(grass.perennial$SLA_m2.kg, na.rm = TRUE)
+sd(grass.perennial$root.depth_m, na.rm = TRUE)
+sd(grass.perennial$RTD.g.cm3, na.rm = TRUE)
+sd(grass.perennial$SRL_m.g, na.rm = TRUE)
+sd(grass.perennial$rootDiam.mm, na.rm = TRUE)
+sd(grass.perennial$precip, na.rm = TRUE)
+sd(grass.perennial$mean.drt.sev.index, na.rm = TRUE)
+sd(grass.perennial$cover.change)
+
+range(grass.perennial$leafN.mg.g, na.rm = TRUE)
+range(grass.perennial$height.m, na.rm = TRUE)
+range(grass.perennial$rootN.mg.g, na.rm = TRUE)
+range(grass.perennial$SLA_m2.kg, na.rm = TRUE)
+range(grass.perennial$root.depth_m, na.rm = TRUE)
+range(grass.perennial$RTD.g.cm3, na.rm = TRUE)
+range(grass.perennial$SRL_m.g, na.rm = TRUE)
+range(grass.perennial$rootDiam.mm, na.rm = TRUE)
+range(grass.perennial$precip, na.rm = TRUE)
+range(grass.perennial$mean.drt.sev.index, na.rm = TRUE)
+range(grass.perennial$cover.change)
+
+mean(forb.annual$leafN.mg.g, na.rm = TRUE)
+mean(forb.annual$height.m, na.rm = TRUE)
+mean(forb.annual$rootN.mg.g, na.rm = TRUE)
+mean(forb.annual$SLA_m2.kg, na.rm = TRUE)
+mean(forb.annual$root.depth_m, na.rm = TRUE)
+mean(forb.annual$RTD.g.cm3, na.rm = TRUE)
+mean(forb.annual$SRL_m.g, na.rm = TRUE)
+mean(forb.annual$rootDiam.mm, na.rm = TRUE)
+mean(forb.annual$precip, na.rm = TRUE)
+mean(forb.annual$mean.drt.sev.index, na.rm = TRUE)
+mean(forb.annual$cover.change)
+
+sd(forb.annual$leafN.mg.g, na.rm = TRUE)
+sd(forb.annual$height.m, na.rm = TRUE)
+sd(forb.annual$rootN.mg.g, na.rm = TRUE)
+sd(forb.annual$SLA_m2.kg, na.rm = TRUE)
+sd(forb.annual$root.depth_m, na.rm = TRUE)
+sd(forb.annual$RTD.g.cm3, na.rm = TRUE)
+sd(forb.annual$SRL_m.g, na.rm = TRUE)
+sd(forb.annual$rootDiam.mm, na.rm = TRUE)
+sd(forb.annual$precip, na.rm = TRUE)
+sd(forb.annual$mean.drt.sev.index, na.rm = TRUE)
+sd(forb.annual$cover.change)
+
+range(forb.annual$leafN.mg.g, na.rm = TRUE)
+range(forb.annual$height.m, na.rm = TRUE)
+range(forb.annual$rootN.mg.g, na.rm = TRUE)
+range(forb.annual$SLA_m2.kg, na.rm = TRUE)
+range(forb.annual$root.depth_m, na.rm = TRUE)
+range(forb.annual$RTD.g.cm3, na.rm = TRUE)
+range(forb.annual$SRL_m.g, na.rm = TRUE)
+range(forb.annual$rootDiam.mm, na.rm = TRUE)
+range(forb.annual$precip, na.rm = TRUE)
+range(forb.annual$mean.drt.sev.index, na.rm = TRUE)
+range(forb.annual$cover.change)
+
+mean(forb.perennial$leafN.mg.g, na.rm = TRUE)
+mean(forb.perennial$height.m, na.rm = TRUE)
+mean(forb.perennial$rootN.mg.g, na.rm = TRUE)
+mean(forb.perennial$SLA_m2.kg, na.rm = TRUE)
+mean(forb.perennial$root.depth_m, na.rm = TRUE)
+mean(forb.perennial$RTD.g.cm3, na.rm = TRUE)
+mean(forb.perennial$SRL_m.g, na.rm = TRUE)
+mean(forb.perennial$rootDiam.mm, na.rm = TRUE)
+mean(forb.perennial$precip, na.rm = TRUE)
+mean(forb.perennial$mean.drt.sev.index, na.rm = TRUE)
+mean(forb.perennial$cover.change)
+
+sd(forb.perennial$leafN.mg.g, na.rm = TRUE)
+sd(forb.perennial$height.m, na.rm = TRUE)
+sd(forb.perennial$rootN.mg.g, na.rm = TRUE)
+sd(forb.perennial$SLA_m2.kg, na.rm = TRUE)
+sd(forb.perennial$root.depth_m, na.rm = TRUE)
+sd(forb.perennial$RTD.g.cm3, na.rm = TRUE)
+sd(forb.perennial$SRL_m.g, na.rm = TRUE)
+sd(forb.perennial$rootDiam.mm, na.rm = TRUE)
+sd(forb.perennial$precip, na.rm = TRUE)
+sd(forb.perennial$mean.drt.sev.index, na.rm = TRUE)
+sd(forb.perennial$cover.change)
+
+range(forb.perennial$leafN.mg.g, na.rm = TRUE)
+range(forb.perennial$height.m, na.rm = TRUE)
+range(forb.perennial$rootN.mg.g, na.rm = TRUE)
+range(forb.perennial$SLA_m2.kg, na.rm = TRUE)
+range(forb.perennial$root.depth_m, na.rm = TRUE)
+range(forb.perennial$RTD.g.cm3, na.rm = TRUE)
+range(forb.perennial$SRL_m.g, na.rm = TRUE)
+range(forb.perennial$rootDiam.mm, na.rm = TRUE)
+range(forb.perennial$precip, na.rm = TRUE)
+range(forb.perennial$mean.drt.sev.index, na.rm = TRUE)
+range(forb.perennial$cover.change)
+
 
 table(perennial.data$functional_group)
 # 230 forbs, 180 grasses
