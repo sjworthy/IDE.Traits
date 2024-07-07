@@ -8,12 +8,12 @@ library(corrplot)
 trait.data = read.csv("./Raw.Data/trait.species.BACI.final.csv")
 
 # subset traits to only those of interest
-trait.data.2 = trait.data[,c(1:9,14:16)]
+trait.data.2 = trait.data[,c(1:9,14:16)] # 1239 species 
 
 # subset out woody species and trees from local_lifeform
 
-trait.data.3 = subset(trait.data.2, !trait.data.2$functional_group == "WOODY")
-trait.data.3 = subset(trait.data.3, !trait.data.3$local_lifeform == "TREE")
+trait.data.3 = subset(trait.data.2, !trait.data.2$functional_group == "WOODY") # 1117 species
+trait.data.3 = subset(trait.data.3, !trait.data.3$local_lifeform == "TREE") # 1115 species
 
 # BACI analysis:
 # 244 new species, 29 removed because TREE or WOODY, 1 FERN removed, 4 CACTUS removed
