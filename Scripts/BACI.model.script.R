@@ -368,7 +368,7 @@ ggPD_boot_test_2(all.data.map.dsi,predictor = "Height",list.4.preds=all.data.dsi
                y.label = "Percent Cover Change")
 ggPD_boot_test_2(all.data.map.dsi,predictor = "SLA",list.4.preds=all.data.dsi.prerun, col.line="#769370",
                booted.preds=all.data.dsi.boot$function.preds, cex.line=2, col.ci="#769370",
-               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = FALSE,
+               alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T, common.scale = TRUE,
                y.label = "Percent Cover Change")
 
 # output individual plots as 3x3
@@ -429,7 +429,7 @@ ggInteract_2D_test(gbm.object = all.data.map.dsi, x="precip",y="leafN.mg.g",col.
 ggInteract_2D_test(gbm.object = all.data.map.dsi, x="RTD.g.cm3",y="leafN.mg.g",col.gradient = c("white","#769370"),
                    show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "RTD", y.label = "LeafN",
-                   z.range = c(-1.03, 0.19), z.label = "% Cover Change", smooth = "average")
+                   z.range = c(-1.0285705, 0.190583), z.label = "% Cover Change", smooth = "average")
 ggInteract_2D_test(gbm.object = all.data.map.dsi, x="SLA_m2.kg",y="height.m",col.gradient = c("white","#769370"),
                    show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "SLA", y.label = "Height",
@@ -482,7 +482,7 @@ ggPD_boot_test_2(annual.no.site.map.dsi,predictor = "RootN",list.4.preds=annual.
           booted.preds=annual.dsi.boot$function.preds, cex.line=2, col.ci="#979461",
           alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T,common.scale = TRUE,
           y.label = "Percent Cover Change")
-ggPD_boot_test_2(annual.no.site.map.dsi,predictor = "RTD",list.4.preds=annual.dsi.prerun, col.line="#979461",
+ggPD_boot_test_2(annual.no.site.map.dsi,predictor = "SRL",list.4.preds=annual.dsi.prerun, col.line="#979461",
                booted.preds=annual.dsi.boot$function.preds, cex.line=2, col.ci="#979461",
                alpha.dot=0.2,type.ci = "ribbon",alpha.ci= 0.3,rug = T,common.scale = TRUE,
                y.label = "Percent Cover Change")
