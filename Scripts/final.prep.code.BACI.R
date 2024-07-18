@@ -140,54 +140,55 @@ cover.data = read.csv("./Formatted.Data/BACI.data.final.csv", row.names = 1)
 # merge trait data and cover data
 
 all.data = merge(cover.data, trait.data.new, by="Taxon") 
-# 692 species from 1234 data points from 83 sites
+# 420 species from 642 data points from 65 sites
 
-# write.csv(all.data, file = "./Formatted.Data/BACI.all.data.csv")
+#write.csv(all.data, file = "./Formatted.Data/BACI.all.data.csv")
 
 #### data set split by lifespan ####
 # need to read out data and fix the lifespan to particular sites since 
 # some species have different lifespan at different sites
 
+# merge all.data and metadata
 all.data.ls = read.csv("./Formatted.Data/BACI.all.data.metadata.csv", row.names = 1)
 table(all.data.ls$local_lifespan)
-# 890 perennial, 292 annual
+# 497 perennial, 126 annual
 
 annual.data = subset(all.data.ls, all.data.ls$local_lifespan == "ANNUAL")
-# 292 data points from 168 species
+# 126 data points from 81 species
 
 perennial.data = subset(all.data.ls, all.data.ls$local_lifespan == "PERENNIAL") 
-# 890 data points of 500 species
+# 497 data points of 324 species
 
 table(all.data.ls$functional_group)
-# 675 forb, 47 graminoid, 392 grass, 120 legume
+# 327 forb, 28 graminoid, 228 grass, 59 legume
 
 grass = subset(all.data.ls, all.data.ls$functional_group == "GRASS") 
-# 392 data points of 196 species
+# 228 data points of 143 species
 
 table(grass$local_lifespan)
-# 73 annuals, 310 perennials
+# 49 annuals, 174 perennials
 
 forb = subset(all.data.ls, all.data.ls$functional_group == "FORB")
-# 675 data points of 400 species
+# 327 data points of 221 species
 
 table(forb$local_lifespan)
-# 194 annuals, 446 perennials
+# 67 annuals, 249 perennials
 
 # grass.annuals
 grass.annual = subset(grass, grass$local_lifespan == "ANNUAL")
-# 73 data points of 33 species
+# 49 data points of 25 species
 
 # grass.perennial
 grass.perennial = subset(grass, grass$local_lifespan == "PERENNIAL")
-# 310 data points of 159 species
+# 174 data points of 114 species
 
 # forb.annual
 forb.annual = subset(forb, forb$local_lifespan == "ANNUAL")
-# 194 data points of 123 species
+# 67 data points of 50 species
 
 # forb.perennial
 forb.perennial = subset(forb, forb$local_lifespan == "PERENNIAL")
-# 446 data points of 260 species
+# 249 data points of 163 species
 
 #### write out the files ####
 

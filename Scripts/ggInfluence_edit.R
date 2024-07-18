@@ -10,7 +10,7 @@ function (gbm.object, col.bar = "skyblue3", show.signif = TRUE,
                                        y = rel.inf)) + geom_bar(fill = col.bar, stat = "identity") + 
       coord_flip() + theme(axis.title = element_text(size = 15), 
                            axis.text = element_text(face = "plain",size = 12), plot.title = element_text(size = 16, 
-                                                                                               face = "bold"), axis.line.x = element_line(size = 0.3), 
+                                                                                               face = "bold"), axis.line.x = element_line(linewidth = 0.3), 
                            panel.background = element_rect(fill = "white"), 
                            panel.grid.major.y = element_line(linewidth = 0.2, linetype = "dotted", 
                                                              color = "grey"), panel.grid.major.x = element_line(linetype = "blank"), 

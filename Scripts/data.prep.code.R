@@ -158,8 +158,8 @@ after.3 = after.2 %>%
 
 # merge before and after together
 
-all.data = full_join(after.3,before.3)
-# 1988 observations, 1274 species, 86 sites
+all.data = inner_join(before.3,after.3)
+# 1003 observations, 706 species, 68 sites
 
 all.data.2 = all.data[,c(1,2,5,6,9,10)]
 all.data.2[is.na(all.data.2)] = 0
@@ -170,7 +170,8 @@ all.data.2 = all.data.2 %>%
          control.after.before = mean.after.control.0 - mean.before.control.0,
          cover.change = drought.after.before - control.after.before)
 
-#write.csv(all.data.2, file = "./Formatted.Data/BACI.data.final.csv")
+write.csv(all.data.2, file = "./Formatted.Data/BACI.data.final.csv")
+
 
 #### AusTraits ####
 # getting trait data from AusTraits
@@ -196,42 +197,34 @@ austraits.subset.traits=austraits.traits$traits
 
 #### Calculate drought severity index for sites ####
 
+# cover data
+data=read.csv("./Raw.Data/IDE_cover_2023-01-02.csv")
+
 # has the amount of precipitation that fell during year 1 of the study at each site
-yr1.ppt=read.csv("./Raw.Data/cover_ppt_2023-05-10.csv")
+# value is corrected for treatment days
 # ppt.1 column is the amount of ppt that fell in the plot in the 365 days prior to biomass collection
 # MAP column is the mean annual precipitation at the site
+yr1.ppt=read.csv("./Raw.Data/cover_ppt_2023-05-10.csv")
 
-drt.trt=read.csv("./Raw.Data/Site_Elev-Disturb.csv")
-drt.trt.2 = drt.trt[,c(2,25)]
-# drought_trt column has the targeted % water removal for the site
+# merge the two together so can slim to year 1 
+all.data = left_join(yr1.ppt, data)
 
-# formula: 
-# 1. precip.drt = amount ppt received * % targeted removal (as decimal)
-# 2. (precip.drt - MAP)/MAP
+all.data.2 = all.data %>%
+  filter(trt == "Drought")
+# plots with 1 treatment year
 
-# merge drt.trt with yr1.ppt
+drought.plots = all.data.2 %>%
+  filter(trt == "Drought")
+# drought plots
 
-all.drt.data = merge(yr1.ppt, drt.trt.2, by = c("site_code"))
-
-all.drt.data = all.drt.data %>%
-  filter(trt == "Drought") # just want drought plots since they had targeted removal
-
-# turn drought_trt into decimal
-all.drt.data$drought_trt_dec = as.numeric(all.drt.data$drought_trt)/100
-
-all.drt.data$precip.drt = all.drt.data$ppt.1*all.drt.data$drought_trt_dec
-all.drt.data$drt.sev.index = (all.drt.data$precip.dr - all.drt.data$map)/all.drt.data$map
-
-# slim dataset to plots with 1 year of drought
-
-all.drt.data.2 = subset(all.drt.data, all.drt.data$n_treat_years == 1)
+drought.plots$DSI = (drought.plots$ppt.1 - drought.plots$map)/drought.plots$map
 
 # get the mean drt.sev.index for each site, this is just mean of drought plots
-site.drt.sev.index = all.drt.data.2 %>%
+site.drt.sev.index = drought.plots %>%
   group_by(site_code) %>%
-  reframe(mean.drt.sev.index = mean(drt.sev.index, na.rm = TRUE))
+  reframe(mean.DSI = mean(DSI, na.rm = TRUE))
 
-# write.csv(site.drt.sev.index, "./Formatted.Data/site.drt.dev.index.csv")
+#write.csv(site.drt.sev.index, "./site.drt.dev.index.csv")
 
 #### get functional group and life_form information for new BACI species ####
 

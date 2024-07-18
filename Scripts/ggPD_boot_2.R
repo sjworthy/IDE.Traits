@@ -104,7 +104,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
         
         if (is.factor(fittedFunc[[i]]$x)) {
           ggPD[[i]] <- ggplot(fittedFunc[[i]], aes(x = x, y = y)) + 
-            geom_boxplot(color = col.line, size = cex.line) + 
+            geom_boxplot(color = col.line, linewidth = cex.line) + 
             geom_boxplot(data = fittedFunc.lower[[i]], aes(x = x, y = y), color = col.ci) + 
             geom_boxplot(data = fittedFunc.upper[[i]], aes(x = x, y = y), color = col.ci) + 
             ylab(y.label) + 
@@ -114,18 +114,18 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                   panel.grid.major = element_line(linetype = "blank"), 
                   axis.text.x = element_text(size = 12), axis.title.x = element_text(size = 15), 
                   axis.text.y = element_text(size = 12), axis.title.y = element_text(size = 15),
-                  axis.line.y = element_line(size = 0.1), 
-                  axis.line.x = element_line(size = 0.1))
+                  axis.line.y = element_line(linewidth = 0.1), 
+                  axis.line.x = element_line(linewidth = 0.1))
           
           if (common.scale == T) {
-            ggPD[[i]] <- ggPD[[i]] + ylim(c(2, 2))}
+            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.0))}
         }
         
         if (type.ci == "lines") {
           ggPD[[i]] <- ggplot(fittedFunc[[i]], aes(x = x, y = y)) + 
-            geom_line(color = col.line, size = cex.line) + 
-            geom_line(data = fittedFunc.lower[[i]], aes(x = x, y = y), size = cex.ci, color = col.ci, linetype = lty.ci) + 
-            geom_line(data = fittedFunc.upper[[i]], aes(x = x, y = y), size = cex.ci, color = col.ci, linetype = lty.ci) + 
+            geom_line(color = col.line, linewidth = cex.line) + 
+            geom_line(data = fittedFunc.lower[[i]], aes(x = x, y = y), linewidth = cex.ci, color = col.ci, linetype = lty.ci) + 
+            geom_line(data = fittedFunc.upper[[i]], aes(x = x, y = y), linewidth = cex.ci, color = col.ci, linetype = lty.ci) + 
             ylab(y.label) + 
             xlab(paste(var.name, "  (", round(gbm.object$contributions[i, 2], 1), "%)", sep = "")) + 
             theme_bw() + 
@@ -135,8 +135,8 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                   axis.title.y = element_text(size = 15),
                   axis.text.x = element_text(size = 12),
                   axis.text.y = element_text(size = 12),
-                  axis.line.y = element_line(size = 0.1), 
-                  axis.line.x = element_line(size = 0.1))
+                  axis.line.y = element_line(linewidth = 0.1), 
+                  axis.line.x = element_line(linewidth = 0.1))
           
           if (smooth == T) {
             ggPD[[i]] <- ggPD[[i]] + geom_smooth(span = span, size = 0.3, color = col.smooth, se = F, linetype = 2)
@@ -148,14 +148,14 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
           }
           
           if (common.scale == T) {
-            ggPD[[i]] <- ggPD[[i]] + ylim(c(-2,2))
+            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.0))
           }
         }
         
         if (type.ci == "ribbon") {
           ggPD[[i]] <- ggplot() + 
             geom_ribbon(data = ribbon[[i]], aes(x = x, ymin = ylow, ymax = yup), fill = col.ci, alpha = alpha.ci) + 
-            geom_line(data = fittedFunc[[i]], aes(x = x, y = y), color = col.line, size = cex.line) + 
+            geom_line(data = fittedFunc[[i]], aes(x = x, y = y), color = col.line, linewidth = cex.line) + 
             ylab(y.label) + 
             xlab(paste(var.name, "  (", round(gbm.object$contributions[i, 2], 1), "%)", sep = "")) + 
             theme_bw() + 
@@ -165,8 +165,8 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                   axis.title.y = element_text(size = 15),
                   axis.text.x = element_text(size = 12),
                   axis.text.y = element_text(size = 12),
-                  axis.line.y = element_line(size = 0.1), 
-                  axis.line.x = element_line(size = 0.1))
+                  axis.line.y = element_line(linewidth = 0.1), 
+                  axis.line.x = element_line(linewidth = 0.1))
           
           if (smooth == T) {
             ggPD[[i]] <- ggPD[[i]] + geom_smooth(data = fittedFunc[[i]], aes(x = x, y = y), span = span, size = 0.3, color = col.smooth, se = F, linetype = 2)
@@ -177,7 +177,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
           }
           
           if (common.scale == T) {
-            ggPD[[i]] <- ggPD[[i]] + ylim(c(-2,2))
+            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.0))
           }
         }
       }
@@ -206,7 +206,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
       
       if (is.factor(fittedFunc$x)) {
         ggPD <- ggplot(fittedFunc, aes(x = x, y = y)) + 
-          geom_boxplot(color = col.line, size = cex.line) + 
+          geom_boxplot(color = col.line, linewidth = cex.line) + 
           geom_boxplot(data = fittedFunc.lower, aes(x = x, y = y), color = col.ci) + 
           geom_boxplot(data = fittedFunc.upper, aes(x = x, y = y), color = col.ci) + 
           ylab(y.label) + 
@@ -216,7 +216,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                 panel.grid.major = element_line(linetype = "blank"), 
                 axis.text.x = element_text(size = 12), axis.title.x = element_text(size = 15), 
                 axis.text.y = element_text(size = 12), axis.title.y = element_text(size = 15),
-                axis.line.y = element_line(size = 0.1), axis.line.x = element_line(size = 0.1))
+                axis.line.y = element_line(linewidth = 0.1), axis.line.x = element_line(linewidth = 0.1))
         
         if (common.scale == T) {
           ggPD <- ggPD + ylim(c(ymin, ymax))}
@@ -224,9 +224,9 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
       
       if (type.ci == "lines") {
         ggPD <- ggplot(fittedFunc, aes(x = x, y = y)) + 
-          geom_line(color = col.line, size = cex.line) + 
-          geom_line(data = fittedFunc.lower, aes(x = x, y = y), size = cex.ci, color = col.ci, linetype = lty.ci) + 
-          geom_line(data = fittedFunc.upper, aes(x = x,  y = y), size = cex.ci, color = col.ci, linetype = lty.ci) + 
+          geom_line(color = col.line, linewidth = cex.line) + 
+          geom_line(data = fittedFunc.lower, aes(x = x, y = y), linewidth = cex.ci, color = col.ci, linetype = lty.ci) + 
+          geom_line(data = fittedFunc.upper, aes(x = x,  y = y), linewidth = cex.ci, color = col.ci, linetype = lty.ci) + 
           ylab(y.label) + 
           xlab(paste(var.name, "  (", round(gbm.object$contributions[predictor, 2], 1), "%)", sep = "")) + 
           theme_bw() + 
@@ -236,8 +236,8 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                 axis.title.y = element_text(size = 15),
                 axis.text.x = element_text(size = 12),
                 axis.text.y = element_text(size = 12),
-                axis.line.y = element_line(size = 0.1), 
-                axis.line.x = element_line(size = 0.1))
+                axis.line.y = element_line(linewidth = 0.1), 
+                axis.line.x = element_line(linewidth = 0.1))
 
         if (smooth == T) {
           ggPD <- ggPD + geom_smooth(span = span, size = 0.3, color = col.smooth, se = F, linetype = 2)
@@ -248,13 +248,13 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
         }
         
         if (common.scale == T) {
-          ggPD <- ggPD + ylim(c(-2,2))
+          ggPD <- ggPD + ylim(c(-3.5,4.0))
         }
       }
       
       if (type.ci == "ribbon") {
         ggPD <- ggplot() + geom_ribbon(data = ribbon, aes(x = x, ymin = ylow, ymax = yup), fill = col.ci, alpha = alpha.ci) + 
-          geom_line(data = fittedFunc, aes(x = x, y = y), color = col.line, size = cex.line) + 
+          geom_line(data = fittedFunc, aes(x = x, y = y), color = col.line, linewidth = cex.line) + 
           ylab(y.label) + 
           xlab(paste(var.name, "  (", round(gbm.object$contributions[predictor, 2], 1), "%)", sep = "")) + 
           theme_bw() + 
@@ -264,8 +264,8 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                 axis.title.y = element_text(size = 15),
                 axis.text.x = element_text(size = 12),
                 axis.text.y = element_text(size = 12),
-                axis.line.y = element_line(size = 0.1), 
-                axis.line.x = element_line(size = 0.1))
+                axis.line.y = element_line(linewidth = 0.1), 
+                axis.line.x = element_line(linewidth = 0.1))
 
         if (smooth == T) {
           ggPD <- ggPD + geom_smooth(data = fittedFunc, aes(x = x, y = y), span = span, size = 0.3, color = col.smooth, se = F, linetype = 2)
@@ -275,7 +275,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
           ggPD <- ggPD + geom_rug(data = fittedVal, aes(x = x, y = y), sides = rug.pos, position = "jitter", color = "#EBEBEB")
         }
         if (common.scale == T) {
-          ggPD <- ggPD + ylim(c(-2,2))
+          ggPD <- ggPD + ylim(c(-3.5,4.0))
         }
       }
       list(ggPD = ggPD)
