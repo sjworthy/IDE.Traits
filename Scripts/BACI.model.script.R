@@ -440,25 +440,36 @@ ggInteract_2D_test(gbm.object = all.data.map.dsi, x="precip",y="height.m",col.gr
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "Precipitation", y.label = "Height",
                    z.range = c(-0.81, 1.38), z.label = "% Cover Change", smooth = "average")
 
+ggInteract_3D(gbm.object = all.data.map.dsi, x="precip",y="height.m")
+
 ggInteract_2D_test(gbm.object = all.data.map.dsi, x="mean.DSI",y="height.m",col.gradient = c("white","#769370"),
                    show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "DSI", y.label = "Height",
                    z.range = c(-0.48, 1.57), z.label = "% Cover Change", smooth = "average")
+
+ggInteract_3D(gbm.object = all.data.map.dsi, x="mean.DSI",y="height.m")
 
 ggInteract_2D_test(gbm.object = all.data.map.dsi, x="rootDiam.mm",y="height.m",col.gradient = c("white","#769370"),
                    show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "Root Diameter", y.label = "Height",
                    z.range = c(-0.75, 1.35), z.label = "% Cover Change", smooth = "average")
 
+ggInteract_3D(gbm.object = all.data.map.dsi,x="rootDiam.mm",y="height.m")
+
 ggInteract_2D_test(gbm.object = all.data.map.dsi, x="leafN.mg.g",y="height.m",col.gradient = c("white","#769370"),
                    show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "LeafN", y.label = "Height",
                    z.range = c(-0.54, 1.64), z.label = "% Cover Change", smooth = "average")
 
+ggInteract_3D(gbm.object = all.data.map.dsi, x="leafN.mg.g",y="height.m")
+
 ggInteract_2D_test(gbm.object = all.data.map.dsi, x="precip",y="leafN.mg.g",col.gradient = c("white","#769370"),
                    show.dot = T,col.dot = "grey20",alpha.dot = 0.5,cex.dot = 0.2,label.contour = F,
                    col.contour = "#254376",show.axis = T,legend = T, x.label = "Precipitation", y.label = "LeafN",
                    z.range = c(-1.14, 0.11), z.label = "% Cover Change", smooth = "average")
+
+ggInteract_3D(gbm.object = all.data.map.dsi, x="precip",y="leafN.mg.g", z.range = c(-1.14, 0.11))
+
 
 #### annual data ####
 annual.no.site.map.dsi = gbm.step(data=annual.data, gbm.x = c(10:17,22,23), gbm.y=9,
@@ -1236,6 +1247,7 @@ range(forb.perennial$precip, na.rm = TRUE)
 range(forb.perennial$mean.DSI, na.rm = TRUE)
 range(forb.perennial$cover.change)
 
+table(annual.data$functional_group)
 
 table(perennial.data$functional_group)
 # 230 forbs, 180 grasses

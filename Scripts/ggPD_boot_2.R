@@ -118,7 +118,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
                   axis.line.x = element_line(linewidth = 0.1))
           
           if (common.scale == T) {
-            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.0))}
+            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.5))}
         }
         
         if (type.ci == "lines") {
@@ -148,7 +148,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
           }
           
           if (common.scale == T) {
-            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.0))
+            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.5))
           }
         }
         
@@ -177,7 +177,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
           }
           
           if (common.scale == T) {
-            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.0))
+            ggPD[[i]] <- ggPD[[i]] + ylim(c(-3.5,4.5))
           }
         }
       }
@@ -248,7 +248,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
         }
         
         if (common.scale == T) {
-          ggPD <- ggPD + ylim(c(-3.5,4.0))
+          ggPD <- ggPD + ylim(c(-3.5,4.5))
         }
       }
       
@@ -275,7 +275,7 @@ ggPD_boot_test_2 <- function(gbm.object, predictor = NULL, n.plots = length(pred
           ggPD <- ggPD + geom_rug(data = fittedVal, aes(x = x, y = y), sides = rug.pos, position = "jitter", color = "#EBEBEB")
         }
         if (common.scale == T) {
-          ggPD <- ggPD + ylim(c(-3.5,4.0))
+          ggPD <- ggPD + ylim(c(-3.5,4.5))
         }
       }
       list(ggPD = ggPD)

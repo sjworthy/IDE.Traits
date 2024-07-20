@@ -144,6 +144,20 @@ all.data = merge(cover.data, trait.data.new, by="Taxon")
 
 #write.csv(all.data, file = "./Formatted.Data/BACI.all.data.csv")
 
+# deteremine number of woody species removed
+
+woody.data = inner_join(cover.data, trait.data.2)
+table(woody.data$functional_group) # 126 out of 1003
+woody.data.2 = subset(woody.data, !woody.data$functional_group == "WOODY") #877
+table(woody.data.2$local_lifeform) # 2 trees removed
+
+# 127 out of 1003 populations, 13% of populations removed for being woody
+
+woody.data.2 = subset(woody.data, woody.data$SLA_m2.kg > 0 ) # 745 taxon
+table(woody.data.2$functional_group) # 102 out of 1003
+woody.data.3 = subset(woody.data.2, !woody.data.2$functional_group == "WOODY") #643
+table(woody.data.3$local_lifeform) # 1 trees removed
+
 #### data set split by lifespan ####
 # need to read out data and fix the lifespan to particular sites since 
 # some species have different lifespan at different sites
@@ -201,3 +215,5 @@ forb.perennial = subset(forb, forb$local_lifespan == "PERENNIAL")
 #write.csv(grass.annual, file = "./Formatted.Data/BACI.grass.annual.csv")
 #write.csv(forb.perennial, file = "./Formatted.Data/BACI.forb.perennial.csv")
 #write.csv(grass.perennial, file = "./Formatted.Data/BACI.grass.perennial.csv")
+
+
