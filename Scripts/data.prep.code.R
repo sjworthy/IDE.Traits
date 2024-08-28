@@ -119,6 +119,10 @@ taxon.check=Taxonstand::TPL(taxon.2$Var1)
 # comparing control-control, drought-drought
 # BACI design of (drought.after-drought.before)-(control.after-control.before)
 
+data.test = data.2 %>%
+  group_by(site_code) %>%
+  filter(n_treat_years == 0 | n_treat_years == 1)
+
 before = data.2 %>%
   filter(n_treat_years == 0)
 # plots with before data
