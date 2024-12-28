@@ -101,6 +101,10 @@ which(data.2$Taxon == "GOODENIA CYLCOPTERA")
 data.2[c(7936,7950,7953,11914,11934,12671,12690,12708,12715,29342,29345,29358,29376),13] = "GOODENIA CYCLOPTERA"
 which(data.2$Taxon == "LYTHRUM HYSSOPIFOLIUM")
 data.2[c(23264,23320,23616,23627),13] = "LYTHRUM HYSSOPIFOLIA"
+which(data.2$Taxon == "BRACHYCOME CAMPYLOCARPA")
+data.2[c(12661,12704),13] = "BRACHYSCOME CAMPYLOCARPA"
+
+
 
 # get taxon list
 taxon.2=as.data.frame(table(data.2$Taxon))
@@ -113,22 +117,34 @@ taxon.2=as.data.frame(table(data.2$Taxon))
 # https://cran.r-project.org/web/packages/Taxonstand/Taxonstand.pdf
 taxon.check=Taxonstand::TPL(taxon.2$Var1)
 
-# write.csv(taxon.check, file="taxon.check.csv")
+#write.csv(taxon.check, file="./Raw.Data/taxon.check.csv")
 
 #### calculate cover change ####
 # comparing control-control, drought-drought
 # BACI design of (drought.after-drought.before)-(control.after-control.before)
 
-data.test = data.2 %>%
+# filter for sites with 0 or 1 has n_treat_years
+data.3 = data.2 %>%
   group_by(site_code) %>%
   filter(n_treat_years == 0 | n_treat_years == 1)
 
-before = data.2 %>%
+# remove sites with only before or after data, keep sites with both sets of data
+table(data.3$site_code, data.3$n_treat_years)
+
+vec = c("antelope.us", "ayora.es", "bayrdrt.de", "bfl.us", "chilcasdrt.ar", "eea.br", "guaribas.br", "indiana.us","jenadrt.de","kinsella.ca","lcnorth.cl","lcsouth.cl",
+        "oklah.us","pineta.es","qdtnorth.cl","qdtsouth.cl","slp.us","validate.fr")
+
+data.4 = data.3 %>%
+  filter(!site_code %in% vec)
+
+table(data.4$site_code, data.4$n_treat_years)
+
+before = data.4 %>%
   filter(n_treat_years == 0)
 # plots with before data
 
 before.1 = before %>%
-  group_by(site_code, Taxon, year, block, plot,trt) %>%
+  group_by(site_code, Taxon, year, block, plot, trt) %>%
   summarize(max_cover = max_cover)
 
 before.2 = pivot_wider(before.1, names_from = trt, values_from = max_cover)
@@ -136,12 +152,10 @@ before.2 = pivot_wider(before.1, names_from = trt, values_from = max_cover)
 before.3 = before.2 %>%
   group_by(site_code, Taxon) %>%
   reframe(mean.before.control = mean(Control, na.rm = TRUE),
-          mean.before.drought = mean(Drought, na.rm = TRUE)) %>%
-  mutate(mean.before.control.0 = replace_na(mean.before.control,0),
-         mean.before.drought.0 = replace_na(mean.before.drought,0))
-# 1416 data points for 973 taxa, from 73 sites
+          mean.before.drought = mean(Drought, na.rm = TRUE))
+# 1314 data points for 896 taxa, from 68 sites
 
-after = data.2 %>%
+after = data.4 %>%
   filter(n_treat_years == 1)
 # plots with after data for year 1
 
@@ -155,36 +169,45 @@ after.2 = pivot_wider(after.1, names_from = trt, values_from = mean_cover)
 after.3 = after.2 %>%
   group_by(site_code, Taxon) %>%
   reframe(mean.after.control = mean(Control, na.rm = TRUE),
-          mean.after.drought = mean(Drought, na.rm = TRUE)) %>%
-  mutate(mean.after.control.0 = replace_na(mean.after.control,0),
-         mean.after.drought.0 = replace_na(mean.after.drought,0))
-# 1575 data points for 1045 taxa, from 81 sites
+          mean.after.drought = mean(Drought, na.rm = TRUE))
+# 1283 data points for 875 taxa, from 68 sites
 
-# merge before and after together
+all.data = full_join(before.3,after.3)
+# 1594 observations, 1041 species, 68 sites
 
-all.data = inner_join(before.3,after.3)
-# 1003 observations, 706 species, 68 sites
+# Need to remove species not found in both control and drought
+# write.csv(all.data, file = "./Raw.Data/cover.removal.csv")
 
-all.data.2 = all.data[,c(1,2,5,6,9,10)]
+all.data.2 = read.csv("./Formatted.Data/after.cover.removal.csv")
+# 1096 observations, 749 species, 68 sites
+
+# percent of observations lost
+
+(1594-1096)/1594 # 31%
+
+# percent of species lost
+
+(1041-749)/1041 # 28% lost
+
 all.data.2[is.na(all.data.2)] = 0
 # some species in only after but not before and some in only before but not after
 
-all.data.2 = all.data.2 %>%
-  mutate(drought.after.before = mean.after.drought.0 - mean.before.drought.0,
-         control.after.before = mean.after.control.0 - mean.before.control.0,
-         cover.change = drought.after.before - control.after.before)
+all.data.3 = all.data.2 %>%
+  mutate(drought.after.minus.before = mean.after.drought - mean.before.drought,
+         control.after.minus.before = mean.after.control - mean.before.control,
+         cover.change = drought.after.minus.before - control.after.minus.before)
 
-write.csv(all.data.2, file = "./Formatted.Data/BACI.data.final.csv")
-
+write.csv(all.data.3[,c(2:10)], file = "./Formatted.Data/Revisions/BACI.data.final.csv")
 
 #### AusTraits ####
 # getting trait data from AusTraits
-austraits <- load_austraits(version = "4.1.0", path = "austraits")
-austraits.2=readRDS("austraits-4.1.0.rds")
+# austraits <- load_austraits(version = "4.1.0", path = "./Raw.Data/austraits")
+austraits.2=readRDS("./Raw.Data/austraits/austraits-4.1.0.rds") # loading it
 
 taxon.df=as.data.frame(unique(austraits.2$traits$taxon_name))
 
-cover.response=read.csv("./Formatted.Data/BACI.data.final.csv")
+# read in our species list
+cover.response=read.csv("./Formatted.Data/Revisions/BACI.data.final.csv")
 cover.species=as.data.frame(unique(cover.response$Taxon))
 
 cover.species.list=as.vector(cover.species$`unique(cover.response$Taxon)`)
@@ -192,12 +215,50 @@ cover.species.list.2=str_to_sentence(cover.species.list)
 
 austraits.subset <- extract_taxa(austraits.2, taxon_name = cover.species.list.2)
 austraits.traits <- extract_trait(austraits.subset, c("leaf_N_per_dry_mass","plant_height",
-                                                      "root_diameter","root_N_per_dry_mass",
-                                                      "root_specific_root_length",
-                                                      "leaf_mass_per_area"))
+                                                      "root_N_per_dry_mass","leaf_mass_per_area",
+                                                      "root_specific_root_length","root_diameter",
+                                                      "root_mass_fraction"))
 austraits.subset.traits=austraits.traits$traits
 
-# write.csv(austraits.subset.traits, file="AusTraits.subset.traits.csv")
+# get rid of max and min
+
+austraits.sub.2 = austraits.subset.traits %>%
+  filter(value_type %in% c("mean", "raw"))
+
+# filter seedlings
+
+austraits.sub.3 = austraits.sub.2 %>%
+  filter(life_stage == "adult")
+
+austraits_wide <- pivot_wider(data = austraits.sub.3, names_from = trait_name, values_from = value)
+
+# get means
+austraits.summary = austraits_wide %>%
+  group_by(taxon_name) %>%
+  summarise(mean.LMA.g.m2 = mean(leaf_mass_per_area, na.rm = TRUE),
+            mean.leafN.mg.g = mean(leaf_N_per_dry_mass, na.rm = TRUE),
+            mean.RMF.g.g = mean(root_mass_fraction, na.rm = TRUE),
+            mean.SRL = mean(root_specific_root_length, na.rm = TRUE))
+
+austraits.summary$LMA.kg.m2 = austraits.summary$mean.LMA.g.m2/1000
+austraits.summary$SLA.m2.kg= 1/austraits.summary$LMA.kg.m2
+
+#write.csv(austraits.summary, file="./Raw.Data/AusTraits.subset.traits.csv")
+
+# get plant height
+
+max.traits = austraits.subset.traits %>%
+  filter(trait_name %in% c("plant_height","root_diameter"))
+
+max_wide <- pivot_wider(data = max.traits, names_from = trait_name, values_from = value)
+
+max.summary = max_wide %>%
+  group_by(taxon_name) %>%
+  summarise(mean.height.m = mean(plant_height, na.rm = TRUE),
+            mean.root.diam.mm = mean(root_diameter, na.rm = TRUE))
+
+# write.csv(max.summary, file="./Raw.Data/AusTraits.subset.traits.2.csv")
+
 
 #### Calculate drought severity index for sites ####
 
