@@ -5,132 +5,162 @@ library(tidyverse)
 library(corrplot)
 
 # read in full data frame 
-trait.data = read.csv("./Raw.Data/trait.species.BACI.final.csv")
+trait.data = read.csv("./Formatted.Data/Revisions/BACI.trait.meta.csv", row.names = 1) 
+# 1096 individuals, 749 species
 
-# subset traits to only those of interest
-trait.data.2 = trait.data[,c(1:9,14:16)] # 1239 species 
+# subset data for analyses
+trait.data.2 = trait.data %>%
+  select(site_code,Taxon,cover.change,leafN.mg.g,height.m,rootN.mg.g,SLA_m2.kg,root.depth_m,rootDiam.mm,
+         SRL.groot.cahill.merge,RTD.groot.cahill.merge,local_lifespan,local_lifeform,functional_group)
 
-# subset out woody species and trees from local_lifeform
+# subset out bryophytes (9), mosses (6), cactus (1), none had SLA and generally few trait data available
 
-trait.data.3 = subset(trait.data.2, !trait.data.2$functional_group == "WOODY") # 1117 species
-trait.data.3 = subset(trait.data.3, !trait.data.3$local_lifeform == "TREE") # 1115 species
+trait.data.3 = trait.data.2 %>%
+  filter(!local_lifeform %in% c("BRYOPHYTE","MOSS","CACTUS")) 
+# 1080 individuals, 739 species
 
-# BACI analysis:
-# 244 new species, 29 removed because TREE or WOODY, 1 FERN removed, 4 CACTUS removed
-# these were removed prior to adding species and traits to the end of trait.data
-# 210 total new species added (if traits available)
+# filter out woody species and trees based on functional group and local_lifeform
 
-# subset for species with SLA
-trait.data.4 = subset(trait.data.3, trait.data.3$SLA_m2.kg > 0 ) # 692 taxon
+trait.data.NW = trait.data.3 %>%
+  filter(!functional_group == "WOODY") %>%
+  filter(!local_lifeform %in% c("SHRUB","TREE"))
+# 957 individuals, 649 species
+# lost 123 individuals (11%) and 90 species (12%)
+  
+#### Get complete cases of traits ####
+
+traits.cc.nw = trait.data.NW[complete.cases(trait.data.NW), ]
+# 259 individuals, 114 species
+traits.cc = trait.data.3[complete.cases(trait.data.3), ]
+# 288 individuals, 129 species
+
+# look at correlations between traits
+
+cor.traits.cc.nw = cor(traits.cc.nw[,c(4:11)],use = "pairwise") 
+corrplot(cor.traits.cc.nw, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+# highest correlation is -0.34 and 0.34
+
+cor.traits.cc = cor(traits.cc[,c(4:11)],use = "pairwise") 
+corrplot(cor.traits.cc, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+# highest correlation is -0.36 and 0.35
+
+
+
 
 #write.csv(trait.data.4, file = "./Formatted.Data/BACI.traits.no.woody.SLA.csv")
 
-#### checking for outliers ####
-# all outliers removed manually from traits.no.woody.SLA.csv and 
-# made new file BACI.traits.no.woody.SLA.no.outlier.csv
 
-hist(trait.data.4$leafN.mg.g)
-boxplot(trait.data.4$leafN.mg.g)
-mean = mean(trait.data.4$leafN.mg.g, na.rm = TRUE)
-std = sd(trait.data.4$leafN.mg.g, na.rm = TRUE)
+
+
+#### checking for trait outliers from trait data without woody species ####
+# not going to remove outliers since need complete cases of traits for individuals to be included in analyses using lmer
+
+hist(trait.data.NW$leafN.mg.g)
+boxplot(trait.data.NW$leafN.mg.g)
+mean = mean(trait.data.NW$leafN.mg.g, na.rm = TRUE)
+std = sd(trait.data.NW$leafN.mg.g, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$leafN.mg.g[which(trait.data.4$leafN.mg.g <Tmin | trait.data.4$leafN.mg.g > Tmax)])
-# removed leafN 54.82000 58.30000 67.58333
+sort(trait.data.NW$leafN.mg.g[which(trait.data.NW$leafN.mg.g <Tmin | trait.data.NW$leafN.mg.g > Tmax)])
+# removed leafN 54.71597
 # percent removed 
-table(is.na(trait.data.4$leafN.mg.g))
-692-207
-3/485*100 #0.62%
+table(is.na(trait.data.NW$leafN.mg.g))
+958-368
+2/590*100 #0.34%
 
-hist(trait.data.4$height.m)
-boxplot(trait.data.4$height.m)
-mean = mean(trait.data.4$height.m, na.rm = TRUE)
-std = sd(trait.data.4$height.m, na.rm = TRUE)
+hist(trait.data.NW$height.m)
+boxplot(trait.data.NW$height.m)
+mean = mean(trait.data.NW$height.m, na.rm = TRUE)
+std = sd(trait.data.NW$height.m, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$height.m[which(trait.data.4$height.m <Tmin | trait.data.4$height.m > Tmax)])
-# removed height 2.600709 - 10
+sort(trait.data.NW$height.m[which(trait.data.NW$height.m <Tmin | trait.data.NW$height.m > Tmax)])
+# removed height 1.371600 - 3.80000
 # percent removed 
-table(is.na(trait.data.4$height.m))
-692-62
-7/630*100 #1.11%
+table(is.na(trait.data.NW$height.m))
+958-216
+14/742*100 #1.89%
 
-hist(trait.data.4$rootN.mg.g)
-boxplot(trait.data.4$rootN.mg.g)
-mean = mean(trait.data.4$rootN.mg.g, na.rm = TRUE)
-std = sd(trait.data.4$rootN.mg.g, na.rm = TRUE)
+hist(trait.data.NW$rootN.mg.g)
+boxplot(trait.data.NW$rootN.mg.g)
+mean = mean(trait.data.NW$rootN.mg.g, na.rm = TRUE)
+std = sd(trait.data.NW$rootN.mg.g, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$rootN.mg.g[which(trait.data.4$rootN.mg.g <Tmin | trait.data.4$rootN.mg.g > Tmax)])
-# remove rootN 34.39000 34.84397 39.26274
+sort(trait.data.NW$rootN.mg.g[which(trait.data.NW$rootN.mg.g <Tmin | trait.data.NW$rootN.mg.g > Tmax)])
+# remove rootN 31.17241-39.26274
 # percent removed 
-table(is.na(trait.data.4$rootN.mg.g))
-692-490
-3/202*100 #1.49%
+table(is.na(trait.data.NW$rootN.mg.g))
+958-613
+6/345*100 #1.74%
 
-hist(trait.data.4$SLA_m2.kg)
-boxplot(trait.data.4$SLA_m2.kg)
-mean = mean(trait.data.4$SLA_m2.kg, na.rm = TRUE)
-std = sd(trait.data.4$SLA_m2.kg, na.rm = TRUE)
+hist(trait.data.NW$SLA_m2.kg)
+boxplot(trait.data.NW$SLA_m2.kg)
+mean = mean(trait.data.NW$SLA_m2.kg, na.rm = TRUE)
+std = sd(trait.data.NW$SLA_m2.kg, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$SLA_m2.kg[which(trait.data.4$SLA_m2.kg <Tmin | trait.data.4$SLA_m2.kg > Tmax)])
-# remove SLA 52.45601 - 98.20000
+sort(trait.data.NW$SLA_m2.kg[which(trait.data.NW$SLA_m2.kg <Tmin | trait.data.NW$SLA_m2.kg > Tmax)])
+# remove SLA 53.50 - 68.90
 # percent removed 
-table(is.na(trait.data.4$SLA_m2.kg))
-13/692*100 #1.88%
+table(is.na(trait.data.NW$SLA_m2.kg))
+958-244
+8/714*100 #1.12%
 
-hist(trait.data.4$root.depth_m)
-boxplot(trait.data.4$root.depth_m)
-mean = mean(trait.data.4$root.depth_m, na.rm = TRUE)
-std = sd(trait.data.4$root.depth_m, na.rm = TRUE)
+hist(trait.data.NW$root.depth_m)
+boxplot(trait.data.NW$root.depth_m)
+mean = mean(trait.data.NW$root.depth_m, na.rm = TRUE)
+std = sd(trait.data.NW$root.depth_m, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$root.depth_m[which(trait.data.4$root.depth_m <Tmin | trait.data.4$root.depth_m > Tmax)])
-# remove depth 2.500000 - 3.828571
+sort(trait.data.NW$root.depth_m[which(trait.data.NW$root.depth_m <Tmin | trait.data.NW$root.depth_m > Tmax)])
+# remove depth 2.426850 - 3.709333
 # percent removed 
-table(is.na(trait.data.4$root.depth_m))
-692-353
-9/339*100 #2.65%
+table(is.na(trait.data.NW$root.depth_m))
+958-478
+15/480*100 #3.13%
 
-hist(trait.data.4$RTD.g.cm3)
-boxplot(trait.data.4$RTD.g.cm3)
-mean = mean(trait.data.4$RTD.g.cm3, na.rm = TRUE)
-std = sd(trait.data.4$RTD.g.cm3, na.rm = TRUE)
+hist(trait.data.NW$RTD.groot.cahill.merge)
+boxplot(trait.data.NW$RTD.groot.cahill.merge)
+mean = mean(trait.data.NW$RTD.groot.cahill.merge, na.rm = TRUE)
+std = sd(trait.data.NW$RTD.groot.cahill.merge, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$RTD.g.cm3[which(trait.data.4$RTD.g.cm3 <Tmin | trait.data.4$RTD.g.cm3 > Tmax)])
-# remove RTD 0.7839500 - 0.9167417
+sort(trait.data.NW$RTD.groot.cahill.merge[which(trait.data.NW$RTD.groot.cahill.merge <Tmin | trait.data.NW$RTD.groot.cahill.merge > Tmax)])
+# remove RTD 0.7000297
 # percent removed 
-table(is.na(trait.data.4$RTD.g.cm3))
-692-458
-3/234*100 #1.28%
+table(is.na(trait.data.NW$RTD.groot.cahill.merge))
+958-581
+1/377*100 #0.27%
 
-hist(trait.data.4$SRL_m.g)
-boxplot(trait.data.4$SRL_m.g)
-mean = mean(trait.data.4$SRL_m.g, na.rm = TRUE)
-std = sd(trait.data.4$SRL_m.g, na.rm = TRUE)
+hist(trait.data.NW$SRL.groot.cahill.merge)
+boxplot(trait.data.NW$SRL.groot.cahill.merge)
+mean = mean(trait.data.NW$SRL.groot.cahill.merge, na.rm = TRUE)
+std = sd(trait.data.NW$SRL.groot.cahill.merge, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$SRL_m.g[which(trait.data.4$SRL_m.g <Tmin | trait.data.4$SRL_m.g > Tmax)])
-# remove SRL 652.6000 - 929.9185
+sort(trait.data.NW$SRL.groot.cahill.merge[which(trait.data.NW$SRL.groot.cahill.merge <Tmin | trait.data.NW$SRL.groot.cahill.merge > Tmax)])
+# remove SRL 527.2000 - 760.8500
 # percent removed 
-table(is.na(trait.data.4$SRL_m.g))
-692-380
-7/312*100 #2.24%
+table(is.na(trait.data.NW$SRL.groot.cahill.merge))
+958-575
+10/383*100 #2.61%
 
-hist(trait.data.4$rootDiam.mm)
-boxplot(trait.data.4$rootDiam.mm)
-mean = mean(trait.data.4$rootDiam.mm, na.rm = TRUE)
-std = sd(trait.data.4$rootDiam.mm, na.rm = TRUE)
+hist(trait.data.NW$rootDiam.mm)
+boxplot(trait.data.NW$rootDiam.mm)
+mean = mean(trait.data.NW$rootDiam.mm, na.rm = TRUE)
+std = sd(trait.data.NW$rootDiam.mm, na.rm = TRUE)
 Tmin = mean-(3*std)
 Tmax = mean+(3*std)
-sort(trait.data.4$rootDiam.mm[which(trait.data.4$rootDiam.mm <Tmin | trait.data.4$rootDiam.mm > Tmax)])
-# remove diam 1.242171 - 2.015308
+sort(trait.data.NW$rootDiam.mm[which(trait.data.NW$rootDiam.mm <Tmin | trait.data.NW$rootDiam.mm > Tmax)])
+# remove diam 1.640000 - 4.830000
 # percent removed 
-table(is.na(trait.data.4$rootDiam.mm))
-692-387
-9/305*100 #2.95%
+table(is.na(trait.data.NW$rootDiam.mm))
+958-556
+4/402*100 #0.995%
+
 
 #### read in new trait data without outliers and cover data ####
 
@@ -144,19 +174,6 @@ all.data = merge(cover.data, trait.data.new, by="Taxon")
 
 #write.csv(all.data, file = "./Formatted.Data/BACI.all.data.csv")
 
-# deteremine number of woody species removed
-
-woody.data = inner_join(cover.data, trait.data.2)
-table(woody.data$functional_group) # 126 out of 1003
-woody.data.2 = subset(woody.data, !woody.data$functional_group == "WOODY") #877
-table(woody.data.2$local_lifeform) # 2 trees removed
-
-# 127 out of 1003 populations, 13% of populations removed for being woody
-
-woody.data.2 = subset(woody.data, woody.data$SLA_m2.kg > 0 ) # 745 taxon
-table(woody.data.2$functional_group) # 102 out of 1003
-woody.data.3 = subset(woody.data.2, !woody.data.2$functional_group == "WOODY") #643
-table(woody.data.3$local_lifeform) # 1 trees removed
 
 #### data set split by lifespan ####
 # need to read out data and fix the lifespan to particular sites since 

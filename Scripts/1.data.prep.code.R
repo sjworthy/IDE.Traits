@@ -8,8 +8,8 @@ library(Taxonstand)
 library(tidyverse)
 library(stringr)
 
-install.packages("remotes")
-remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
+#install.packages("remotes")
+#remotes::install_github("traitecoevo/austraits", dependencies = TRUE, upgrade = "ask")
 library(austraits) 
 
 #### Prepping final species list ####
@@ -291,14 +291,16 @@ site.drt.sev.index = drought.plots %>%
 
 #write.csv(site.drt.sev.index, "./site.drt.dev.index.csv")
 
-#### get functional group and life_form information for new BACI species ####
+#### get functional group and life_form information for BACI species ####
 
-new.species = read.csv("./New.dfs/BACI.species.list.csv", row.names = 1)
-colnames(new.species)="Taxon"
+species = read.csv("./Formatted.Data/Revisions/BACI.trait.data.csv", row.names = 1)
+
 data=read.csv("./Raw.Data/IDE_cover_2023-01-02.csv") %>%
-  select(Taxon,local_lifeform,functional_group)
+  select(site_code,Taxon,local_lifespan,local_lifeform,functional_group)
 
-species.merge = left_join(new.species,data, by = "Taxon")
+# merge by site_code and Taxon to add life_form and functional group
+species.merge = left_join(species,data)
+
 species.merge.2 = unique(species.merge)
 
-write.csv(species.merge.2, file = "./New.dfs/new.species.info.csv")
+#write.csv(species.merge.2, file = "./Formatted.Data/Revisions/BACI.trait.meta.csv")
