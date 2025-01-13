@@ -11,7 +11,7 @@ trait.data = read.csv("./Formatted.Data/Revisions/BACI.trait.meta.csv", row.name
 # subset data for analyses
 trait.data.2 = trait.data %>%
   select(site_code,Taxon,cover.change,leafN.mg.g,height.m,rootN.mg.g,SLA_m2.kg,root.depth_m,rootDiam.mm,
-         SRL.groot.cahill.merge,RTD.groot.cahill.merge,local_lifespan,local_lifeform,functional_group)
+         SRL.groot.cahill.merge,RTD.groot.cahill.merge,RMF.g.g,local_lifespan,local_lifeform,functional_group)
 
 # subset out bryophytes (9), mosses (6), cactus (1), none had SLA and generally few trait data available
 
@@ -19,40 +19,82 @@ trait.data.3 = trait.data.2 %>%
   filter(!local_lifeform %in% c("BRYOPHYTE","MOSS","CACTUS")) 
 # 1080 individuals, 739 species
 
+# write.csv(trait.data.3, file = "./Formatted.Data/Revisions/final.data.for.impute.csv")
+
 # filter out woody species and trees based on functional group and local_lifeform
 
 trait.data.NW = trait.data.3 %>%
   filter(!functional_group == "WOODY") %>%
   filter(!local_lifeform %in% c("SHRUB","TREE"))
-# 957 individuals, 649 species
-# lost 123 individuals (11%) and 90 species (12%)
-  
+# 956 individuals, 648 species
+# lost 124 individuals (11%) and 91 species (12%)
+
+# write.csv(trait.data.NW, file = "./Formatted.Data/Revisions/final.data.NW.for.impute.csv")
+
 #### Get complete cases of traits ####
 
 traits.cc.nw = trait.data.NW[complete.cases(trait.data.NW), ]
-# 259 individuals, 114 species
+# 224 individuals, 96 species
+
+# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.NW.csv")
+
 traits.cc = trait.data.3[complete.cases(trait.data.3), ]
-# 288 individuals, 129 species
+# 236 individuals, 103 species
+
+# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.csv")
 
 # look at correlations between traits
 
-cor.traits.cc.nw = cor(traits.cc.nw[,c(4:11)],use = "pairwise") 
+cor.traits.cc.nw = cor(traits.cc.nw[,c(4:12)],use = "pairwise") 
 corrplot(cor.traits.cc.nw, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.34 and 0.34
+# highest correlation is -0.38 and 0.35
 
-cor.traits.cc = cor(traits.cc[,c(4:11)],use = "pairwise") 
+cor.traits.cc = cor(traits.cc[,c(4:12)],use = "pairwise") 
 corrplot(cor.traits.cc, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.36 and 0.35
+# highest correlation is -0.38 and 0.35
+
+#### complete cases without RMF since not in Weigelt 2021 ####
+
+traits.data.NW.2 = trait.data.NW[,c(1:11,13:15)]
+
+traits.cc.nw.weigelt = traits.data.NW.2[complete.cases(traits.data.NW.2), ]
+# 259 individuals, 114 species
+
+# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.NW.weigelt.csv")
+
+trait.data.3.2 = trait.data.3[,c(1:11,13:15)]
+
+traits.cc.weigelt = trait.data.3.2[complete.cases(trait.data.3.2), ]
+# 288 individuals, 129 species
+
+# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.weigelt.csv")
 
 
+#### data set split by lifespan ####
 
+# only enough data for perennials to fit models, not annuals
 
-#write.csv(trait.data.4, file = "./Formatted.Data/BACI.traits.no.woody.SLA.csv")
+table(traits.cc.nw$local_lifespan)
+# 184 perennial, 31 annual
+table(traits.cc$local_lifespan)
+# 196 perennial, 31 annual
+table(traits.cc.nw.weigelt$local_lifespan)
+# 218 perennial, 32 annual
+table(traits.cc.weigelt$local_lifespan)
+# 247 perennial, 32 annual
 
+#### data set split by functional group
 
-
+table(traits.cc.nw$functional_group)
+# 97 forb, 3 graminoid, 94 grass, 30 legume
+table(traits.cc$functional_group)
+# 97 forb, 3 graminoid, 94 grass, 30 legume, 12 woody
+table(traits.cc.nw.weigelt$functional_group)
+# 114 forb, 5 graminoid, 106 grass, 34 legume
+table(traits.cc.weigelt$functional_group)
+# 116 forb, 5 graminoid, 106 grass, 34 legume, 27 woody
 
 #### checking for trait outliers from trait data without woody species ####
 # not going to remove outliers since need complete cases of traits for individuals to be included in analyses using lmer
