@@ -48,7 +48,7 @@ traits.cc = trait.data.3[complete.cases(trait.data.3), ]
 cor.traits.cc.nw = cor(traits.cc.nw[,c(4:12)],use = "pairwise") 
 corrplot(cor.traits.cc.nw, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.38 and 0.35
+# highest correlation is -0.39 and 0.35
 
 cor.traits.cc = cor(traits.cc[,c(4:12)],use = "pairwise") 
 corrplot(cor.traits.cc, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
