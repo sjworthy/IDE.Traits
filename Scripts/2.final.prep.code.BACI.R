@@ -41,7 +41,7 @@ traits.cc.nw = trait.data.NW[complete.cases(trait.data.NW), ]
 traits.cc = trait.data.3[complete.cases(trait.data.3), ]
 # 236 individuals, 103 species
 
-# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.csv")
+# write.csv(traits.cc, file = "./Formatted.Data/Revisions/final.data.CC.csv")
 
 # look at correlations between traits
 
@@ -62,14 +62,14 @@ traits.data.NW.2 = trait.data.NW[,c(1:11,13:15)]
 traits.cc.nw.weigelt = traits.data.NW.2[complete.cases(traits.data.NW.2), ]
 # 259 individuals, 114 species
 
-# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.NW.weigelt.csv")
+# write.csv(traits.cc.nw.weigelt, file = "./Formatted.Data/Revisions/final.data.CC.NW.weigelt.csv")
 
 trait.data.3.2 = trait.data.3[,c(1:11,13:15)]
 
 traits.cc.weigelt = trait.data.3.2[complete.cases(trait.data.3.2), ]
 # 288 individuals, 129 species
 
-# write.csv(traits.cc.nw, file = "./Formatted.Data/Revisions/final.data.CC.weigelt.csv")
+# write.csv(traits.cc.weigelt, file = "./Formatted.Data/Revisions/final.data.CC.weigelt.csv")
 
 
 #### data set split by lifespan ####

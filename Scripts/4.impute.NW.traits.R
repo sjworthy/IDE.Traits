@@ -318,5 +318,23 @@ RMF = ggplot(all.data, aes(x = RMF.g.g, y = impute.RMF.g.g))+
   theme_classic()
 RMF # R2 = 0.99
 
+### Replace NAs in the original trait data with the imputed values
+
+imputed.traits = read.csv("./Formatted.Data/Revisions/imputed.traits.NW.csv")
+
+imput_final<-imputed.traits%>%
+  mutate(leafN.final = coalesce(leafN.mg.g,impute.leafN.mg.g),
+         height.final = coalesce(height.m,impute.height.m),
+         rootN.final = coalesce(rootN.mg.g,impute.rootN.mg.g),
+         SLA.final = coalesce(SLA_m2.kg,impute.SLA_m2.kg),
+         root.depth.final = coalesce(root.depth_m,impute.root.depth_m),
+         rootDiam.final = coalesce(rootDiam.mm,impute.rootDiam.mm),
+         SRL.final = coalesce(SRL.groot.cahill.merge,impute.SRL.groot.cahill.merge),
+         RTD.final = coalesce(RTD.groot.cahill.merge,impute.RTD.groot.cahill.merge),
+         RMF.final = coalesce(RMF.g.g,impute.RMF.g.g))
+
+sum(is.na(imput_final[,c(26:34)])) # no NAs in the final imputed trait dataset
+
+write.csv(imput_final, file = "./Formatted.Data/Revisions/imputed.traits.NW.final.csv")
 
 
