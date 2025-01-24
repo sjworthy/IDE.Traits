@@ -13,6 +13,7 @@ library(MuMIn)
 library(corrplot)
 library(effects)
 library(sjPlot)
+library(brms)
 
 # steps
 # test for trait correlations
@@ -309,4 +310,86 @@ perennial.grass.impute.model = lmer(cover.change ~ leafN.final + height.final + 
                                       SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), data = perennial.grass.imputed.3)
 summary(perennial.grass.impute.model)
 
+
+
+#### final.data.CC BAYES ####
+# model of trait data with complete cases for all species
+
+final.data.CC = read.csv("./Formatted.Data/Revisions/final.data.CC.csv",row.names = 1)
+
+# look at correlations between traits
+cor.traits.cc = cor(final.data.CC[,c(4:12)],use = "pairwise") 
+corrplot(cor.traits.cc, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+# highest correlation is -0.38 and 0.35
+
+final.data.CC.2 = scale(final.data.CC[,c(4:12)])
+final.data.CC.3 = cbind(final.data.CC[,c(1:3)],final.data.CC.2)
+
+# 236 data points estimating 11 variables
+
+# Get brms suggested priors 
+
+get_prior(cover.change ~ 1 + leafN.mg.g + height.m + rootN.mg.g + SLA_m2.kg + root.depth_m + rootDiam.mm + SRL.groot.cahill.merge + 
+            RTD.groot.cahill.merge + RMF.g.g + (1|site_code) + (1|Taxon),
+          family = gaussian(),
+          data = final.data.CC.3)
+
+priors <- c(prior(normal(0, 10), class = b))
+
+
+CC.model = brm(cover.change ~ leafN.mg.g + height.m + rootN.mg.g + SLA_m2.kg + root.depth_m + rootDiam.mm +
+                 SRL.groot.cahill.merge + RTD.groot.cahill.merge + RMF.g.g + SRL.groot.cahill.merge*RTD.groot.cahill.merge + (1|site_code) + (1|Taxon), 
+               family = gaussian(),
+               prior = priors,
+               data = final.data.CC.3)
+
+summary(CC.model)
+plot(CC.model, nvariables=6, ask=FALSE)
+pp_check(CC.model, ndraws = 500)
+
+conditional_effects(CC.model, re_formula = NULL)
+
+# Add interaction between RTD and SRL
+
+CC.model.interact = lmer(cover.change ~ leafN.mg.g + height.m + rootN.mg.g + SLA_m2.kg + root.depth_m + rootDiam.mm +
+                           SRL.groot.cahill.merge + RTD.groot.cahill.merge + RMF.g.g + SRL.groot.cahill.merge*RTD.groot.cahill.merge +
+                           (1|site_code) + (1|Taxon), data = final.data.CC.3)
+summary(CC.model.interact)
+# RTD is significant
+r.squaredGLMM(CC.model.interact) # 0.07, 0.21
+
+plot(CC.model.interact)
+output.plot = allEffects(CC.model.interact)
+plot(output.plot)
+hist(resid(CC.model.interact))
+
+#### imputed.traits.final BAYES ####
+# model of trait data with complete cases for all species
+
+imputed.traits = read.csv("./Formatted.Data/Revisions/imputed.traits.final.csv",row.names = 1)
+
+# look at correlations between traits
+cor.traits.impute = cor(imputed.traits[,c(26:34)],use = "pairwise") 
+corrplot(cor.traits.impute, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
+         col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
+# highest correlation is -0.31 and 0.35
+
+imputed.traits.2 = scale(imputed.traits[,c(26:34)])
+imputed.traits.3 = cbind(imputed.traits[,c(1:3)],imputed.traits.2)
+
+# 907 data points estimating 11 variables
+
+priors <- c(prior(normal(0, 10), class = b))
+
+
+imputed.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                             SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), 
+                           family = gaussian(),
+                           prior = priors,
+                           data = imputed.traits.3)
+
+summary(imputed.traits.model)
+plot(imputed.traits.model, nvariables=6, ask=FALSE)
+pp_check(imputed.traits.model, ndraws = 500)
 

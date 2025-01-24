@@ -262,34 +262,42 @@ max.summary = max_wide %>%
 
 #### Calculate drought severity index for sites ####
 
-# cover data
-data=read.csv("./Raw.Data/IDE_cover_2023-01-02.csv")
-
 # has the amount of precipitation that fell during year 1 of the study at each site
 # value is corrected for treatment days
 # ppt.1 column is the amount of ppt that fell in the plot in the 365 days prior to biomass collection
 # MAP column is the mean annual precipitation at the site
 yr1.ppt=read.csv("./Raw.Data/cover_ppt_2023-05-10.csv")
 
-# merge the two together so can slim to year 1 
-all.data = left_join(yr1.ppt, data)
-
-all.data.2 = all.data %>%
-  filter(trt == "Drought")
+yr1.ppt.2 = yr1.ppt %>%
+  filter(trt == "Drought") %>%
+  filter(n_treat_years == 1)
 # plots with 1 treatment year
 
-drought.plots = all.data.2 %>%
-  filter(trt == "Drought")
-# drought plots
-
-drought.plots$DSI = (drought.plots$ppt.1 - drought.plots$map)/drought.plots$map
+yr1.ppt.2$DSI = (yr1.ppt.2$ppt.1 - yr1.ppt.2$map)/yr1.ppt.2$map
 
 # get the mean drt.sev.index for each site, this is just mean of drought plots
-site.drt.sev.index = drought.plots %>%
+site.drt.sev.index = yr1.ppt.2 %>%
   group_by(site_code) %>%
-  reframe(mean.DSI = mean(DSI, na.rm = TRUE))
+  reframe(mean.DSI = mean(DSI, na.rm = TRUE),
+          mean.MAP = mean(map, na.rm = TRUE))
 
-#write.csv(site.drt.sev.index, "./site.drt.dev.index.csv")
+# cdpt_drt.us excluded because n_treat-year is blank
+
+cdpt_drt.us = yr1.ppt %>%
+  filter(site_code == "cdpt_drt.us") %>%
+  filter(trt == "Drought") %>%
+  filter(n_treat_days > 0)
+  
+cdpt_drt.us$DSI = (cdpt_drt.us$ppt.1 - cdpt_drt.us$map)/cdpt_drt.us$map
+
+cdpt_drt.us.index = cdpt_drt.us %>%
+  group_by(site_code) %>%
+  reframe(mean.DSI = mean(DSI, na.rm = TRUE),
+          mean.MAP = mean(map, na.rm = TRUE))
+
+all.data = rbind(site.drt.sev.index,cdpt_drt.us.index)
+
+# write.csv(all.data, "./Raw.Data/site.drt.dev.index.csv")
 
 #### get functional group and life_form information for BACI species ####
 

@@ -340,5 +340,186 @@ perennial.grass.impute.model = lmer(cover.change ~ leafN.final + height.final + 
                                       SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), data = perennial.grass.imputed.4)
 summary(perennial.grass.impute.model)
 
+### Bayes ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+
+imputed.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                 SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), 
+               family = gaussian(),
+               prior = priors,
+               data = imputed.traits.4)
+
+summary(imputed.traits.model)
+plot(imputed.traits.model, nvariables=6, ask=FALSE)
+pp_check(imputed.traits.model, ndraws = 500)
+
+annual.impute.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                            SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), 
+                          family = gaussian(),
+                          prior = priors,
+                          data = annual.imputed.4)
+
+summary(annual.impute.model)
+
+perennial.impute.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                            SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), 
+                          family = gaussian(),
+                          prior = priors,
+                          data = perennial.imputed.4)
+
+summary(perennial.impute.model)
+
+grass.impute.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                             SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), 
+                           family = gaussian(),
+                           prior = priors,
+                           data = grass.imputed.4)
+
+forb.impute.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                           SRL.final + RTD.final + RMF.final + (1|site_code) + (1|Taxon), 
+                         family = gaussian(),
+                         prior = priors,
+                         data = forb.imputed.4)
+
+#### checking for trait outliers from trait data without woody species ####
+# not going to remove outliers since need complete cases of traits for individuals to be included in analyses using lmer
+
+imputed.traits = read.csv("./Formatted.Data/Revisions/imputed.traits.NW.final.csv", row.names = 1)
+
+hist(imputed.traits$leafN.final)
+boxplot(imputed.traits$leafN.final)
+mean = mean(imputed.traits$leafN.final, na.rm = TRUE)
+std = sd(imputed.traits$leafN.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$leafN.final[which(imputed.traits$leafN.final <Tmin | imputed.traits$leafN.final > Tmax)])
+# removed leafN 45.18532 45.32000 46.00560 54.71597 54.71597
+# percent removed 
+table(is.na(imputed.traits$leafN.final))
+958-368
+2/590*100 #0.34%
+
+hist(imputed.traits$height.final)
+boxplot(imputed.traits$height.final)
+mean = mean(imputed.traits$height.final, na.rm = TRUE)
+std = sd(imputed.traits$height.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$height.final[which(imputed.traits$height.final <Tmin | imputed.traits$height.final > Tmax)])
+# removed height 1.371600 1.383400 1.392886 1.439388 1.462500 1.493520 1.500000 1.750000 1.800000 1.800048 1.828800 1.996670 2.847733 3.800000
+# percent removed 
+table(is.na(imputed.traits$height.final))
+958-216
+14/742*100 #1.89%
+
+hist(imputed.traits$rootN.final)
+boxplot(imputed.traits$rootN.final)
+mean = mean(imputed.traits$rootN.final, na.rm = TRUE)
+std = sd(imputed.traits$rootN.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$rootN.final[which(imputed.traits$rootN.final <Tmin | imputed.traits$rootN.final > Tmax)])
+# remove rootN 27.18327 - 39.39083
+# percent removed 
+table(is.na(imputed.traits$rootN.final))
+958-613
+6/345*100 #1.74%
+
+hist(imputed.traits$SLA.final)
+boxplot(imputed.traits$SLA.final)
+mean = mean(imputed.traits$SLA.final, na.rm = TRUE)
+std = sd(imputed.traits$SLA.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$SLA.final[which(imputed.traits$SLA.final <Tmin | imputed.traits$SLA.final > Tmax)])
+# remove SLA: 49.05439 53.50000 53.50000 57.70000 61.28000 63.13000 68.90000 68.90000
+# percent removed 
+table(is.na(imputed.traits$SLA.final))
+958-244
+8/714*100 #1.12%
+
+hist(imputed.traits$root.depth.final)
+boxplot(imputed.traits$root.depth.final)
+mean = mean(imputed.traits$root.depth.final, na.rm = TRUE)
+std = sd(imputed.traits$root.depth.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$root.depth.final[which(imputed.traits$root.depth.final <Tmin | imputed.traits$root.depth.final > Tmax)])
+# remove depth 6.451600 - 6.451600
+# percent removed 
+table(is.na(imputed.traits$root.depth.final))
+958-478
+15/480*100 #3.13%
+
+hist(imputed.traits$RTD.final)
+boxplot(imputed.traits$RTD.final)
+mean = mean(imputed.traits$RTD.final, na.rm = TRUE)
+std = sd(imputed.traits$RTD.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$RTD.final[which(imputed.traits$RTD.final <Tmin | imputed.traits$RTD.final > Tmax)])
+# remove RTD 0.6525000 - 0.9708695
+# percent removed 
+table(is.na(imputed.traits$RTD.final))
+958-581
+1/377*100 #0.27%
+
+hist(imputed.traits$SRL.final)
+boxplot(imputed.traits$SRL.final)
+mean = mean(imputed.traits$SRL.final, na.rm = TRUE)
+std = sd(imputed.traits$SRL.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$SRL.final[which(imputed.traits$SRL.final <Tmin | imputed.traits$SRL.final > Tmax)])
+# remove SRL 437.3523-760.8500
+# percent removed 
+table(is.na(imputed.traits$SRL.final))
+958-575
+10/383*100 #2.61%
+
+hist(imputed.traits$rootDiam.final)
+boxplot(imputed.traits$rootDiam.final)
+mean = mean(imputed.traits$rootDiam.final, na.rm = TRUE)
+std = sd(imputed.traits$rootDiam.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$rootDiam.final[which(imputed.traits$rootDiam.final <Tmin | imputed.traits$rootDiam.final > Tmax)])
+# remove diam 1.126012 1.396500 1.640000 1.850000 1.963333 4.830000
+# percent removed 
+table(is.na(imputed.traits$rootDiam.final))
+958-556
+4/402*100 #0.995%
+
+hist(imputed.traits$RMF.final)
+boxplot(imputed.traits$RMF.final)
+mean = mean(imputed.traits$RMF.final, na.rm = TRUE)
+std = sd(imputed.traits$RMF.final, na.rm = TRUE)
+Tmin = mean-(3*std)
+Tmax = mean+(3*std)
+sort(imputed.traits$RMF.final[which(imputed.traits$RMF.final <Tmin | imputed.traits$RMF.final > Tmax)])
+# remove RMF: 0.04850791- 0.8630137
+# percent removed 
+table(is.na(imputed.traits$RMF.final))
+958-556
+4/402*100 #0.995%
+
+
+# 94 total removed because some removed with multiple traits
+imputed.traits.2 = imputed.traits %>%
+  filter(round(leafN.final, 5) < 45.18532) %>% # 4
+  filter(round(height.final, 5) < 1.371600) %>% # 11
+  filter(round(rootN.final, 5) < 27.18327) %>% # 18
+  filter(round(SLA.final, 5) < 49.05439) %>% # 8
+  filter(round(root.depth.final, 5) < 6.451600) %>% # 15
+  filter(round(RTD.final, 5) < 0.6525000) %>% # 11
+  filter(round(SRL.final, 5) < 437.3523) %>% # 21
+  filter(round(rootDiam.final, 5) < 1.126012) %>% # 6
+  filter(round(RMF.final, 5) > 0.04850791 & round(RMF.final, 5) < 0.76700839) # 10
+
+
+
+
 
 
