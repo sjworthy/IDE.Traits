@@ -67,7 +67,12 @@ imputed.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.fin
                            data = imputed)
 
 summary(imputed.traits.model)
-# nothing significant
+# MAP
+
+saveRDS(imputed.traits.model, file = "./Results/all.imputed.traits.woody.rds")
+
+bayes_R2(imputed.traits.model)
+# R2 0.05001068 0.02284897 0.0181526 0.1069306
 
 imputed.traits.interact = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                            family = gaussian(),
@@ -75,6 +80,14 @@ imputed.traits.interact = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + me
                            data = imputed)
 
 summary(imputed.traits.interact)
+# nothing significant
+
+imputed.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                              family = gaussian(),
+                              prior = priors,
+                              data = imputed)
+
+summary(imputed.traits.interact.2)
 # nothing significant
 
 #### imputed traits lifespan model ####
@@ -89,7 +102,10 @@ annual.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.fina
 
 summary(annual.traits.model)
 # MAP
+bayes_R2(annual.traits.model)
+# R2 0.1520941 0.04437346 0.07316097 0.2476708
 
+# saveRDS(annual.traits.model, file = "./Results/annual.imputed.traits.woody.rds")
 
 annual.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                           family = gaussian(),
@@ -99,14 +115,26 @@ annual.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mea
 summary(annual.traits.interact)
 # nothing significant
 
+annual.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                             family = gaussian(),
+                             prior = priors,
+                             data = imputed.annual)
+
+summary(annual.traits.interact.2)
+# nothing significant
+
 perennial.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                                SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                              family = gaussian(),
                              prior = priors,
                              data = imputed.perennial)
 
+#saveRDS(perennial.traits.model, file = "./Results/perennial.imputed.traits.woody.rds")
+
 summary(perennial.traits.model)
 # nothing significant
+bayes_R2(perennial.traits.model)
+# R2 0.05795415 0.02685958 0.02063487 0.1269215
 
 perennial.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                              family = gaussian(),
@@ -114,6 +142,13 @@ perennial.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + 
                              data = imputed.perennial)
 
 summary(perennial.traits.interact)
+# nothing significant
+
+perennial.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed.perennial)
+summary(perennial.traits.interact.2)
 # nothing significant
 
 #### impute traits functional group ####
@@ -129,12 +164,24 @@ forb.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final 
 summary(forb.traits.model)
 # leafN
 
+saveRDS(forb.traits.model, file = "./Results/forb.imputed.traits.woody.rds")
+bayes_R2(forb.traits.model)
+# R2 0.108043 0.04480473 0.04352589 0.2169503
+
 forb.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                         family = gaussian(),
                         prior = priors,
                         data = imputed.forb)
 
 summary(forb.traits.interact)
+# nothing significant
+
+forb.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                           family = gaussian(),
+                           prior = priors,
+                           data = imputed.forb)
+
+summary(forb.traits.interact.2)
 # nothing significant
 
 grass.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
@@ -146,12 +193,24 @@ grass.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final
 summary(grass.traits.model)
 # nothing significant
 
+saveRDS(grass.traits.model, file = "./Results/grass.imputed.traits.woody.rds")
+bayes_R2(grass.traits.model)
+# R2 0.107352 0.03969512 0.04436312 0.1968012
+
 grass.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                          family = gaussian(),
                          prior = priors,
                          data = imputed.grass)
 
 summary(grass.traits.interact)
+# nothing significant
+
+grass.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                            family = gaussian(),
+                            prior = priors,
+                            data = imputed.grass)
+
+summary(grass.traits.interact.2)
 # nothing significant
 
 #### imputed traits lifespan x functional group ####
@@ -167,12 +226,24 @@ annual.forb.traits.model = brm(cover.change ~ leafN.final + height.final + rootN
 summary(annual.forb.traits.model)
 # nothing significant
 
+saveRDS(annual.forb.traits.model, file = "./Results/annual.forb.imputed.traits.woody.rds")
+bayes_R2(annual.forb.traits.model)
+# R2 0.2164187 0.06508607 0.1044091 0.3573045
+
 annual.forb.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
                                family = gaussian(),
                                prior = priors,
                                data = imputed.annual.forb)
 
 summary(annual.forb.traits.interact)
+# nothing significant
+
+annual.forb.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed.annual.forb)
+
+summary(annual.forb.traits.interact.2)
 # nothing significant
 
 perennial.forb.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
@@ -184,12 +255,24 @@ perennial.forb.traits.model = brm(cover.change ~ leafN.final + height.final + ro
 summary(perennial.forb.traits.model)
 # nothing significant
 
+saveRDS(perennial.forb.traits.model, file = "./Results/perennial.forb.imputed.traits.woody.rds")
+bayes_R2(perennial.forb.traits.model)
+#R2 0.1539832 0.06549766 0.05882718 0.3090808
+
 perennial.forb.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
                                   family = gaussian(),
                                   prior = priors,
                                   data = imputed.perennial.forb)
 
 summary(perennial.forb.traits.interact)
+# nothing significant
+
+perennial.forb.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.perennial.forb)
+
+summary(perennial.forb.traits.interact.2)
 # nothing significant
 
 perennial.grass.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
@@ -201,12 +284,23 @@ perennial.grass.traits.model = brm(cover.change ~ leafN.final + height.final + r
 summary(perennial.grass.traits.model)
 # nothing significant
 
+#saveRDS(perennial.grass.traits.model, file = "./Results/perennial.grass.imputed.traits.woody.rds")
+bayes_R2(perennial.grass.traits.model)
+# R2 0.1460877 0.0555151 0.05771307 0.2693545
 perennial.grass.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
                                    family = gaussian(),
                                    prior = priors,
                                    data = imputed.perennial.grass)
 
 summary(perennial.grass.traits.interact)
+# nothing significant
+
+perennial.grass.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.perennial.grass)
+
+summary(perennial.grass.traits.interact.2)
 # nothing significant
 
 
@@ -273,6 +367,9 @@ imputed.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.
 
 summary(imputed.traits.NW.model)
 # leafN
+saveRDS(imputed.traits.NW.model, file = "./Results/all.imputed.traits.no_woody.rds")
+bayes_R2(imputed.traits.NW.model)
+# R2 0.06008998 0.02492269 0.02400752 0.1181871
 
 imputed.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                               family = gaussian(),
@@ -294,6 +391,9 @@ annual.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.f
 
 summary(annual.traits.NW.model)
 # MAP
+saveRDS(annual.traits.NW.model, file = "./Results/annual.imputed.traits.no_woody.rds")
+bayes_R2(annual.traits.NW.model)
+# R2 0.1542627 0.04448325 0.07546093 0.2476329
 
 annual.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                              family = gaussian(),
@@ -301,7 +401,7 @@ annual.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + 
                              data = imputed.NW.annual)
 
 summary(annual.traits.NW.interact)
-# MAP
+
 
 perennial.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                                   SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
@@ -312,6 +412,9 @@ perennial.traits.NW.model = brm(cover.change ~ leafN.final + height.final + root
 summary(perennial.traits.NW.model)
 # nothing significant
 
+saveRDS(perennial.traits.NW.model, file = "./Results/perennial.imputed.traits.no_woody.rds")
+bayes_R2(perennial.traits.NW.model)
+# R2 0.081794 0.03372474 0.03279104 0.1602133
 perennial.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
                                 prior = priors,
@@ -333,6 +436,10 @@ forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.fin
 summary(forb.traits.NW.model)
 # leafN significant
 
+saveRDS(forb.traits.NW.model, file = "./Results/forb.imputed.traits.no_woody.rds")
+bayes_R2(forb.traits.NW.model)
+# R2 0.1148149 0.04304049 0.04828436 0.2129581
+
 forb.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                            family = gaussian(),
                            prior = priors,
@@ -341,7 +448,14 @@ forb.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + me
 summary(forb.traits.NW.interact)
 # RTD*SRL significant
 
+saveRDS(forb.traits.NW.interact, file = "./Results/forb.imputed.traits.no_woody.interact.rds")
+bayes_R2(forb.traits.NW.interact)
+# R2 0.07621882 0.03958888 0.02139439 0.1744512
+
 conditional_effects(forb.traits.NW.interact)
+# positive SRL
+# positive RTD
+# positive for high SRL, low RTD
 
 grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                               SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
@@ -351,6 +465,10 @@ grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.fi
 
 summary(grass.traits.NW.model)
 # nothing significant
+
+saveRDS(grass.traits.NW.model, file = "./Results/grass.imputed.traits.no_woody.rds")
+bayes_R2(grass.traits.NW.model)
+# R2 0.1131223 0.04113157 0.04815195 0.2051698
 
 grass.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                             family = gaussian(),
@@ -373,13 +491,16 @@ annual.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + ro
 summary(annual.forb.traits.NW.model)
 # MAP significant
 
+saveRDS(annual.forb.traits.NW.model, file = "./Results/annual.forb.imputed.traits.no_woody.rds")
+bayes_R2(annual.forb.traits.NW.model)
+# R2 0.2252887 0.0659826 0.1116487 0.3650369
+
 annual.forb.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
                                   family = gaussian(),
                                   prior = priors,
                                   data = imputed.NW.annual.forb)
 
 summary(annual.forb.traits.NW.interact)
-# MAP significant
 
 perennial.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                                        SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
@@ -389,6 +510,10 @@ perennial.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final +
 
 summary(perennial.forb.traits.NW.model)
 # nothing significant
+
+saveRDS(perennial.forb.traits.NW.model, file = "./Results/perennial.forb.imputed.traits.no_woody.rds")
+bayes_R2(perennial.forb.traits.NW.model)
+#R2 0.1475479 0.05794628 0.06079698 0.2874462
 
 perennial.forb.traits.NW.interact= brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
                                      family = gaussian(),
@@ -406,6 +531,10 @@ perennial.grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final 
 
 summary(perennial.grass.traits.NW.model)
 # nothing significant
+
+saveRDS(perennial.grass.traits.NW.model, file = "./Results/perennial.grass.imputed.traits.no_woody.rds")
+bayes_R2(perennial.grass.traits.NW.model)
+#R2 0.1499307 0.06219888 0.05914333 0.2792502
 
 perennial.grass.traits.NW.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
                                       family = gaussian(),
