@@ -69,29 +69,79 @@ imputed.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.fin
 summary(imputed.traits.model)
 # MAP
 
-saveRDS(imputed.traits.model, file = "./Results/all.imputed.traits.woody.rds")
+# saveRDS(imputed.traits.model, file = "./Results/all.imputed.traits.woody.rds")
 
 bayes_R2(imputed.traits.model)
 # R2 0.05001068 0.02284897 0.0181526 0.1069306
 
-imputed.traits.interact = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                           family = gaussian(),
-                           prior = priors,
-                           data = imputed)
+# Interactions
 
-summary(imputed.traits.interact)
-# nothing significant
-
-imputed.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+imputed.traits.height.SLA = brm(cover.change ~ height.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                               family = gaussian(),
                               prior = priors,
                               data = imputed)
 
-summary(imputed.traits.interact.2)
+summary(imputed.traits.height.SLA)
 # nothing significant
 
-#### imputed traits lifespan model ####
+imputed.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed)
 
+summary(imputed.traits.height.leafN)
+# nothing significant
+
+imputed.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed)
+
+summary(imputed.traits.depth.SLA)
+# nothing significant
+
+imputed.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed)
+
+summary(imputed.traits.depth.leafN)
+# MAP is positive, significant
+
+imputed.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                           family = gaussian(),
+                           prior = priors,
+                           data = imputed)
+
+summary(imputed.traits.RTD.SRL)
+# nothing significant
+
+imputed.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                              family = gaussian(),
+                              prior = priors,
+                              data = imputed)
+
+summary(imputed.traits.SLA.RMF)
+# nothing significant
+
+imputed.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                             family = gaussian(),
+                             prior = priors,
+                             data = imputed)
+
+summary(imputed.traits.leafN.RMF)
+# MAP significant positive
+# leafN:RMF significant positive
+
+saveRDS(imputed.traits.leafN.RMF, file = "./Results/all.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.traits.leafN.RMF)
+# R2 0.04569436 0.02099302 0.01492096 0.0965261
+
+conditional_effects(imputed.traits.leafN.RMF)
+# higher cover change with high leafN and high RMF or low leafN and low RMF
+
+#### imputed traits lifespan model ####
+##### Annual #####
 piors <- c(prior(normal(0, 10), class = b))
 
 annual.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
@@ -107,22 +157,63 @@ bayes_R2(annual.traits.model)
 
 # saveRDS(annual.traits.model, file = "./Results/annual.imputed.traits.woody.rds")
 
-annual.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                          family = gaussian(),
-                          prior = priors,
-                          data = imputed.annual)
+imputed.annual.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                         family = gaussian(),
+                                         prior = priors,
+                                         data = imputed.annual)
 
-summary(annual.traits.interact)
+summary(imputed.annual.traits.height.leafN)
+# MAP
+
+imputed.annual.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.annual)
+
+summary(imputed.annual.traits.depth.SLA)
+# MAP
+
+imputed.annual.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                        family = gaussian(),
+                                        prior = priors,
+                                        data = imputed.annual)
+
+summary(imputed.annual.traits.depth.leafN)
+# MAP is positive, significant
+
+imputed.annual.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.annual)
+
+summary(imputed.annual.traits.RTD.SRL)
 # nothing significant
 
-annual.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                             family = gaussian(),
-                             prior = priors,
-                             data = imputed.annual)
+imputed.annual.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.annual)
 
-summary(annual.traits.interact.2)
-# nothing significant
+summary(imputed.annual.traits.SLA.RMF)
+# MAP
 
+imputed.annual.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.annual)
+
+summary(imputed.annual.traits.leafN.RMF)
+# MAP significant positive
+# leafN:RMF significant positive
+
+saveRDS(imputed.annual.traits.leafN.RMF, file = "./Results/all.imputed.annual.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.annual.traits.leafN.RMF)
+# R2 0.1406763 0.04769004 0.05628005 0.2433342
+
+conditional_effects(imputed.annual.traits.leafN.RMF)
+# higher cover change with high leafN and high RMF or low leafN and low RMF
+
+##### Perennial #####
 perennial.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                                SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                              family = gaussian(),
@@ -136,23 +227,56 @@ summary(perennial.traits.model)
 bayes_R2(perennial.traits.model)
 # R2 0.05795415 0.02685958 0.02063487 0.1269215
 
-perennial.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                             family = gaussian(),
-                             prior = priors,
-                             data = imputed.perennial)
+imputed.perennial.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                            family = gaussian(),
+                                            prior = priors,
+                                            data = imputed.perennial)
 
-summary(perennial.traits.interact)
+summary(imputed.perennial.traits.height.leafN)
 # nothing significant
 
-perennial.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                family = gaussian(),
-                                prior = priors,
-                                data = imputed.perennial)
-summary(perennial.traits.interact.2)
+imputed.perennial.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                        family = gaussian(),
+                                        prior = priors,
+                                        data = imputed.perennial)
+
+summary(imputed.perennial.traits.depth.SLA)
+# nothing significant
+
+imputed.perennial.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                           family = gaussian(),
+                                           prior = priors,
+                                           data = imputed.perennial)
+
+summary(imputed.perennial.traits.depth.leafN)
+# nothing significant
+
+imputed.perennial.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.perennial)
+
+summary(imputed.perennial.traits.RTD.SRL)
+# nothing significant
+
+imputed.perennial.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.perennial)
+
+summary(imputed.perennial.traits.SLA.RMF)
+# nothing significant
+
+imputed.perennial.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                         family = gaussian(),
+                                         prior = priors,
+                                         data = imputed.perennial)
+
+summary(imputed.perennial.traits.leafN.RMF)
 # nothing significant
 
 #### impute traits functional group ####
-
+##### Forb #####
 priors <- c(prior(normal(0, 10), class = b))
 
 forb.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
@@ -168,22 +292,57 @@ saveRDS(forb.traits.model, file = "./Results/forb.imputed.traits.woody.rds")
 bayes_R2(forb.traits.model)
 # R2 0.108043 0.04480473 0.04352589 0.2169503
 
-forb.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                        family = gaussian(),
-                        prior = priors,
-                        data = imputed.forb)
+imputed.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.forb)
 
-summary(forb.traits.interact)
+summary(imputed.forb.traits.height.leafN)
+# leafN
+
+imputed.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                   family = gaussian(),
+                                   prior = priors,
+                                   data = imputed.forb)
+
+summary(imputed.forb.traits.depth.SLA)
 # nothing significant
 
-forb.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                           family = gaussian(),
-                           prior = priors,
-                           data = imputed.forb)
+imputed.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.forb)
 
-summary(forb.traits.interact.2)
+summary(imputed.forb.traits.depth.leafN)
+# leafN
+
+imputed.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed.forb)
+
+summary(imputed.forb.traits.RTD.SRL)
 # nothing significant
 
+test = readRDS("./Results/forb.imputed.traits.no_woody.interact.rds")
+
+imputed.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed.forb)
+
+summary(imputed.forb.traits.SLA.RMF)
+# nothing significant
+
+imputed.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.forb)
+
+summary(imputed.forb.traits.leafN.RMF)
+# leafN
+
+##### Grass #####
 grass.traits.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                            SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                          family = gaussian(),
@@ -197,21 +356,61 @@ saveRDS(grass.traits.model, file = "./Results/grass.imputed.traits.woody.rds")
 bayes_R2(grass.traits.model)
 # R2 0.107352 0.03969512 0.04436312 0.1968012
 
-grass.traits.interact = brm(cover.change ~ SRL.final*RTD.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                         family = gaussian(),
-                         prior = priors,
-                         data = imputed.grass)
+imputed.grass.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                        family = gaussian(),
+                                        prior = priors,
+                                        data = imputed.grass)
 
-summary(grass.traits.interact)
+summary(imputed.grass.traits.height.leafN)
 # nothing significant
 
-grass.traits.interact.2 = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                            family = gaussian(),
-                            prior = priors,
-                            data = imputed.grass)
+imputed.grass.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.grass)
 
-summary(grass.traits.interact.2)
+summary(imputed.grass.traits.depth.SLA)
 # nothing significant
+
+imputed.grass.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.grass)
+
+summary(imputed.grass.traits.depth.leafN)
+# nothing significant
+
+imputed.grass.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                   family = gaussian(),
+                                   prior = priors,
+                                   data = imputed.grass)
+
+summary(imputed.grass.traits.RTD.SRL)
+# nothing significant
+
+imputed.grass.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                   family = gaussian(),
+                                   prior = priors,
+                                   data = imputed.grass)
+
+summary(imputed.grass.traits.SLA.RMF)
+# nothing significant
+
+imputed.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.grass)
+
+summary(imputed.grass.traits.leafN.RMF)
+# MAP significant positive
+# leafN:RMF significant positive
+
+saveRDS(imputed.grass.traits.leafN.RMF, file = "./Results/all.imputed.grass.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.grass.traits.leafN.RMF)
+# R2 0.04569436 0.02099302 0.01492096 0.0965261
+
+conditional_effects(imputed.grass.traits.leafN.RMF)
+# higher cover change with high leafN and high RMF or low leafN and low RMF
 
 #### imputed traits lifespan x functional group ####
 
