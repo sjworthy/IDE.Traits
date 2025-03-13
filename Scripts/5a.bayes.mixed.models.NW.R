@@ -606,247 +606,285 @@ imputed.NW.perennial.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF
 
 summary(imputed.NW.perennial.grass.traits.leafN.RMF)
 
-#### ALL Imputed plots ####
+#### ALL Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+
+# imputed traits with woody species
+imputed.NW = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.outliersRM.csv", row.names = 1) %>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
 
 imputed.traits.NW.model = readRDS("./Results/all.imputed.traits.no_woody.rds")
 
+imputed.NW$leafN.bt =(imputed.NW$leafN.final*7.114868) + 21.16957
+imputed.NW$height.bt = (imputed.NW$height.final*0.2353906) + 0.3476824
+imputed.NW$rootN.bt = (imputed.NW$rootN.final*4.488773) + 9.855027
+imputed.NW$SLA.bt = (imputed.NW$SLA.final*8.581554) + 19.93883
+imputed.NW$Depth.bt = (imputed.NW$root.depth.final*0.5333377) + 0.5784653
+imputed.NW$Diam.bt = (imputed.NW$rootDiam.final*0.1598629) + 0.3501538
+imputed.NW$SRL.bt = (imputed.NW$SRL.final*74.26099) + 106.4204
+imputed.NW$RTD.bt = (imputed.NW$RTD.final*0.1159369) + 0.2349392
+imputed.NW$RMF.bt = (imputed.NW$RMF.final*0.1058164) + 0.4007788
+imputed.NW$DSI.bt = (imputed.NW$mean.DSI*0.1950438) + -0.4604709
+imputed.NW$MAP.bt = (imputed.NW$mean.MAP*487.1451) + 691.6107
+
 imputed.NW.2 = imputed.NW %>%
-  dplyr::select(cover.change,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
-range(imputed.NW.2$leafN.final) # -2.597385  3.235539
-range(imputed.NW.2$height.final) # -1.438810  4.140568
-range(imputed.NW.2$rootN.final) # -2.110828  3.513945
-range(imputed.NW.2$SLA.final) # -2.018426  3.074172
-range(imputed.NW.2$root.depth.final) # -0.9946143  5.8703299
-range(imputed.NW.2$rootDiam.final) # -1.699918  4.853275
-range(imputed.NW.2$SRL.final) # -1.399432  4.192371
-range(imputed.NW.2$RTD.final) # -1.825843  3.321296
-range(imputed.NW.2$RMF.final) # -2.642873  3.138332
-range(imputed.NW.2$mean.DSI) # -2.111273  2.998072
-range(imputed.NW.2$mean.MAP) # -1.147113  3.437147
+range(imputed.NW.2$cover.change) # -20.66667  21.24500
+range(imputed.NW.2$leafN.bt) # 2.68952 44.19000
+range(imputed.NW.2$height.bt) # 0.009000065 1.322333168
+range(imputed.NW.2$rootN.bt) # 0.3800001 25.6283267
+range(imputed.NW.2$SLA.bt) # 2.617597 46.320000
+range(imputed.NW.2$Depth.bt) # 0.048000 3.709334
+range(imputed.NW.2$Diam.bt) # 0.07840003 1.12601234
+range(imputed.NW.2$SRL.bt) # 2.497204 417.749987
+range(imputed.NW.2$RTD.bt) # 0.02325659 0.61999992
+range(imputed.NW.2$RMF.bt) # 0.1211194 0.7328658
+range(imputed.NW.2$DSI.bt) # -0.8722616  0.1242845
+range(imputed.NW.2$MAP.bt) # 132.8 2366.0
 
 all.effects = conditional_effects(imputed.traits.NW.model)
 
+#### ALL leafN ####
+
 leafN.effects = all.effects$leafN.final
+leafN.effects$leafN.bt = (leafN.effects$leafN.final*7.114868) + 21.16957
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*7.114868) + 21.16957
 
 all.leafN.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = leafN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = leafN.effects, aes(x = leafN.final, y = estimate__), color = "#769370", size = 1.5) +  
-  geom_ribbon(data = leafN.effects, aes(x = leafN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#769370", size = 1.5) +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.6,3.3),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(6.93, 14.05, 21.17, 28.28, 35.40, 42.51))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
 all.leafN.plot
 
-ggsave("./Plots/all.traits.NW.leafN.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#scale_x_continuous(limits = c(-2.6,3.3),
+                   #breaks = seq(-2, 3, by = 1),
+                   #labels = c(6.9, 14.1, 21.2, 28.3, 35.4, 42.5))+
+
+#### All height ####
 
 height.effects = all.effects$height.final
+height.effects$height.bt = (height.effects$height.final*0.2353906) + 0.3476824
 
 x.value = c(-1,0,1,2,3,4)
 (x.value*0.2353906) + 0.3476824
 
 all.height.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = height.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = height.effects, aes(x = height.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = height.effects, aes(x = height.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Height", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.5, 4.2),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(0.11, 0.35, 0.58, 0.82, 1.05, 1.29))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
 all.height.plot
 
-ggsave("./Plots/all.traits.NW.height.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.height.pdf", height = 3, width = 3)
+
+#### All rootN ####
 
 rootN.effects = all.effects$rootN.final
+rootN.effects$rootN.bt = (rootN.effects$rootN.final*4.488773) + 9.855027
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*4.488773) + 9.855027
 
 all.rootN.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = rootN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootN.effects, aes(x = rootN.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootN.effects, aes(x = rootN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Root N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.2, 3.6),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.88, 5.36, 9.86, 14.34, 18.83, 23.32))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
 all.rootN.plot
 
-ggsave("./Plots/all.traits.NW.rootN.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### All SLA ####
 
 SLA.effects = all.effects$SLA.final
+SLA.effects$SLA.bt = (SLA.effects$SLA.final*8.581554) + 19.93883
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*8.581554) + 19.93883
 
 all.SLA.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = SLA.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SLA.effects, aes(x = SLA.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SLA.effects, aes(x = SLA.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "SLA", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.2, 3.1),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(2.78, 11.36, 19.94, 28.52, 37.11, 45.68))+
-  theme_classic(base_size = 22)
+  geom_point(data = imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596, 46.320001)+
+  theme_classic()
 all.SLA.plot
 
-ggsave("./Plots/all.traits.NW.SLA.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### All Depth ####
 
 root.depth.effects = all.effects$root.depth.final
+root.depth.effects$Depth.bt = (root.depth.effects$root.depth.final*0.5333377) + 0.5784653
 
-x.value = c(-1,0,1,2,3,4,5,6)
+x.value = c(0,1,2,3,4,5)
 (x.value*0.5333377) + 0.5784653
 
 all.root.depth.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = root.depth.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = root.depth.effects, aes(x = root.depth.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = root.depth.effects, aes(x = root.depth.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1, 5.9),
-                     breaks = seq(-1,6, by = 1),
-                     labels = c(0.05,0.58, 1.11, 1.65, 2.18, 2.71, 3.24,3.79))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
 all.root.depth.plot
 
-ggsave("./Plots/all.traits.NW.root.depth.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### All Diameter ####
 
 rootDiam.effects = all.effects$rootDiam.final
+rootDiam.effects$Diam.bt = (rootDiam.effects$rootDiam.final*0.1598629) + 0.3501538
 
-x.value = c(-1,0,1,2,3,4,5)
+x.value = c(-1,0,1,2,3,4)
 (x.value*0.1598629) + 0.3501538
 
 all.rootDiam.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = rootDiam.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootDiam.effects, aes(x = rootDiam.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootDiam.effects, aes(x = rootDiam.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.7, 4.9),
-                     breaks = seq(-1, 5, by = 1),
-                     labels = c(0.19, 0.35, 0.51, 0.67, 0.83, 0.99,1.15))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
 all.rootDiam.plot
 
-ggsave("./Plots/all.traits.NW.rootDiam.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### All SRL ####
 
 SRL.effects = all.effects$SRL.final
+SRL.effects$SRL.bt = (SRL.effects$SRL.final*74.26099) + 106.4204
 
 x.value = c(-1,0,1,2,3,4)
 (x.value*74.26099) + 106.4204
 
 all.SRL.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = SRL.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SRL.effects, aes(x = SRL.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SRL.effects, aes(x = SRL.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.4, 4.2),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(32.16, 106.42, 180.68, 254.94, 329.20, 403.46))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
 all.SRL.plot
 
-ggsave("./Plots/all.traits.NW.SRL.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### All RTD ####
 
 RTD.effects = all.effects$RTD.final
+RTD.effects$RTD.bt = (RTD.effects$RTD.final*0.1159369) + 0.2349392
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1159369) + 0.2349392
 
 all.RTD.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = RTD.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RTD.effects, aes(x = RTD.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.9, 3.4),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.12, 0.23, 0.35, 0.47, 0.58, 0.70))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658, 0.61999993)+
+  theme_classic()
 all.RTD.plot
 
-ggsave("./Plots/all.traits.NW.RTD.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### All RMF ####
 
 RMF.effects = all.effects$RMF.final
+RMF.effects$RMF.bt = (RMF.effects$RMF.final*0.1058164) + 0.4007788
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1058164) + 0.4007788
 
 all.RMF.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = RMF.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RMF.effects, aes(x = RMF.final, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RMF.effects, aes(x = RMF.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.7, 3.2),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.19, 0.29, 0.40, 0.51, 0.61, 0.72))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
 all.RMF.plot
 
-ggsave("./Plots/all.traits.NW.RMF.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### All DSI ####
 
 DSI.effects = all.effects$mean.DSI
+DSI.effects$DSI.bt = (DSI.effects$mean.DSI*0.1950438) + -0.4604709
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1950438) + -0.4604709
 
 all.DSI.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = mean.DSI, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = DSI.effects, aes(x = mean.DSI, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = DSI.effects, aes(x = mean.DSI, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.2, 3),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(-0.85, -0.66, -0.46, -0.27, -0.07, 0.12))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+   theme_classic()
 all.DSI.plot
 
-ggsave("./Plots/all.traits.NW.DSI.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### All MAP ####
 
 MAP.effects = all.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*487.1451) + 691.6107
 
 x.value = c(-1,0,1,2,3)
 (x.value*487.1451) + 691.6107
 
 all.MAP.plot = ggplot() +
-  geom_point(data = imputed.NW.2, aes(x = mean.MAP, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = MAP.effects, aes(x = mean.MAP, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = MAP.effects, aes(x = mean.MAP, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
+  geom_point(data = imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
   labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.2, 3.5),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(204.47, 691.61, 1178.17, 1665.90, 2153.05))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
 all.MAP.plot
 
-ggsave("./Plots/all.traits.NW.MAP.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.MAP.pdf", height = 3, width = 3)
 
 #### ALL interactions ####
 
 imputed.NW.traits.height.leafN = readRDS("./Results/all.imputed.traits.NW.height.leafN.rds")
 
 height.leafN.effect = conditional_effects(imputed.NW.traits.height.leafN, effects = "height.final:leafN.final")$`height.final:leafN.final`
+height.leafN.effect$height.bt = (height.leafN.effect$height.final*0.2353906) + 0.3476824
 
 # only plot high and low values
 
 height.leafN.effect.2 = height.leafN.effect %>%
   filter(effect2__ %in% c(-0.98,1.03))
+
 # height
 x.value = c(-1,0,1,2,3,4)
 (x.value*0.2353906) + 0.3476824
@@ -856,25 +894,24 @@ x.value = c(-0.98,1.03)
 (x.value*7.114868) + 21.16957
 
 
-all.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = height.final, y = estimate__, group = as.factor(effect2__))) +
-  geom_line(aes(color = as.factor(effect2__)), size = 1.5) +  
+all.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
   labs(x = "Height", y = "Percent Cover Change", color = "Leaf N") +
-  scale_colour_manual(values = c("black", "#769370"), labels = c("28.50","14.20"))+
+  scale_colour_manual(values = c("black", "#769370"), labels = c("28.5","14.2"))+
   scale_fill_manual(values = c("black", "#769370"))+
-  scale_x_continuous(breaks = seq(-1, 4, by = 1),
-                     labels = c(0.11, 0.35, 0.58, 0.82, 1.05, 1.29))+
-  theme_classic(base_size = 22)
+  theme_classic()
 all.height.x.leafN.plot
 
-ggsave("./Plots/all.traits.NW.height.leafN.pdf", height = 7, width = 7)
-ggsave("./Plots/all.traits.NW.height.leafN.legend.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.height.leafN.pdf", height = 3, width = 3)
+ggsave("./Plots/all.traits.NW.height.leafN.legend.pdf", height = 3, width = 3)
 
 imputed.NW.traits.leafN.RMF = readRDS("./Results/all.imputed.NW.traits.leafN.RMF.rds")
 
 leafN.RMF.effect = conditional_effects(imputed.NW.traits.leafN.RMF, effects = "leafN.final:RMF.final")$`leafN.final:RMF.final`
+leafN.RMF.effect$leafN.bt = (leafN.RMF.effect$leafN.final*7.114868) + 21.16957
 
 # only plot high and low values
 
@@ -888,45 +925,54 @@ x.value = c(-2,-1,0,1,2,3)
 x.value = c(-1.02,0.99)
 (x.value*0.1058164) + 0.4007788
 
-all.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.final, y = estimate__, group = as.factor(effect2__))) +
-  geom_line(aes(color = as.factor(effect2__)), size = 1.5) +  
+all.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
   labs(x = "Leaf N", y = "Percent Cover Change", color = "RMF") +
-  scale_colour_manual(values = c("black", "#769370"), labels = c("0.51","0.29"))+
+  scale_colour_manual(values = c("black", "#769370"), labels = c("0.5","0.3"))+
   scale_fill_manual(values = c("black", "#769370"))+
-  scale_x_continuous(breaks = seq(-2, 3, by = 1),
-                     labels = c(6.93, 14.05, 21.17, 28.28, 35.40, 42.51))+
-  theme_classic(base_size = 22)
+  xlim(2.68951,44.19001)+
+  theme_classic()
 all.leafN.x.RMF.plot
 
-ggsave("./Plots/all.traits.NW.leafN.RMF.pdf", height = 7, width = 7)
-ggsave("./Plots/all.traits.NW.leafN.RMF.legend.pdf", height = 7, width = 7)
+ggsave("./Plots/all.traits.NW.leafN.RMF.pdf", height = 3, width = 3)
+ggsave("./Plots/all.traits.NW.leafN.RMF.legend.pdf", height = 3, width = 3)
 
-#### ANNUAL Imputed plots ####
+#### ANNUAL Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+
+# imputed traits with woody species
+imputed.NW.annual = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annuals.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
 
 annual.traits.NW.model = readRDS("./Results/annual.imputed.traits.no_woody.rds")
 
+imputed.NW.annual$leafN.bt =(imputed.NW.annual$leafN.final*7.384253) + 22.54886
+imputed.NW.annual$height.bt = (imputed.NW.annual$height.final*0.2308751) + 0.3156657
+imputed.NW.annual$rootN.bt = (imputed.NW.annual$rootN.final*4.33202) + 9.997142
+imputed.NW.annual$SLA.bt = (imputed.NW.annual$SLA.final*9.312314) + 22.81754
+imputed.NW.annual$Depth.bt = (imputed.NW.annual$root.depth.final*0.4346265) + 0.5402869
+imputed.NW.annual$Diam.bt = (imputed.NW.annual$rootDiam.final*0.1367222) + 0.3407223
+imputed.NW.annual$SRL.bt = (imputed.NW.annual$SRL.final*73.49115) + 125.697
+imputed.NW.annual$RTD.bt = (imputed.NW.annual$RTD.final*0.1111574) + 0.2026466
+imputed.NW.annual$RMF.bt = (imputed.NW.annual$RMF.final*0.1037188) + 0.3934184
+imputed.NW.annual$DSI.bt = (imputed.NW.annual$mean.DSI*0.2300417) + -0.4690337
+imputed.NW.annual$MAP.bt = (imputed.NW.annual$mean.MAP*293.1676) + 477.7734
+
 annual.imputed.NW.2 = imputed.NW.annual %>%
-  dplyr::select(cover.change,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
 annual.effects = conditional_effects(annual.traits.NW.model)
 
-range(annual.imputed.NW.2$leafN.final) # -2.220848  2.930715
-range(annual.imputed.NW.2$height.final) # -1.328275  3.539346
-range(annual.imputed.NW.2$rootN.final) # -2.099977  3.608290
-range(annual.imputed.NW.2$SLA.final) # -2.169165  2.342324
-range(annual.imputed.NW.2$root.depth.final) # -1.132666  3.075555
-range(annual.imputed.NW.2$rootDiam.final) # -1.760667  2.969117
-range(annual.imputed.NW.2$SRL.final) # -1.405576  3.973989
-range(annual.imputed.NW.2$RTD.final) # -1.613838  3.181998
-range(annual.imputed.NW.2$RMF.final) # -2.625359  2.581537
-range(annual.imputed.NW.2$mean.DSI) # -1.752847  2.579177
-range(annual.imputed.NW.2$mean.MAP) # -1.176711  2.739820
-
+#### Annual leafN ####
 leafN.effects = annual.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*7.384253) + 22.54886
 
 attr(annual.imputed.NW.2$leafN.final, "scaled:scale")
 attr(annual.imputed.NW.2$leafN.final, "scaled:center")
@@ -935,20 +981,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*7.384253) + 22.54886
 
 annual.leafN.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = leafN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = leafN.effects, aes(x = leafN.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = leafN.effects, aes(x = leafN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.3,3.0),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(7.78, 15.16, 22.55, 29.93, 37.31, 44.70))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
 annual.leafN.plot
 
-ggsave("./Plots/annual.traits.NW.leafN.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### Annual height ####
 
 height.effects = annual.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2308751) + 0.3156657
 
 attr(annual.imputed.NW.2$height.final, "scaled:scale")
 attr(annual.imputed.NW.2$height.final, "scaled:center")
@@ -957,20 +1004,21 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*0.2308751) + 0.3156657
 
 annual.height.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = height.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = height.effects, aes(x = height.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = height.effects, aes(x = height.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Height", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.4, 3.6),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(0.08, 0.32, 0.55, 0.78, 1.01, 1.24))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
 annual.height.plot
 
-ggsave("./Plots/annual.traits.NW.height.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.height.pdf", height = 3, width = 3)
 
+
+#### Annual RootN ####
 rootN.effects = annual.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.33202) + 9.997142
 
 attr(annual.imputed.NW.2$rootN.final, "scaled:scale")
 attr(annual.imputed.NW.2$rootN.final, "scaled:center")
@@ -979,20 +1027,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*4.33202) + 9.997142
 
 annual.rootN.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = rootN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootN.effects, aes(x = rootN.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootN.effects, aes(x = rootN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Root N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.1, 3.7),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(1.33, 5.67, 9.99, 14.33, 18.66, 22.99))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
 annual.rootN.plot
 
-ggsave("./Plots/annual.traits.NW.rootN.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### Annual SLA ####
 
 SLA.effects = annual.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.312314) + 22.81754
 
 attr(annual.imputed.NW.2$SLA.final, "scaled:scale")
 attr(annual.imputed.NW.2$SLA.final, "scaled:center")
@@ -1001,42 +1050,44 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*9.312314) + 22.81754
 
 annual.SLA.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = SLA.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SLA.effects, aes(x = SLA.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SLA.effects, aes(x = SLA.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "SLA", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.2, 2.4),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(4.19, 13.51, 22.82, 32.13, 41.44, 50.75))+
-  theme_classic(base_size = 22)
+  geom_point(data = annual.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
 annual.SLA.plot
 
-ggsave("./Plots/annual.traits.NW.SLA.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### Annual depth ####
 
 root.depth.effects = annual.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.4346265) + 0.5402869
 
 attr(annual.imputed.NW.2$root.depth.final, "scaled:scale")
 attr(annual.imputed.NW.2$root.depth.final, "scaled:center")
 
-x.value = c(-1,0,1,2,3,4)
+x.value = c(0,1,2,3,4,5)
 (x.value*0.4346265) + 0.5402869
 
 annual.root.depth.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = root.depth.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = root.depth.effects, aes(x = root.depth.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = root.depth.effects, aes(x = root.depth.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.2, 3.1),
-                     breaks = seq(-1,4, by = 1),
-                     labels = c(0.11,0.54, 0.97, 1.41, 1.84, 2.28))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
 annual.root.depth.plot
 
-ggsave("./Plots/annual.traits.NW.root.depth.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### Annual Diam ####
 
 rootDiam.effects = annual.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1367222) + 0.3407223
 
 attr(annual.imputed.NW.2$rootDiam.final, "scaled:scale")
 attr(annual.imputed.NW.2$rootDiam.final, "scaled:center")
@@ -1045,20 +1096,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1367222) + 0.3407223
 
 annual.rootDiam.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = rootDiam.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootDiam.effects, aes(x = rootDiam.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootDiam.effects, aes(x = rootDiam.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.8, 3.0),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.07, 0.20, 0.34, 0.48, 0.61, 0.75))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
 annual.rootDiam.plot
 
-ggsave("./Plots/annual.traits.NW.rootDiam.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### Annual SRL ####
 
 SRL.effects = annual.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*73.49115) + 125.697
 
 attr(annual.imputed.NW.2$SRL.final, "scaled:scale")
 attr(annual.imputed.NW.2$SRL.final, "scaled:center")
@@ -1067,20 +1119,21 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*73.49115) + 125.697
 
 annual.SRL.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = SRL.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SRL.effects, aes(x = SRL.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SRL.effects, aes(x = SRL.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.5, 4.0),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(52.21, 125.69, 199.19, 272.68, 346.17, 419.66))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
 annual.SRL.plot
 
-ggsave("./Plots/annual.traits.NW.SRL.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### Annual RTD ####
 
 RTD.effects = annual.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1111574) + 0.2026466
 
 attr(annual.imputed.NW.2$RTD.final, "scaled:scale")
 attr(annual.imputed.NW.2$RTD.final, "scaled:center")
@@ -1089,20 +1142,21 @@ x.value = c(-1,0,1,2,3)
 (x.value*0.1111574) + 0.2026466
 
 annual.RTD.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = RTD.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RTD.effects, aes(x = RTD.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.7, 3.2),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(0.09, 0.21, 0.32, 0.42, 0.54))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
 annual.RTD.plot
 
-ggsave("./Plots/annual.traits.NW.RTD.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### Annual RMF ####
 
 RMF.effects = annual.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1037188) + 0.3934184
 
 attr(annual.imputed.NW.2$RMF.final, "scaled:scale")
 attr(annual.imputed.NW.2$RMF.final, "scaled:center")
@@ -1111,20 +1165,21 @@ x.value = c(-3,-2,-1,0,1,2,3)
 (x.value*0.1037188) + 0.3934184
 
 annual.RMF.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = RMF.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RMF.effects, aes(x = RMF.final, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RMF.effects, aes(x = RMF.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.7, 2.6),
-                     breaks = seq(-3, 3, by = 1),
-                     labels = c(0.08, 0.19, 0.29, 0.39, 0.49, 0.61, 0.71))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
 annual.RMF.plot
 
-ggsave("./Plots/annual.traits.NW.RMF.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### Annual DSI ####
 
 DSI.effects = annual.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.2300417) + -0.4690337
 
 attr(annual.imputed.NW.2$mean.DSI, "scaled:scale")
 attr(annual.imputed.NW.2$mean.DSI, "scaled:center")
@@ -1133,20 +1188,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.2300417) + -0.4690337
 
 annual.DSI.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = mean.DSI, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = DSI.effects, aes(x = mean.DSI, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = DSI.effects, aes(x = mean.DSI, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.8,2.6),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(-0.69, -0.46, -0.24, -0.01, 0.22))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
 annual.DSI.plot
 
-ggsave("./Plots/annual.traits.NW.DSI.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### Annual MAP ####
 
 MAP.effects = annual.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*293.1676) + 477.7734
 
 attr(annual.imputed.NW.2$mean.MAP, "scaled:scale")
 attr(annual.imputed.NW.2$mean.MAP, "scaled:center")
@@ -1155,24 +1211,23 @@ x.value = c(-1,0,1,2,3)
 (x.value*293.1676) + 477.7734
 
 annual.MAP.plot = ggplot() +
-  geom_point(data = annual.imputed.NW.2, aes(x = mean.MAP, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = MAP.effects, aes(x = mean.MAP, y = estimate__), color = "#979461", size = 1.5) +  
-  geom_ribbon(data = MAP.effects, aes(x = mean.MAP, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
+  geom_point(data = annual.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#979461", size = 1.5) +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
   labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.2, 2.8),
-                     breaks = seq(-1, 2, by = 1),
-                     labels = c(184.61, 477.77, 770.94, 1064.11))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
 annual.MAP.plot
 
-ggsave("./Plots/annual.traits.NW.MAP.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.MAP.pdf", height = 3, width = 3)
 
 #### ANNUAL interactions ####
 
 annual.imputed.NW.traits.leafN.RMF = readRDS("./Results/annual.imputed.NW.traits.leafN.RMF.rds")
 
 leafN.RMF.effect = conditional_effects(annual.imputed.NW.traits.leafN.RMF, effects = "leafN.final:RMF.final")$`leafN.final:RMF.final`
+leafN.RMF.effect$leafN.bit= (leafN.RMF.effect$leafN.final*7.384253) + 22.54886
 
 # only plot high and low values
 
@@ -1187,7 +1242,7 @@ x.value = c(-2,-1,0,1,2,3)
 x.value = c(-1.05,0.97)
 (x.value*0.1037188) + 0.3934184
 
-annual.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.final, y = estimate__, group = as.factor(effect2__))) +
+annual.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.bit, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
@@ -1195,37 +1250,45 @@ annual.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.final,
   labs(x = "Leaf N", y = "Percent Cover Change", color = "RMF") +
   scale_colour_manual(values = c("black", "#979461"), labels = c("0.49","0.28"))+
   scale_fill_manual(values = c("black", "#979461"))+
-  scale_x_continuous(breaks = seq(-2, 3, by = 1),
-                     labels = c(7.78, 15.16, 22.55, 29.93, 37.32, 44.70))+
-  theme_classic(base_size = 22)
+  xlim(2.68951,44.19001)+
+  theme_classic()
 annual.leafN.x.RMF.plot
 
-ggsave("./Plots/annual.traits.NW.leafN.RMF.pdf", height = 7, width = 7)
-ggsave("./Plots/annual.traits.NW.leafN.RMF.legend.pdf", height = 7, width = 7)
+ggsave("./Plots/annual.traits.NW.leafN.RMF.pdf", height = 3, width = 3)
+ggsave("./Plots/annual.traits.NW.leafN.RMF.legend.pdf", height = 3, width = 3)
 
-#### PERENNIAL Imputed plots ####
+#### PERENNIAL Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+imputed.NW.perennial = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennials.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
 
 perennial.traits.NW.model = readRDS("./Results/perennial.imputed.traits.no_woody.rds")
 
+imputed.NW.perennial$leafN.bt =(imputed.NW.perennial$leafN.final*6.812995) + 20.47022
+imputed.NW.perennial$height.bt = (imputed.NW.perennial$height.final*0.2365653) + 0.3627378
+imputed.NW.perennial$rootN.bt = (imputed.NW.perennial$rootN.final*4.532848) + 9.765547
+imputed.NW.perennial$SLA.bt = (imputed.NW.perennial$SLA.final*7.966249) + 18.75888
+imputed.NW.perennial$Depth.bt = (imputed.NW.perennial$root.depth.final*0.5706892) + 0.5903092
+imputed.NW.perennial$Diam.bt = (imputed.NW.perennial$rootDiam.final*0.166311) + 0.3535401
+imputed.NW.perennial$SRL.bt = (imputed.NW.perennial$SRL.final*73.08878) + 98.7131
+imputed.NW.perennial$RTD.bt = (imputed.NW.perennial$RTD.final*0.1151264) + 0.249861
+imputed.NW.perennial$RMF.bt = (imputed.NW.perennial$RMF.final*0.1053099) + 0.4042604
+imputed.NW.perennial$DSI.bt = (imputed.NW.perennial$mean.DSI*0.1779261) + -0.4547629
+imputed.NW.perennial$MAP.bt = (imputed.NW.perennial$mean.MAP*522.5359) + 772.0729
+
 perennial.imputed.NW.2 = imputed.NW.perennial %>%
-  dplyr::select(cover.change,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
 perennial.effects = conditional_effects(perennial.traits.NW.model)
 
-range(perennial.imputed.NW.2$leafN.final) # -2.609822  3.130349
-range(perennial.imputed.NW.2$height.final) # -1.448808  4.056365
-range(perennial.imputed.NW.2$rootN.final) # -2.070563  3.386362
-range(perennial.imputed.NW.2$SLA.final) # -1.933604  3.459736
-range(perennial.imputed.NW.2$root.depth.final) # -0.9029594  5.4653640
-range(perennial.imputed.NW.2$rootDiam.final) # -1.654370  4.644744
-range(perennial.imputed.NW.2$SRL.final) # -1.316425  3.643188
-range(perennial.imputed.NW.2$RTD.final) # -1.954990  3.215066
-range(perennial.imputed.NW.2$RMF.final) # -2.352661  3.120367
-range(perennial.imputed.NW.2$mean.DSI) # -2.346473  3.254426
-range(perennial.imputed.NW.2$mean.MAP) # -1.110111  3.050369
+#### Perennial LeafN ####
 
 leafN.effects = perennial.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.812995) + 20.47022
 
 attr(perennial.imputed.NW.2$leafN.final, "scaled:scale")
 attr(perennial.imputed.NW.2$leafN.final, "scaled:center")
@@ -1234,20 +1297,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*6.812995) + 20.47022
 
 perennial.leafN.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = leafN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = leafN.effects, aes(x = leafN.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = leafN.effects, aes(x = leafN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.7,3.2),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(6.84, 13.66, 20.47, 27.28, 34.10, 40.91))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
 perennial.leafN.plot
 
-ggsave("./Plots/perennial.traits.NW.leafN.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### Perennial Height ####
 
 height.effects = perennial.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2365653) + 0.3627378
 
 attr(perennial.imputed.NW.2$height.final, "scaled:scale")
 attr(perennial.imputed.NW.2$height.final, "scaled:center")
@@ -1256,20 +1320,21 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*0.2365653) + 0.3627378
 
 perennial.height.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = height.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = height.effects, aes(x = height.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = height.effects, aes(x = height.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Height", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.5, 4.1),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(0.13, 0.36, 0.59, 0.84, 1.07, 1.31))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
 perennial.height.plot
 
-ggsave("./Plots/perennial.traits.NW.height.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.height.pdf", height = 3, width = 3)
+
+#### Perennial RootN ####
 
 rootN.effects = perennial.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.532848) + 9.765547
 
 attr(perennial.imputed.NW.2$rootN.final, "scaled:scale")
 attr(perennial.imputed.NW.2$rootN.final, "scaled:center")
@@ -1278,20 +1343,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*4.532848) + 9.765547
 
 perennial.rootN.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = rootN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootN.effects, aes(x = rootN.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootN.effects, aes(x = rootN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Root N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.1, 3.4),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.70, 5.23, 9.77, 14.29, 18.83, 23.36))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
 perennial.rootN.plot
 
-ggsave("./Plots/perennial.traits.NW.rootN.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### Perennial SLA ####
 
 SLA.effects = perennial.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*7.966249) + 18.75888
 
 attr(perennial.imputed.NW.2$SLA.final, "scaled:scale")
 attr(perennial.imputed.NW.2$SLA.final, "scaled:center")
@@ -1300,20 +1366,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*7.966249) + 18.75888
 
 perennial.SLA.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = SLA.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SLA.effects, aes(x = SLA.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SLA.effects, aes(x = SLA.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "SLA", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.0, 3.5),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(2.83, 10.79, 18.75, 26.73, 34.69, 42.66))+
-  theme_classic(base_size = 22)
+  geom_point(data = perennial.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
 perennial.SLA.plot
 
-ggsave("./Plots/perennial.traits.NW.SLA.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### Perennial Depth ####
 
 root.depth.effects = perennial.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.5706892) + 0.5903092
 
 attr(perennial.imputed.NW.2$root.depth.final, "scaled:scale")
 attr(perennial.imputed.NW.2$root.depth.final, "scaled:center")
@@ -1322,20 +1389,21 @@ x.value = c(-1,0,1,2,3,4,5)
 (x.value*0.5706892) + 0.5903092
 
 perennial.root.depth.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = root.depth.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = root.depth.effects, aes(x = root.depth.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = root.depth.effects, aes(x = root.depth.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1, 5.5),
-                     breaks = seq(-1,5, by = 1),
-                     labels = c(0.02,0.59, 1.16, 1.73, 2.30, 2.87, 3.44))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
 perennial.root.depth.plot
 
-ggsave("./Plots/perennial.traits.NW.root.depth.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### Perennial Diam ####
 
 rootDiam.effects = perennial.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.166311) + 0.3535401
 
 attr(perennial.imputed.NW.2$rootDiam.final, "scaled:scale")
 attr(perennial.imputed.NW.2$rootDiam.final, "scaled:center")
@@ -1344,20 +1412,21 @@ x.value = c(-1,0,1,2,3,4,5)
 (x.value*0.166311) + 0.3535401
 
 perennial.rootDiam.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = rootDiam.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootDiam.effects, aes(x = rootDiam.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootDiam.effects, aes(x = rootDiam.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.7, 4.7),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(0.19, 0.35, 0.52, 0.69, 0.85, 1.02))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
 perennial.rootDiam.plot
 
-ggsave("./Plots/perennial.traits.NW.rootDiam.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### Perennial SRL ####
 
 SRL.effects = perennial.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*73.08878) + 98.7131
 
 attr(perennial.imputed.NW.2$SRL.final, "scaled:scale")
 attr(perennial.imputed.NW.2$SRL.final, "scaled:center")
@@ -1366,20 +1435,21 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*73.08878) + 98.7131
 
 perennial.SRL.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = SRL.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SRL.effects, aes(x = SRL.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SRL.effects, aes(x = SRL.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.4, 3.7),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(25.62, 98.71, 171.80, 244.89, 317.98, 391.07))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
 perennial.SRL.plot
 
-ggsave("./Plots/perennial.traits.NW.SRL.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### Perennial RTD ####
 
 RTD.effects = perennial.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1151264) + 0.249861
 
 attr(perennial.imputed.NW.2$RTD.final, "scaled:scale")
 attr(perennial.imputed.NW.2$RTD.final, "scaled:center")
@@ -1388,20 +1458,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1151264) + 0.249861
 
 perennial.RTD.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = RTD.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RTD.effects, aes(x = RTD.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.0, 3.3),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.02, 0.13, 0.25, 0.36, 0.48, 0.59))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
 perennial.RTD.plot
 
-ggsave("./Plots/perennial.traits.NW.RTD.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### Perennial RMF ####
 
 RMF.effects = perennial.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1053099) + 0.4042604
 
 attr(perennial.imputed.NW.2$RMF.final, "scaled:scale")
 attr(perennial.imputed.NW.2$RMF.final, "scaled:center")
@@ -1410,20 +1481,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1053099) + 0.4042604
 
 perennial.RMF.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = RMF.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RMF.effects, aes(x = RMF.final, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RMF.effects, aes(x = RMF.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.4, 3.2),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.19, 0.29, 0.41, 0.51, 0.61, 0.72))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
 perennial.RMF.plot
 
-ggsave("./Plots/perennial.traits.NW.RMF.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### Perennial DSI ####
 
 DSI.effects = perennial.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1779261) + -0.4547629
 
 attr(perennial.imputed.NW.2$mean.DSI, "scaled:scale")
 attr(perennial.imputed.NW.2$mean.DSI, "scaled:center")
@@ -1432,20 +1504,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1779261) + -0.4547629
 
 perennial.DSI.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = mean.DSI, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = DSI.effects, aes(x = mean.DSI, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = DSI.effects, aes(x = mean.DSI, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  geom_point(data = perennial.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.4, 3.3),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(-0.81, -0.63, -0.45, -0.28, -0.09, 0.08))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
 perennial.DSI.plot
 
-ggsave("./Plots/perennial.traits.NW.DSI.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### Perennial MAP ####
 
 MAP.effects = perennial.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*522.5359) + 772.0729
 
 attr(perennial.imputed.NW.2$mean.MAP, "scaled:scale")
 attr(perennial.imputed.NW.2$mean.MAP, "scaled:center")
@@ -1454,25 +1527,23 @@ x.value = c(-1,0,1,2,3)
 (x.value*522.5359) + 772.0729
 
 perennial.MAP.plot = ggplot() +
-  geom_point(data = perennial.imputed.NW.2, aes(x = mean.MAP, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = MAP.effects, aes(x = mean.MAP, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = MAP.effects, aes(x = mean.MAP, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Mean perennial Precipitation", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.2, 3.1),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(249.54, 772.07, 1294.61, 1817.14, 2339.68))+
-  theme_classic(base_size = 22)
+  geom_point(data = perennial.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
+  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
 perennial.MAP.plot
 
-ggsave("./Plots/perennial.traits.NW.MAP.pdf", height = 7, width = 7)
-
+ggsave("./Plots/perennial.traits.NW.MAP.pdf", height = 3, width = 3)
 
 #### PERENNIAL interactions ####
 
 perennial.imputed.NW.traits.height.leafN = readRDS("./Results/perennial.imputed.traits.NW.height.leafN.rds")
 
 height.leafN.effect = conditional_effects(perennial.imputed.NW.traits.height.leafN, effects = "height.final:leafN.final")$`height.final:leafN.final`
+height.leafN.effect$height.bt= (height.leafN.effect$height.final*0.2365653) + 0.3627378
 
 # only plot high and low values
 
@@ -1487,7 +1558,7 @@ x.value = c(-1,0,1,2,3,4)
 x.value = c(-0.97,1.02)
 (x.value*6.812995) + 20.47022
 
-perennial.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = height.final, y = estimate__, group = as.factor(effect2__))) +
+perennial.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
@@ -1495,37 +1566,45 @@ perennial.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = hei
   labs(x = "Height", y = "Percent Cover Change", color = "Leaf N") +
   scale_colour_manual(values = c("black", "#F1C646"), labels = c("27.41","13.86"))+
   scale_fill_manual(values = c("black", "#F1C646"))+
-  scale_x_continuous(breaks = seq(-1, 4, by = 1),
-                     labels = c(0.13, 0.36, 0.59, 0.84, 1.07, 1.31))+
-  theme_classic(base_size = 22)
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
 perennial.height.x.leafN.plot
 
-ggsave("./Plots/perennial.traits.NW.height.leafN.pdf", height = 7, width = 7)
-ggsave("./Plots/perennial.traits.NW.height.leafN.legend.pdf", height = 7, width = 7)
+ggsave("./Plots/perennial.traits.NW.height.leafN.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.traits.NW.height.leafN.legend.pdf", height = 3, width = 3)
 
-#### FORB Imputed plots ####
+#### FORB Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
 
 forb.traits.NW.model = readRDS("./Results/forb.imputed.traits.no_woody.rds")
 
+imputed.NW.forb$leafN.bt =(imputed.NW.forb$leafN.final*6.403163) + 21.66854
+imputed.NW.forb$height.bt = (imputed.NW.forb$height.final*0.2396416) + 0.3214792
+imputed.NW.forb$rootN.bt = (imputed.NW.forb$rootN.final*4.173927) + 10.5821
+imputed.NW.forb$SLA.bt = (imputed.NW.forb$SLA.final*8.362926) + 20.14641
+imputed.NW.forb$Depth.bt = (imputed.NW.forb$root.depth.final*0.6095345) + 0.6503508
+imputed.NW.forb$Diam.bt = (imputed.NW.forb$rootDiam.final*0.1590925) + 0.3579696
+imputed.NW.forb$SRL.bt = (imputed.NW.forb$SRL.final*71.25811) + 105.5323
+imputed.NW.forb$RTD.bt = (imputed.NW.forb$RTD.final*0.1184977) + 0.227384
+imputed.NW.forb$RMF.bt = (imputed.NW.forb$RMF.final*0.1176732) + 0.3992223
+imputed.NW.forb$DSI.bt = (imputed.NW.forb$mean.DSI*0.1949549) + -0.4644806
+imputed.NW.forb$MAP.bt = (imputed.NW.forb$mean.MAP*448.2603) + 657.7821
+
 forb.imputed.NW.2 = imputed.NW.forb %>%
-  dplyr::select(cover.change,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
 forb.effects = conditional_effects(forb.traits.NW.model)
 
-range(forb.imputed.NW.2$leafN.final) # -2.964007  3.517241
-range(forb.imputed.NW.2$height.final) # -1.303944  4.176462
-range(forb.imputed.NW.2$rootN.final) # -2.319661  3.604814
-range(forb.imputed.NW.2$SLA.final) # -2.096015  3.002170
-range(forb.imputed.NW.2$root.depth.final) # -0.9521214  5.0185553
-range(forb.imputed.NW.2$rootDiam.final) # -1.551108  4.827648
-range(forb.imputed.NW.2$SRL.final) # -1.429975  4.218829
-range(forb.imputed.NW.2$RTD.final) # -1.722628  2.986269
-range(forb.imputed.NW.2$RMF.final) # -2.363349  2.835340
-range(forb.imputed.NW.2$mean.DSI) # -2.091669  3.020008
-range(forb.imputed.NW.2$mean.MAP) # -1.171155  3.810773
+#### Forb leafN ####
 
 leafN.effects = forb.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.403163) + 21.66854
 
 attr(forb.imputed.NW.2$leafN.final, "scaled:scale")
 attr(forb.imputed.NW.2$leafN.final, "scaled:center")
@@ -1534,20 +1613,21 @@ x.value = c(-3,-2,-1,0,1,2,3)
 (x.value*6.403163) + 21.66854
 
 forb.leafN.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = leafN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = leafN.effects, aes(x = leafN.final, y = estimate__), color = "#F17236", size = 1.5) +  
-  geom_ribbon(data = leafN.effects, aes(x = leafN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#F17236", size = 1.5) +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-3.0,3.6),
-                     breaks = seq(-3, 3, by = 1),
-                     labels = c(2.46, 8.86,15.27, 21.67, 28.07, 34.47, 40.88))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
 forb.leafN.plot
 
-ggsave("./Plots/forb.traits.NW.leafN.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### Forb height ####
 
 height.effects = forb.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2396416) + 0.3214792
 
 attr(forb.imputed.NW.2$height.final, "scaled:scale")
 attr(forb.imputed.NW.2$height.final, "scaled:center")
@@ -1556,20 +1636,21 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*0.2396416) + 0.3214792
 
 forb.height.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = height.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = height.effects, aes(x = height.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = height.effects, aes(x = height.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Height", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.4, 4.2),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(0.08, 0.32, 0.56, 0.81, 1.04, 1.28))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
 forb.height.plot
 
-ggsave("./Plots/forb.traits.NW.height.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.height.pdf", height = 3, width = 3)
+
+#### Forb rootN ####
 
 rootN.effects = forb.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.173927) + 10.5821
 
 attr(forb.imputed.NW.2$rootN.final, "scaled:scale")
 attr(forb.imputed.NW.2$rootN.final, "scaled:center")
@@ -1578,20 +1659,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*4.173927) + 10.5821
 
 forb.rootN.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = rootN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootN.effects, aes(x = rootN.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootN.effects, aes(x = rootN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Root N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.4, 3.7),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(2.23, 6.41, 10.58, 14.76, 18.93, 23.11))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268) +
+  theme_classic()
 forb.rootN.plot
 
-ggsave("./Plots/forb.traits.NW.rootN.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### Forb SLA ####
 
 SLA.effects = forb.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*8.362926) + 20.14641
 
 attr(forb.imputed.NW.2$SLA.final, "scaled:scale")
 attr(forb.imputed.NW.2$SLA.final, "scaled:center")
@@ -1600,20 +1682,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*8.362926) + 20.14641
 
 forb.SLA.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = SLA.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SLA.effects, aes(x = SLA.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SLA.effects, aes(x = SLA.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "SLA", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.1, 3.1),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(3.42, 11.78, 20.15, 28.51, 36.87, 45.23))+
-  theme_classic(base_size = 22)
+  geom_point(data = forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
 forb.SLA.plot
 
-ggsave("./Plots/forb.traits.NW.SLA.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### Forb Depth ####
 
 root.depth.effects = forb.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.6095345) + 0.6503508
 
 attr(forb.imputed.NW.2$root.depth.final, "scaled:scale")
 attr(forb.imputed.NW.2$root.depth.final, "scaled:center")
@@ -1622,20 +1705,21 @@ x.value = c(-1,0,1,2,3,4,5)
 (x.value*0.6095345) + 0.6503508
 
 forb.root.depth.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = root.depth.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = root.depth.effects, aes(x = root.depth.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = root.depth.effects, aes(x = root.depth.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1, 5.1),
-                     breaks = seq(-1,5, by = 1),
-                     labels = c(0.04,0.65, 1.26, 1.87, 2.48, 3.09, 3.69))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
 forb.root.depth.plot
 
-ggsave("./Plots/forb.traits.NW.root.depth.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### Forb Diam ####
 
 rootDiam.effects = forb.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1590925) + 0.3579696
 
 attr(forb.imputed.NW.2$rootDiam.final, "scaled:scale")
 attr(forb.imputed.NW.2$rootDiam.final, "scaled:center")
@@ -1644,20 +1728,21 @@ x.value = c(-1,0,1,2,3,4,5)
 (x.value*0.1590925) + 0.3579696
 
 forb.rootDiam.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = rootDiam.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootDiam.effects, aes(x = rootDiam.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootDiam.effects, aes(x = rootDiam.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.6, 4.9),
-                     breaks = seq(-1, 5, by = 1),
-                     labels = c(0.19, 0.36, 0.52, 0.68, 0.84, 0.99,1.15))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
 forb.rootDiam.plot
 
-ggsave("./Plots/forb.traits.NW.rootDiam.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### Forb SRL ####
 
 SRL.effects = forb.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*71.25811) + 105.5323
 
 attr(forb.imputed.NW.2$SRL.final, "scaled:scale")
 attr(forb.imputed.NW.2$SRL.final, "scaled:center")
@@ -1666,20 +1751,21 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*71.25811) + 105.5323
 
 forb.SRL.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = SRL.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SRL.effects, aes(x = SRL.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SRL.effects, aes(x = SRL.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.5, 4.3),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(34.27, 105.53, 176.79, 248.05, 319.31, 390.56))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
 forb.SRL.plot
 
-ggsave("./Plots/forb.traits.NW.SRL.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### Forb RTD ####
 
 RTD.effects = forb.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1184977) + 0.227384
 
 attr(forb.imputed.NW.2$RTD.final, "scaled:scale")
 attr(forb.imputed.NW.2$RTD.final, "scaled:center")
@@ -1688,20 +1774,21 @@ x.value = c(-1,0,1,2,3)
 (x.value*0.1184977) + 0.227384
 
 forb.RTD.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = RTD.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RTD.effects, aes(x = RTD.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.8, 3.0),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(0.11, 0.23, 0.35, 0.46, 0.58))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
 forb.RTD.plot
 
-ggsave("./Plots/forb.traits.NW.RTD.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### Forb RMF ####
 
 RMF.effects = forb.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1176732) + 0.3992223
 
 attr(forb.imputed.NW.2$RMF.final, "scaled:scale")
 attr(forb.imputed.NW.2$RMF.final, "scaled:center")
@@ -1710,20 +1797,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1176732) + 0.3992223
 
 forb.RMF.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = RMF.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RMF.effects, aes(x = RMF.final, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RMF.effects, aes(x = RMF.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.4, 2.9),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.16, 0.28, 0.39, 0.52, 0.31, 0.75))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
 forb.RMF.plot
 
-ggsave("./Plots/forb.traits.NW.RMF.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### Forb DSI ####
 
 DSI.effects = forb.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1949549) + -0.4644806
 
 attr(forb.imputed.NW.2$mean.DSI, "scaled:scale")
 attr(forb.imputed.NW.2$mean.DSI, "scaled:center")
@@ -1732,20 +1820,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1949549) + -0.4644806
 
 forb.DSI.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = mean.DSI, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = DSI.effects, aes(x = mean.DSI, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = DSI.effects, aes(x = mean.DSI, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  geom_point(data = forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.1, 3.1),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(-0.85, -0.66, -0.46, -0.27, -0.07, 0.12))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
 forb.DSI.plot
 
-ggsave("./Plots/forb.traits.NW.DSI.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### Forb MAP ####
 
 MAP.effects = forb.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*448.2603) + 657.7821
 
 attr(forb.imputed.NW.2$mean.MAP, "scaled:scale")
 attr(forb.imputed.NW.2$mean.MAP, "scaled:center")
@@ -1754,24 +1843,23 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*448.2603) + 657.7821
 
 forb.MAP.plot = ggplot() +
-  geom_point(data = forb.imputed.NW.2, aes(x = mean.MAP, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = MAP.effects, aes(x = mean.MAP, y = estimate__), color = "#F17236", size = 1.5) +  
-  geom_ribbon(data = MAP.effects, aes(x = mean.MAP, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Mean forb Precipitation", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.2, 3.9),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(209.52, 657.78, 1106.04, 1554.31, 2022.56))+
-  theme_classic(base_size = 22)
+  geom_point(data = forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
+  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
 forb.MAP.plot
 
-ggsave("./Plots/forb.traits.NW.MAP.pdf", height = 7, width = 7)
+ggsave("./Plots/forb.traits.NW.MAP.pdf", height = 3, width = 3)
 
 #### FORB interactions ####
 
 forb.imputed.NW.traits.RTD.SRL = readRDS("./Results/forb.imputed.traits.NW.RTD.SRL.rds")
 
 RTD.SRL.effect = conditional_effects(forb.imputed.NW.traits.RTD.SRL, effects = "RTD.final:SRL.final")$`RTD.final:SRL.final`
+RTD.SRL.effect$RTD.bt= (RTD.SRL.effect$RTD.final*0.1184977) + 0.227384
 
 # only plot high and low values
 
@@ -1786,44 +1874,53 @@ x.value = c(-1,0,1,2,3)
 x.value = c(-1,1.05)
 (x.value*71.25811) + 105.5323
 
-forb.RTD.x.SRL.plot = ggplot(data = RTD.SRL.effect.2, aes(x = RTD.final, y = estimate__, group = as.factor(effect2__))) +
+forb.RTD.x.SRL.plot = ggplot(data = RTD.SRL.effect.2, aes(x = RTD.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
   geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
-  labs(x = "RTD", y = "Percent Cover Change", color = "SRL") +
+  labs(x = "Root Tissue Density", y = "Percent Cover Change", color = "SRL") +
   scale_colour_manual(values = c("black", "#F17236"), labels = c("180.35","34.27"))+
   scale_fill_manual(values = c("black", "#F17236"))+
-  scale_x_continuous(breaks = seq(-1, 3, by = 1),
-                     labels = c(0.11, 0.23, 0.35, 0.47, 0.58))+
-  theme_classic(base_size = 22)
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
 forb.RTD.x.SRL.plot
 
-ggsave("./Plots/forb.traits.NW.RTD.SRL.pdf", height = 7, width = 7)
-ggsave("./Plots/forb.traits.NW.RTD.SRL.legend.pdf", height = 7, width = 7)
-#### GRASS Imputed plots ####
+ggsave("./Plots/forb.traits.NW.RTD.SRL.pdf", height = 3, width = 3)
+ggsave("./Plots/forb.traits.NW.RTD.SRL.legend.pdf", height = 3, width = 3)
+
+#### GRASS Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+imputed.NW.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.grass.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
 
 grass.traits.NW.model = readRDS("./Results/grass.imputed.traits.no_woody.rds")
 
+imputed.NW.grass$leafN.bt =(imputed.NW.grass$leafN.final*6.281442) + 18.41922
+imputed.NW.grass$height.bt = (imputed.NW.grass$height.final*0.2266876) + 0.3988779
+imputed.NW.grass$rootN.bt = (imputed.NW.grass$rootN.final*2.712129) + 7.59045
+imputed.NW.grass$SLA.bt = (imputed.NW.grass$SLA.final*9.570923) + 20.3176
+imputed.NW.grass$Depth.bt = (imputed.NW.grass$root.depth.final*0.3671355) + 0.4529895
+imputed.NW.grass$Diam.bt = (imputed.NW.grass$rootDiam.final*0.1707781) + 0.3486828
+imputed.NW.grass$SRL.bt = (imputed.NW.grass$SRL.final*82.36672) + 115.2106
+imputed.NW.grass$RTD.bt = (imputed.NW.grass$RTD.final*0.1085128) + 0.2621843
+imputed.NW.grass$RMF.bt = (imputed.NW.grass$RMF.final*0.07914561) + 0.4233237
+imputed.NW.grass$DSI.bt = (imputed.NW.grass$mean.DSI*0.2007843) + -0.4496194
+imputed.NW.grass$MAP.bt = (imputed.NW.grass$mean.MAP*441.5584) + 637.2953
+
 grass.imputed.NW.2 = imputed.NW.grass %>%
-  dplyr::select(cover.change,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
 grass.effects = conditional_effects(grass.traits.NW.model)
 
-range(grass.imputed.NW.2$leafN.final) # -1.937329  3.576683
-range(grass.imputed.NW.2$height.final) # -1.605196  3.534036
-range(grass.imputed.NW.2$rootN.final) # -2.658593  4.697596
-range(grass.imputed.NW.2$SLA.final) # -1.772276  2.716809
-range(grass.imputed.NW.2$root.depth.final) # -1.029564  6.072718
-range(grass.imputed.NW.2$rootDiam.final) # -1.456175  3.228266
-range(grass.imputed.NW.2$SRL.final) # -1.261202  3.673079
-range(grass.imputed.NW.2$RTD.final) # -2.187709  3.297452
-range(grass.imputed.NW.2$RMF.final) # -2.216468  2.901228
-range(grass.imputed.NW.2$mean.DSI) # -2.104957  2.858311
-range(grass.imputed.NW.2$mean.MAP) # -1.142534  3.915008
+#### Grass leafN ####
 
 leafN.effects = grass.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.281442) + 18.41922
 
 attr(grass.imputed.NW.2$leafN.final, "scaled:scale")
 attr(grass.imputed.NW.2$leafN.final, "scaled:center")
@@ -1832,20 +1929,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*6.281442) + 18.41922
 
 grass.leafN.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = leafN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = leafN.effects, aes(x = leafN.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = leafN.effects, aes(x = leafN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2,3.6),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(5.86, 12.14,18.42, 24.71, 30.98, 37.26))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
 grass.leafN.plot
 
-ggsave("./Plots/grass.traits.NW.leafN.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### Grass height ####
 
 height.effects = grass.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2266876) + 0.3988779
 
 attr(grass.imputed.NW.2$height.final, "scaled:scale")
 attr(grass.imputed.NW.2$height.final, "scaled:center")
@@ -1854,20 +1952,21 @@ x.value = c(-1,0,1,2,3)
 (x.value*0.2266876) + 0.3988779
 
 grass.height.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = height.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = height.effects, aes(x = height.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = height.effects, aes(x = height.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Height", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.7, 3.6),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(0.17, 0.39, 0.63, 0.85, 1.08))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
 grass.height.plot
 
-ggsave("./Plots/grass.traits.NW.height.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.height.pdf", height = 3, width = 3)
+
+#### Grass rootN ####
 
 rootN.effects = grass.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*2.712129) + 7.59045
 
 attr(grass.imputed.NW.2$rootN.final, "scaled:scale")
 attr(grass.imputed.NW.2$rootN.final, "scaled:center")
@@ -1876,20 +1975,21 @@ x.value = c(-2,-1,0,1,2,3,4)
 (x.value*2.712129) + 7.59045
 
 grass.rootN.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = rootN.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootN.effects, aes(x = rootN.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootN.effects, aes(x = rootN.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root N", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.7, 4.7),
-                     breaks = seq(-2, 4, by = 1),
-                     labels = c(2.17, 4.88, 7.59, 10.31, 13.01, 15.73, 18.44))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
 grass.rootN.plot
 
-ggsave("./Plots/grass.traits.NW.rootN.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### Grass SLA ####
 
 SLA.effects = grass.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.570923) + 20.3176
 
 attr(grass.imputed.NW.2$SLA.final, "scaled:scale")
 attr(grass.imputed.NW.2$SLA.final, "scaled:center")
@@ -1898,20 +1998,21 @@ x.value = c(-1,0,1,2,3)
 (x.value*9.570923) + 20.31763
 
 grass.SLA.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = SLA.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SLA.effects, aes(x = SLA.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SLA.effects, aes(x = SLA.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "SLA", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.8, 2.8),
-                     breaks = seq(-1, 2, by = 1),
-                     labels = c(10.75, 20.32, 29.89, 39.46))+
-  theme_classic(base_size = 22)
+  geom_point(data = grass.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
 grass.SLA.plot
 
-ggsave("./Plots/grass.traits.NW.SLA.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### Grass Depth ####
 
 root.depth.effects = grass.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.3671355) + 0.4529895
 
 attr(grass.imputed.NW.2$root.depth.final, "scaled:scale")
 attr(grass.imputed.NW.2$root.depth.final, "scaled:center")
@@ -1920,20 +2021,21 @@ x.value = c(-1,0,1,2,3,4,5,6)
 (x.value*0.3671355) + 0.4529895
 
 grass.root.depth.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = root.depth.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = root.depth.effects, aes(x = root.depth.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = root.depth.effects, aes(x = root.depth.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.1, 6.1),
-                     breaks = seq(-1,6, by = 1),
-                     labels = c(0.08,0.45, 0.82, 1.19, 1.55, 1.92, 2.29, 2.66))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
 grass.root.depth.plot
 
-ggsave("./Plots/grass.traits.NW.root.depth.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### Grass Diam ####
 
 rootDiam.effects = grass.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1707781) + 0.3486828
 
 attr(grass.imputed.NW.2$rootDiam.final, "scaled:scale")
 attr(grass.imputed.NW.2$rootDiam.final, "scaled:center")
@@ -1942,20 +2044,21 @@ x.value = c(-1,0,1,2,3)
 (x.value*0.1707781) + 0.3486828
 
 grass.rootDiam.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = rootDiam.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = rootDiam.effects, aes(x = rootDiam.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = rootDiam.effects, aes(x = rootDiam.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.5, 3.3),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(0.18, 0.35, 0.52, 0.69, 0.86))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
 grass.rootDiam.plot
 
-ggsave("./Plots/grass.traits.NW.rootDiam.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### Grass SRL ####
 
 SRL.effects = grass.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*82.36672) + 115.2106
 
 attr(grass.imputed.NW.2$SRL.final, "scaled:scale")
 attr(grass.imputed.NW.2$SRL.final, "scaled:center")
@@ -1964,20 +2067,21 @@ x.value = c(-1,0,1,2,3)
 (x.value*82.36672) + 115.2106
 
 grass.SRL.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = SRL.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = SRL.effects, aes(x = SRL.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = SRL.effects, aes(x = SRL.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.3, 3.7),
-                     breaks = seq(-1, 3, by = 1),
-                     labels = c(32.84, 115.21, 197.58, 279.94, 362.31))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
 grass.SRL.plot
 
-ggsave("./Plots/grass.traits.NW.SRL.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### Grass RTD ####
 
 RTD.effects = grass.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1085128) + 0.2621843
 
 attr(grass.imputed.NW.2$RTD.final, "scaled:scale")
 attr(grass.imputed.NW.2$RTD.final, "scaled:center")
@@ -1986,20 +2090,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.1085128) + 0.2621843
 
 grass.RTD.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = RTD.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RTD.effects, aes(x = RTD.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.2, 3.3),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.05, 0.15, 0.26, 0.37, 0.48,0.59))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
 grass.RTD.plot
 
-ggsave("./Plots/grass.traits.NW.RTD.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### Grass RMF ####
 
 RMF.effects = grass.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.07914561) + 0.4233237
 
 attr(grass.imputed.NW.2$RMF.final, "scaled:scale")
 attr(grass.imputed.NW.2$RMF.final, "scaled:center")
@@ -2008,20 +2113,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.07914561) + 0.4233237
 
 grass.RMF.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = RMF.final, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RMF.effects, aes(x = RMF.final, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = RMF.effects, aes(x = RMF.final, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.3, 3.0),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(0.26, 0.34, 0.42, 0.51, 0.58, 0.66))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
 grass.RMF.plot
 
-ggsave("./Plots/grass.traits.NW.RMF.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### Grass DSI ####
 
 DSI.effects = grass.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.2007843) + -0.4496194
 
 attr(grass.imputed.NW.2$mean.DSI, "scaled:scale")
 attr(grass.imputed.NW.2$mean.DSI, "scaled:center")
@@ -2030,20 +2136,21 @@ x.value = c(-2,-1,0,1,2,3)
 (x.value*0.2007843) + -0.4496194
 
 grass.DSI.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = mean.DSI, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = DSI.effects, aes(x = mean.DSI, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
-  geom_ribbon(data = DSI.effects, aes(x = mean.DSI, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  geom_point(data = grass.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-2.2, 2.9),
-                     breaks = seq(-2, 3, by = 1),
-                     labels = c(-0.85, -0.66, -0.45, -0.25, -0.05, 0.15))+
-  theme_classic(base_size = 22)
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
 grass.DSI.plot
 
-ggsave("./Plots/grass.traits.NW.DSI.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### Grass MAP ####
 
 MAP.effects = grass.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*441.5584) + 637.2953
 
 attr(grass.imputed.NW.2$mean.MAP, "scaled:scale")
 attr(grass.imputed.NW.2$mean.MAP, "scaled:center")
@@ -2052,15 +2159,758 @@ x.value = c(-1,0,1,2,3,4)
 (x.value*441.5584) + 637.2953
 
 grass.MAP.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = mean.MAP, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = MAP.effects, aes(x = mean.MAP, y = estimate__), color = "#6E687E", size = 1.5) +  
-  geom_ribbon(data = MAP.effects, aes(x = mean.MAP, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Mean grass Precipitation", y = "Percent Cover Change") +
-  ylim(-20.7,21.3)+
-  scale_x_continuous(limits = c(-1.2, 4.0),
-                     breaks = seq(-1, 4, by = 1),
-                     labels = c(195.74, 637.29, 1078.85, 1520.41, 1961.97,2403.52))+
-  theme_classic(base_size = 22)
+  geom_point(data = grass.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
+  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
 grass.MAP.plot
 
-ggsave("./Plots/grass.traits.NW.MAP.pdf", height = 7, width = 7)
+ggsave("./Plots/grass.traits.NW.MAP.pdf", height = 3, width = 3)
+
+#### PERENNIAL GRASS Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+imputed.NW.perennial.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+
+perennial.grass.traits.NW.model = readRDS("./Results/perennial.grass.imputed.traits.no_woody.rds")
+
+imputed.NW.perennial.grass$leafN.bt =(imputed.NW.perennial.grass$leafN.final*5.50471) + 17.71951
+imputed.NW.perennial.grass$height.bt = (imputed.NW.perennial.grass$height.final*0.23344) + 0.4066261
+imputed.NW.perennial.grass$rootN.bt = (imputed.NW.perennial.grass$rootN.final*2.940311) + 7.794231
+imputed.NW.perennial.grass$SLA.bt = (imputed.NW.perennial.grass$SLA.final*9.175084) + 19.32517
+imputed.NW.perennial.grass$Depth.bt = (imputed.NW.perennial.grass$root.depth.final*0.3665233) + 0.4460136
+imputed.NW.perennial.grass$Diam.bt = (imputed.NW.perennial.grass$rootDiam.final*0.1693868) + 0.3418054
+imputed.NW.perennial.grass$SRL.bt = (imputed.NW.perennial.grass$SRL.final*85.10344) + 113.0663
+imputed.NW.perennial.grass$RTD.bt = (imputed.NW.perennial.grass$RTD.final*0.1033287) + 0.2760841
+imputed.NW.perennial.grass$RMF.bt = (imputed.NW.perennial.grass$RMF.final*0.08185729) + 0.4278072
+imputed.NW.perennial.grass$DSI.bt = (imputed.NW.perennial.grass$mean.DSI*0.1851188) + -0.4469141
+imputed.NW.perennial.grass$MAP.bt = (imputed.NW.perennial.grass$mean.MAP*466.5336) + 686.9575
+
+perennial.grass.imputed.NW.2 = imputed.NW.perennial.grass %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
+  drop_na()
+
+perennial.grass.effects = conditional_effects(perennial.grass.traits.NW.model)
+
+#### Perennial Grass leafN ####
+
+leafN.effects = perennial.grass.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*5.50471) + 17.71951
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*5.50471) + 17.71951
+
+perennial.grass.leafN.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Leaf N", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
+perennial.grass.leafN.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### Perennial Grass height ####
+
+height.effects = perennial.grass.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.23344) + 0.4066261
+
+x.value = c(-1,0,1,2,3)
+(x.value*0.23344) + 0.4066261
+
+perennial.grass.height.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Height", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
+perennial.grass.height.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.height.pdf", height = 3, width = 3)
+
+#### Perennial Grass rootN ####
+
+rootN.effects = perennial.grass.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*2.940311) + 7.794231
+
+x.value = c(-2,-1,0,1,2,3,4)
+(x.value*2.940311) + 7.794231
+
+perennial.grass.rootN.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Root N", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
+perennial.grass.rootN.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### Perennial Grass SLA ####
+
+SLA.effects = perennial.grass.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.175084) + 19.32517
+
+x.value = c(-1,0,1,2,3)
+(x.value*9.175084) + 19.32517
+
+perennial.grass.SLA.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
+perennial.grass.SLA.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### Perennial Grass depth ####
+
+root.depth.effects = perennial.grass.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.3665233) + 0.4460136
+
+x.value = c(-1,0,1,2,3,4,5,6)
+(x.value*0.3665233) + 0.4460136
+
+perennial.grass.root.depth.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
+perennial.grass.root.depth.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### Perennial Grass Diam ####
+
+rootDiam.effects = perennial.grass.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1693868) + 0.3418054
+
+x.value = c(-1,0,1,2,3)
+(x.value*0.1693868) + 0.3418054
+
+perennial.grass.rootDiam.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
+perennial.grass.rootDiam.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### Perennial Grass SRL ####
+
+SRL.effects = perennial.grass.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*85.10344) + 113.0663
+
+x.value = c(-1,0,1,2,3)
+(x.value*85.10344) + 113.0663
+
+perennial.grass.SRL.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
+perennial.grass.SRL.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### Perennial Grass RTD ####
+
+RTD.effects = perennial.grass.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1033287) + 0.2760841
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.1033287) + 0.2760841
+
+perennial.grass.RTD.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
+perennial.grass.RTD.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### Perennial Grass RMF ####
+
+RMF.effects = perennial.grass.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.08185729) + 0.4278072
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.08185729) + 0.4278072
+
+perennial.grass.RMF.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
+perennial.grass.RMF.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### Perennial Grass DSI ####
+
+DSI.effects = perennial.grass.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1851188) + -0.4469141
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.1851188) + -0.4469141
+
+perennial.grass.DSI.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
+perennial.grass.DSI.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### Perennial Grass MAP ####
+
+MAP.effects = perennial.grass.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*466.5336) + 686.9575
+
+x.value = c(-1,0,1,2,3,4)
+(x.value*466.5336) + 686.9575
+
+perennial.grass.MAP.plot = ggplot() +
+  geom_point(data = perennial.grass.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
+  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
+perennial.grass.MAP.plot
+
+ggsave("./Plots/perennial.grass.traits.NW.MAP.pdf", height = 3, width = 3)
+
+#### PERENNIAL forb Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+
+perennial.forb.traits.NW.model = readRDS("./Results/perennial.forb.imputed.traits.no_woody.rds")
+
+imputed.NW.perennial.forb$leafN.bt =(imputed.NW.perennial.forb$leafN.final*6.163125) + 21.2703
+imputed.NW.perennial.forb$height.bt = (imputed.NW.perennial.forb$height.final*0.2398901) + 0.3335025
+imputed.NW.perennial.forb$rootN.bt = (imputed.NW.perennial.forb$rootN.final*4.060239) + 10.55429
+imputed.NW.perennial.forb$SLA.bt = (imputed.NW.perennial.forb$SLA.final*7.330182) + 18.8354
+imputed.NW.perennial.forb$Depth.bt = (imputed.NW.perennial.forb$root.depth.final*0.6839351) + 0.6887514
+imputed.NW.perennial.forb$Diam.bt = (imputed.NW.perennial.forb$rootDiam.final*0.1702321) + 0.3728557
+imputed.NW.perennial.forb$SRL.bt = (imputed.NW.perennial.forb$SRL.final*66.81515) + 92.88134
+imputed.NW.perennial.forb$RTD.bt = (imputed.NW.perennial.forb$RTD.final*0.1226583) + 0.241658
+imputed.NW.perennial.forb$RMF.bt = (imputed.NW.perennial.forb$RMF.final*0.1195843) + 0.4031475
+imputed.NW.perennial.forb$DSI.bt = (imputed.NW.perennial.forb$mean.DSI*0.1767211) + -0.4540636
+imputed.NW.perennial.forb$MAP.bt = (imputed.NW.perennial.forb$mean.MAP*483.3507) + 751.5249
+
+perennial.forb.imputed.NW.2 = imputed.NW.perennial.forb %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
+  drop_na()
+
+perennial.forb.effects = conditional_effects(perennial.forb.traits.NW.model)
+
+#### Perennial forb leafN ####
+
+leafN.effects = perennial.forb.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.163125) + 21.2703
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*6.163125) + 21.2703
+
+perennial.forb.leafN.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Leaf N", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
+perennial.forb.leafN.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### Perennial forb height ####
+
+height.effects = perennial.forb.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2398901) + 0.3335025
+
+x.value = c(-1,0,1,2,3)
+(x.value*0.2398901) + 0.3335025
+
+perennial.forb.height.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Height", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
+perennial.forb.height.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.height.pdf", height = 3, width = 3)
+
+#### Perennial forb rootN ####
+
+rootN.effects = perennial.forb.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.060239) + 10.55429
+
+x.value = c(-2,-1,0,1,2,3,4)
+(x.value*4.060239) + 10.55429
+
+perennial.forb.rootN.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Root N", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
+perennial.forb.rootN.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### Perennial forb SLA ####
+
+SLA.effects = perennial.forb.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*7.330182) + 18.8354
+
+x.value = c(-1,0,1,2,3)
+(x.value*7.330182) + 18.8354
+
+perennial.forb.SLA.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
+perennial.forb.SLA.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### Perennial forb depth ####
+
+root.depth.effects = perennial.forb.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.6839351) + 0.6887514
+
+x.value = c(-1,0,1,2,3,4,5,6)
+(x.value*0.6839351) + 0.6887514
+
+perennial.forb.root.depth.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
+perennial.forb.root.depth.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### Perennial forb Diam ####
+
+rootDiam.effects = perennial.forb.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1702321) + 0.3728557
+
+x.value = c(-1,0,1,2,3)
+(x.value*0.1702321) + 0.3728557
+
+perennial.forb.rootDiam.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
+perennial.forb.rootDiam.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### Perennial forb SRL ####
+
+SRL.effects = perennial.forb.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*66.81515) + 92.88134
+
+x.value = c(-1,0,1,2,3)
+(x.value*66.81515) + 92.88134
+
+perennial.forb.SRL.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
+perennial.forb.SRL.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### Perennial forb RTD ####
+
+RTD.effects = perennial.forb.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1226583) + 0.241658
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.1226583) + 0.241658
+
+perennial.forb.RTD.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
+perennial.forb.RTD.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### Perennial forb RMF ####
+
+RMF.effects = perennial.forb.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1195843) + 0.4031475
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.1195843) + 0.4031475
+
+perennial.forb.RMF.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
+perennial.forb.RMF.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### Perennial forb DSI ####
+
+DSI.effects = perennial.forb.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1767211) + -0.4540636
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.1767211) + -0.4540636
+
+perennial.forb.DSI.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
+perennial.forb.DSI.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### Perennial forb MAP ####
+
+MAP.effects = perennial.forb.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*483.3507) + 751.5249
+
+x.value = c(-1,0,1,2,3,4)
+(x.value*483.3507) + 751.5249
+
+perennial.forb.MAP.plot = ggplot() +
+  geom_point(data = perennial.forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
+  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
+perennial.forb.MAP.plot
+
+ggsave("./Plots/perennial.forb.traits.NW.MAP.pdf", height = 3, width = 3)
+
+#### ANNUAL FORB Backtransform ####
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+
+annual.forb.traits.NW.model = readRDS("./Results/annual.forb.imputed.traits.no_woody.rds")
+
+imputed.NW.annual.forb$leafN.bt =(imputed.NW.annual.forb$leafN.final*6.789956) + 22.1907
+imputed.NW.annual.forb$height.bt = (imputed.NW.annual.forb$height.final*0.2390744) + 0.3002752
+imputed.NW.annual.forb$rootN.bt = (imputed.NW.annual.forb$rootN.final*4.242741) + 10.49856
+imputed.NW.annual.forb$SLA.bt = (imputed.NW.annual.forb$SLA.final*9.43772) + 22.54378
+imputed.NW.annual.forb$Depth.bt = (imputed.NW.annual.forb$root.depth.final*0.4594328) + 0.576239
+imputed.NW.annual.forb$Diam.bt = (imputed.NW.annual.forb$rootDiam.final*0.1309004) + 0.33456
+imputed.NW.annual.forb$SRL.bt = (imputed.NW.annual.forb$SRL.final*73.2686) + 124.8044
+imputed.NW.annual.forb$RTD.bt = (imputed.NW.annual.forb$RTD.final*0.110191) + 0.2068199
+imputed.NW.annual.forb$RMF.bt = (imputed.NW.annual.forb$RMF.final*0.1125971) + 0.3882978
+imputed.NW.annual.forb$DSI.bt = (imputed.NW.annual.forb$mean.DSI*0.2195586) + -0.4745653
+imputed.NW.annual.forb$MAP.bt = (imputed.NW.annual.forb$mean.MAP*297.4522) + 478.9622
+
+annual.forb.imputed.NW.2 = imputed.NW.annual.forb %>%
+  dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
+  drop_na()
+
+annual.forb.effects = conditional_effects(annual.forb.traits.NW.model)
+
+#### annual forb leafN ####
+
+leafN.effects = annual.forb.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.789956) + 22.1907
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*6.789956) + 22.1907
+
+annual.forb.leafN.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Leaf N", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.68951,44.19001)+
+  theme_classic()
+annual.forb.leafN.plot
+
+ggsave("./Plots/annual.forb.traits.NW.leafN.pdf", height = 3, width = 3)
+
+#### annual forb height ####
+
+height.effects = annual.forb.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2390744) + 0.3002752
+
+x.value = c(-1,0,1,2,3)
+(x.value*0.2390744) + 0.3002752
+
+annual.forb.height.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Height", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.009000064,1.322333169)+
+  theme_classic()
+annual.forb.height.plot
+
+ggsave("./Plots/annual.forb.traits.NW.height.pdf", height = 3, width = 3)
+
+#### annual forb rootN ####
+
+rootN.effects = annual.forb.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.242741) + 10.49856
+
+x.value = c(-2,-1,0,1,2,3,4)
+(x.value*4.242741) + 10.49856
+
+annual.forb.rootN.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Root N", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.3800000,25.6283268)+
+  theme_classic()
+annual.forb.rootN.plot
+
+ggsave("./Plots/annual.forb.traits.NW.rootN.pdf", height = 3, width = 3)
+
+#### annual forb SLA ####
+
+SLA.effects = annual.forb.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.43772) + 22.54378
+
+x.value = c(-1,0,1,2,3)
+(x.value*9.43772) + 22.54378
+
+annual.forb.SLA.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.617596,46.320001)+
+  theme_classic()
+annual.forb.SLA.plot
+
+ggsave("./Plots/annual.forb.traits.NW.SLA.pdf", height = 3, width = 3)
+
+#### annual forb depth ####
+
+root.depth.effects = annual.forb.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.4594328) + 0.576239
+
+x.value = c(-1,0,1,2,3,4,5,6)
+(x.value*0.4594328) + 0.576239
+
+annual.forb.root.depth.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.0479999,3.709335)+
+  theme_classic()
+annual.forb.root.depth.plot
+
+ggsave("./Plots/annual.forb.traits.NW.root.depth.pdf", height = 3, width = 3)
+
+#### annual forb Diam ####
+
+rootDiam.effects = annual.forb.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1309004) + 0.33456
+
+x.value = c(-1,0,1,2,3)
+(x.value*0.1309004) + 0.33456
+
+annual.forb.rootDiam.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.07840002,1.12601235)+
+  theme_classic()
+annual.forb.rootDiam.plot
+
+ggsave("./Plots/annual.forb.traits.NW.rootDiam.pdf", height = 3, width = 3)
+
+#### annual forb SRL ####
+
+SRL.effects = annual.forb.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*73.2686) + 124.8044
+
+x.value = c(-1,0,1,2,3)
+(x.value*73.2686) + 124.8044
+
+annual.forb.SRL.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(2.497203,417.749988)+
+  theme_classic()
+annual.forb.SRL.plot
+
+ggsave("./Plots/annual.forb.traits.NW.SRL.pdf", height = 3, width = 3)
+
+#### annual forb RTD ####
+
+RTD.effects = annual.forb.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.110191) + 0.2068199
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.110191) + 0.2068199
+
+annual.forb.RTD.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.02325658,0.61999993)+
+  theme_classic()
+annual.forb.RTD.plot
+
+ggsave("./Plots/annual.forb.traits.NW.RTD.pdf", height = 3, width = 3)
+
+#### annual forb RMF ####
+
+RMF.effects = annual.forb.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1125971) + 0.3882978
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.1125971) + 0.3882978
+
+annual.forb.RMF.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(0.1211193,0.7328659)+
+  theme_classic()
+annual.forb.RMF.plot
+
+ggsave("./Plots/annual.forb.traits.NW.RMF.pdf", height = 3, width = 3)
+
+#### annual forb DSI ####
+
+DSI.effects = annual.forb.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.2195586) + -0.4745653
+
+x.value = c(-2,-1,0,1,2,3)
+(x.value*0.2195586) + -0.4745653
+
+annual.forb.DSI.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
+  geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(-0.8722616,0.1242846)+
+  theme_classic()
+annual.forb.DSI.plot
+
+ggsave("./Plots/annual.forb.traits.NW.DSI.pdf", height = 3, width = 3)
+
+#### annual forb MAP ####
+
+MAP.effects = annual.forb.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*297.4522) + 478.9622
+
+x.value = c(-1,0,1,2,3,4)
+(x.value*297.4522) + 478.9622
+
+annual.forb.MAP.plot = ggplot() +
+  geom_point(data = annual.forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#B50200", size = 1.5) +  
+  geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
+  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  ylim(-20.66667,21.24500)+
+  xlim(132.7,2366.1)+
+  theme_classic()
+annual.forb.MAP.plot
+
+ggsave("./Plots/annual.forb.traits.NW.MAP.pdf", height = 3, width = 3)
+
