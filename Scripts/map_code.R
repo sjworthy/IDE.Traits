@@ -7,6 +7,7 @@
 
 library(pRecipe)
 library(giscoR)
+library(raster)
 library(terra)
 library(rayshader)
 library(classInt)
@@ -19,11 +20,13 @@ sites.65 = read.csv("./Formatted.Data/IDE.sites.65.csv")
 # get the whole world
 world_sf = gisco_get_countries()
 
-download_data(dataset = "mswep",
-              path = getwd(),
-              timestep = "yearly")
+#download_data(dataset = "mswep",
+              #path = getwd(),
+              #timestep = "yearly")
 
-mswep_data = terra::rast("mswep_tp_mm_global_197902_202301_025_yearly.nc")
+mswep_data = terra::rast("./mswep_tp_mm_global_197902_202301_025_yearly.nc")
+terra::ext(mswep_data) <- c(-180, 180, -90, 90)
+
 names(mswep_data) = 1979:2023
 
 mswep_df = mswep_data %>%
@@ -31,9 +34,7 @@ mswep_df = mswep_data %>%
 
 # remove 2023, not complete data
 mswep_df = mswep_df[,c(1:46)]
-
 mswep_df_2 = mswep_df[,c(3:46)]
-
 mswep_df$MAP = rowMeans(mswep_df_2)
 
 terra::plot(mswep_data[[1]])
