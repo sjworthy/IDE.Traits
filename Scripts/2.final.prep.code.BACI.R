@@ -672,5 +672,19 @@ write.csv(imputed.traits.NW.annual.forb, file = "./Formatted.Data/Revisions/Fina
 write.csv(imputed.traits.NW.perennial.forb, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv")
 write.csv(imputed.traits.NW.perennial.grass, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv")
 
+# how many annual grass species would have been in the model
+imputed.traits.NW.annual.grass = imputed.traits.NW.2 %>%
+  filter(local_lifespan == "ANNUAL") %>%
+  filter(functional_group == "GRASS")
+
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+
+imputed.traits.NW.annual.grass.2 = imputed.traits.NW.annual.grass %>%
+left_join(., enviro, by = "site_code")
+
+imputed.traits.NW.annual.grass.3 = imputed.traits.NW.annual.grass.2 %>%
+  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  drop_na()
+
 
 

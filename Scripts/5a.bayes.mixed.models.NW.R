@@ -2914,3 +2914,233 @@ annual.forb.MAP.plot
 
 ggsave("./Plots/annual.forb.traits.NW.MAP.pdf", height = 3, width = 3)
 
+
+#### Dot Plots ####
+imputed.traits.NW.model = readRDS("./Results/all.imputed.traits.no_woody.rds")
+sum = summary(imputed.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.2 = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#769370"))
+  
+All.species.plot = ggplot(data = coef.2,
+       aes(y = factor(row.names(coef.2), levels = rev(row.names(coef.2))),
+           x = Estimate,
+           xmin = `l-95% CI`,
+           xmax = `u-95% CI`,
+           fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "#769370") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "All-Species")
+All.species.plot
+
+annual.traits.NW.model = readRDS("./Results/annual.imputed.traits.no_woody.rds")
+
+sum = summary(annual.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.annual = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#979461"))
+
+annual.plot = ggplot(data = coef.annual,
+                          aes(y = factor(row.names(coef.annual), levels = rev(row.names(coef.annual))),
+                              x = Estimate,
+                              xmin = `l-95% CI`,
+                              xmax = `u-95% CI`,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#979461") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Annuals")
+annual.plot
+
+perennial.traits.NW.model = readRDS("./Results/perennial.imputed.traits.no_woody.rds")
+
+sum = summary(perennial.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.perennial = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#F1C646"))
+
+perennial.plot = ggplot(data = coef.perennial,
+                     aes(y = factor(row.names(coef.perennial), levels = rev(row.names(coef.perennial))),
+                         x = Estimate,
+                         xmin = `l-95% CI`,
+                         xmax = `u-95% CI`,
+                         fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#F1C646") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennials")
+perennial.plot
+
+forb.traits.NW.model = readRDS("./Results/forb.imputed.traits.no_woody.rds")
+
+sum = summary(forb.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.forb = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#F17236"))
+
+forb.plot = ggplot(data = coef.forb,
+                        aes(y = factor(row.names(coef.forb), levels = rev(row.names(coef.forb))),
+                            x = Estimate,
+                            xmin = `l-95% CI`,
+                            xmax = `u-95% CI`,
+                            fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#F17236") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Forbs")
+forb.plot
+
+grass.traits.NW.model = readRDS("./Results/grass.imputed.traits.no_woody.rds")
+
+sum = summary(grass.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.grass = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6E687E"))
+
+grass.plot = ggplot(data = coef.grass,
+                   aes(y = factor(row.names(coef.grass), levels = rev(row.names(coef.grass))),
+                       x = Estimate,
+                       xmin = `l-95% CI`,
+                       xmax = `u-95% CI`,
+                       fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#6E687E") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Grasses")
+grass.plot
+
+annual.forb.traits.NW.model = readRDS("./Results/annual.forb.imputed.traits.no_woody.rds")
+
+sum = summary(annual.forb.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.annual.forb = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#B50200"))
+
+annual.forb.plot = ggplot(data = coef.annual.forb,
+                    aes(y = factor(row.names(coef.annual.forb), levels = rev(row.names(coef.annual.forb))),
+                        x = Estimate,
+                        xmin = `l-95% CI`,
+                        xmax = `u-95% CI`,
+                        fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#B50200") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Annual Forbs")
+annual.forb.plot
+
+perennial.grass.traits.NW.model = readRDS("./Results/perennial.grass.imputed.traits.no_woody.rds")
+
+sum = summary(perennial.grass.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.perennial.grass = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6089B5"))
+
+perennial.grass.plot = ggplot(data = coef.perennial.grass,
+                    aes(y = factor(row.names(coef.perennial.grass), levels = rev(row.names(coef.perennial.grass))),
+                        x = Estimate,
+                        xmin = `l-95% CI`,
+                        xmax = `u-95% CI`,
+                        fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#6089B5") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Grasses")
+perennial.grass.plot
+
+perennial.forb.traits.NW.model = readRDS("./Results/perennial.forb.imputed.traits.no_woody.rds")
+
+sum = summary(perennial.forb.traits.NW.model)
+coef = sum$fixed
+row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
+                    "SRL", "RTD","RMF","DSI","Precipitation")
+coef.perennial.forb = coef %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "black"))
+
+perennial.forb.plot = ggplot(data = coef.perennial.forb,
+                              aes(y = factor(row.names(coef.perennial.forb), levels = rev(row.names(coef.perennial.forb))),
+                                  x = Estimate,
+                                  xmin = `l-95% CI`,
+                                  xmax = `u-95% CI`,
+                                  fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "black") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Forbs")
+perennial.forb.plot
+
+library(cowplot)
+
+png(filename = "./Plots/coef.plot.png",  width = 11, 
+    height = 11, units = "in", res = 600)
+
+plot_grid(All.species.plot,annual.plot,perennial.plot,grass.plot,forb.plot,
+                     annual.forb.plot,perennial.forb.plot,perennial.grass.plot)
+
+dev.off()
+
+#### Plotting random effects ####
+
+imputed.traits.NW.model = readRDS("./Results/all.imputed.traits.no_woody.rds")
+
+rf = ranef(imputed.traits.NW.model)
+species.rf = as.data.frame(rf$Taxon)
+row.names(species.rf) = stringr::str_to_sentence(row.names(species.rf))
+site.rf = as.data.frame(rf$site_code)
+
+
+species.rf.2 = species.rf %>%
+  mutate(coef.zero = Q2.5.Intercept/Q97.5.Intercept  < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#769370"))
+
+species.rf.plot = ggplot(data = species.rf.2,
+                          aes(y = row.names(species.rf.2),
+                              x = Estimate.Intercept,
+                              xmin = Q2.5.Intercept,
+                              xmax = Q97.5.Intercept,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "#769370") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic()+
+  labs(y = "",x = "Mean with 95% CI", title = "All-Species")
+species.rf.plot
