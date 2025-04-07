@@ -4,6 +4,7 @@
 # load libraries 
 library(tidyverse)
 library(brms)
+library(cowplot)
 
 #### Load imputed data without woody species ####
 
@@ -56,6 +57,28 @@ imputed.NW.perennial.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imp
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
 
+imputed.NW.forb.legume = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.legume.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+imputed.NW.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.graminoid.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+imputed.NW.annual.forb.legume = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forb.legume.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+imputed.NW.perennial.forb.legume = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv", row.names = 1)%>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+
+
 #### imputed traits model NW ####
 
 priors <- c(prior(normal(0, 10), class = b))
@@ -87,14 +110,6 @@ bayes_R2(imputed.NW.traits.height.leafN)
 conditional_effects(imputed.NW.traits.height.leafN)
 # positive cover change with taller height and higher leafN
 
-imputed.NW.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                 family = gaussian(),
-                                 prior = priors,
-                                 data = imputed.NW)
-
-summary(imputed.NW.traits.depth.SLA)
-# nothing significant
-
 imputed.NW.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                     family = gaussian(),
                                     prior = priors,
@@ -102,6 +117,10 @@ imputed.NW.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final 
 
 summary(imputed.NW.traits.depth.leafN)
 # leafN
+
+saveRDS(imputed.NW.traits.depth.leafN, file = "./Results/all.imputed.NW.traits.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+# 0.04902346 0.02481235 0.01394253 0.1094119
 
 imputed.NW.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
@@ -111,13 +130,9 @@ imputed.NW.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + 
 summary(imputed.NW.traits.RTD.SRL)
 # nothing significant
 
-imputed.NW.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                family = gaussian(),
-                                prior = priors,
-                                data = imputed.NW)
-
-summary(imputed.NW.traits.SLA.RMF)
-# nothing significant
+saveRDS(imputed.NW.traits.RTD.SRL, file = "./Results/all.imputed.NW.traits.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.04620861 0.02366104 0.01308091 0.1012018
 
 imputed.NW.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                   family = gaussian(),
@@ -136,10 +151,75 @@ bayes_R2(imputed.NW.traits.leafN.RMF)
 conditional_effects(imputed.NW.traits.leafN.RMF)
 # higher cover change with high leafN and high RMF or low leafN and low RMF
 
+#### All-species Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                   family = gaussian(),
+                                   prior = priors,
+                                   data = imputed.NW)
+
+summary(imputed.NW.traits.height.MAP.DSI)
+
+saveRDS(imputed.NW.traits.height.MAP.DSI, file = "./Results/all.imputed.NW.traits.height.MAP.DSI.rds")
+
+imputed.NW.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed.NW)
+
+summary(imputed.NW.traits.leafN.MAP.DSI)
+# leafN 
+# leafN x DSI
+
+saveRDS(imputed.NW.traits.leafN.MAP.DSI, file = "./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+# R2 0.06092939 0.0258172 0.02256498 0.1241577
+
+conditional_effects(imputed.NW.traits.leafN.MAP.DSI)
+# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW)
+
+summary(imputed.NW.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.traits.root.depth.MAP.DSI, file = "./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
+
+imputed.NW.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed.NW)
+
+summary(imputed.NW.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.traits.RTD.MAP.DSI, file = "./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
+
+
+imputed.NW.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed.NW)
+
+summary(imputed.NW.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.traits.SRL.MAP.DSI, file = "./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
+
+imputed.NW.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed.NW)
+
+summary(imputed.NW.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.traits.RMF.MAP.DSI, file = "./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
 
 #### imputed ANNUAL traits lifespan model NW ####
 
-piors <- c(prior(normal(0, 10), class = b))
+priors <- c(prior(normal(0, 10), class = b))
 
 annual.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                                SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
@@ -161,13 +241,8 @@ imputed.NW.annual.traits.height.leafN = brm(cover.change ~ height.final*leafN.fi
 summary(imputed.NW.annual.traits.height.leafN)
 # MAP
 
-imputed.NW.annual.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                        family = gaussian(),
-                                        prior = priors,
-                                        data = imputed.NW.annual)
+saveRDS(imputed.NW.annual.traits.height.leafN, file = "./Results/annual.imputed.traits.NW.height.leafN.rds")
 
-summary(imputed.NW.annual.traits.depth.SLA)
-# MAP
 
 imputed.NW.annual.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                            family = gaussian(),
@@ -177,6 +252,9 @@ imputed.NW.annual.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN
 summary(imputed.NW.annual.traits.depth.leafN)
 # MAP is positive, significant
 
+saveRDS(imputed.NW.annual.traits.depth.leafN, file = "./Results/annual.imputed.traits.NW.depth.leafN.rds")
+
+
 imputed.NW.annual.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                        family = gaussian(),
                                        prior = priors,
@@ -185,13 +263,8 @@ imputed.NW.annual.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean
 summary(imputed.NW.annual.traits.RTD.SRL)
 # nothing significant
 
-imputed.NW.annual.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.annual)
+saveRDS(imputed.NW.annual.traits.RTD.SRL, file = "./Results/annual.imputed.traits.NW.RTD.SRL.rds")
 
-summary(imputed.NW.annual.traits.SLA.RMF)
-# MAP
 
 imputed.NW.annual.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                          family = gaussian(),
@@ -209,7 +282,85 @@ bayes_R2(imputed.NW.annual.traits.leafN.RMF)
 conditional_effects(imputed.NW.annual.traits.leafN.RMF)
 # higher cover change with high leafN and high RMF or low leafN and low RMF
 
+#### Annuals Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.annual.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.annual)
+
+summary(imputed.NW.annual.traits.height.MAP.DSI)
+# height x MAP
+
+saveRDS(imputed.NW.annual.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.annual.traits.height.MAP.DSI)
+# R2 0.1208656 0.04510458 0.04694877 0.2220583
+
+conditional_effects(imputed.NW.annual.traits.height.MAP.DSI)
+# higher height x higher MAP
+
+imputed.NW.annual.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                             family = gaussian(),
+                                             prior = priors,
+                                             data = imputed.NW.annual)
+
+summary(imputed.NW.annual.traits.leafN.MAP.DSI)
+# leafN x DSI
+
+saveRDS(imputed.NW.annual.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.annual.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.annual.traits.leafN.MAP.DSI)
+# R2 0.1705448 0.05178855 0.07863608 0.2805161
+
+conditional_effects(imputed.NW.annual.traits.leafN.MAP.DSI)
+# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.annual.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                  family = gaussian(),
+                                                  prior = priors,
+                                                  data = imputed.NW.annual)
+
+summary(imputed.NW.annual.traits.root.depth.MAP.DSI)
+# MAP
+
+saveRDS(imputed.NW.annual.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.annual.traits.depth.MAP.DSI.rds")
+
+
+imputed.NW.annual.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                           family = gaussian(),
+                                           prior = priors,
+                                           data = imputed.NW.annual)
+
+summary(imputed.NW.annual.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.annual.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.annual.traits.RTD.MAP.DSI.rds")
+
+
+imputed.NW.annual.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                           family = gaussian(),
+                                           prior = priors,
+                                           data = imputed.NW.annual)
+
+summary(imputed.NW.annual.traits.SRL.MAP.DSI)
+# MAP
+
+saveRDS(imputed.NW.annual.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.annual.traits.SRL.MAP.DSI.rds")
+
+imputed.NW.annual.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                           family = gaussian(),
+                                           prior = priors,
+                                           data = imputed.NW.annual)
+
+summary(imputed.NW.annual.traits.RMF.MAP.DSI)
+# MAP
+
+saveRDS(imputed.NW.annual.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.annual.traits.RMF.MAP.DSI.rds")
+
 #### imputed PERENNIAL traits lifespan model NW ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
 perennial.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                                   SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
@@ -238,14 +389,6 @@ bayes_R2(imputed.NW.perennial.traits.height.leafN)
 conditional_effects(imputed.NW.perennial.traits.height.leafN)
 # higher cover for taller plants with higher leafN
 
-imputed.NW.perennial.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                           family = gaussian(),
-                                           prior = priors,
-                                           data = imputed.NW.perennial)
-
-summary(imputed.NW.perennial.traits.depth.SLA)
-# nothing significant
-
 imputed.NW.perennial.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
                                               prior = priors,
@@ -253,6 +396,8 @@ imputed.NW.perennial.traits.depth.leafN = brm(cover.change ~ root.depth.final*le
 
 summary(imputed.NW.perennial.traits.depth.leafN)
 # nothing significant
+
+saveRDS(imputed.NW.perennial.traits.depth.leafN, file = "./Results/perennial.imputed.traits.NW.depth.leafN.rds")
 
 imputed.NW.perennial.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                           family = gaussian(),
@@ -262,13 +407,7 @@ imputed.NW.perennial.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + m
 summary(imputed.NW.perennial.traits.RTD.SRL)
 # nothing significant
 
-imputed.NW.perennial.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                          family = gaussian(),
-                                          prior = priors,
-                                          data = imputed.NW.perennial)
-
-summary(imputed.NW.perennial.traits.SLA.RMF)
-# nothing significant
+saveRDS(imputed.NW.perennial.traits.RTD.SRL, file = "./Results/perennial.imputed.traits.NW.RTD.SRL.rds")
 
 imputed.NW.perennial.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                             family = gaussian(),
@@ -277,6 +416,67 @@ imputed.NW.perennial.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final
 
 summary(imputed.NW.perennial.traits.leafN.RMF)
 # nothing significant
+
+saveRDS(imputed.NW.perennial.traits.leafN.RMF, file = "./Results/perennial.imputed.traits.NW.leafN.RMF.rds")
+
+#### Perennial Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.perennial.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                 family = gaussian(),
+                                                 prior = priors,
+                                                 data = imputed.NW.perennial)
+
+summary(imputed.NW.perennial.traits.height.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.height.MAP.DSI.rds")
+
+
+imputed.NW.perennial.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.perennial)
+
+summary(imputed.NW.perennial.traits.leafN.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.leafN.MAP.DSI.rds")
+
+imputed.NW.perennial.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                     family = gaussian(),
+                                                     prior = priors,
+                                                     data = imputed.NW.perennial)
+
+summary(imputed.NW.perennial.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.depth.MAP.DSI.rds")
+
+imputed.NW.perennial.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.perennial)
+
+summary(imputed.NW.perennial.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.RTD.MAP.DSI.rds")
+
+imputed.NW.perennial.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.perennial)
+
+summary(imputed.NW.perennial.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.SRL.MAP.DSI.rds")
+
+imputed.NW.perennial.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.perennial)
+
+summary(imputed.NW.perennial.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.RMF.MAP.DSI.rds")
 
 #### impute FORB traits functional group NW ####
 
@@ -350,6 +550,141 @@ imputed.NW.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + me
 summary(imputed.NW.forb.traits.leafN.RMF)
 # leafN significant positive
 
+#### impute FORB and LEGUME traits functional group NW ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+forb.legume.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                             SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                           family = gaussian(),
+                           prior = priors,
+                           data = imputed.NW.forb.legume)
+
+summary(forb.legume.traits.NW.model)
+# leafN significant
+# height significant
+# RTD significant
+
+saveRDS(forb.legume.traits.NW.model, file = "./Results/forb.legume.imputed.traits.no_woody.rds")
+bayes_R2(forb.legume.traits.NW.model)
+# R2 0.1206621 0.04300289 0.05401455 0.2241898
+
+imputed.NW.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                          family = gaussian(),
+                                          prior = priors,
+                                          data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.height.leafN)
+# leafN
+
+saveRDS(imputed.NW.forb.legume.traits.height.leafN, file = "./Results/forb.legume.imputed.traits.NW.height.leafN.rds")
+
+
+imputed.NW.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                         family = gaussian(),
+                                         prior = priors,
+                                         data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.depth.leafN)
+# leafN
+
+saveRDS(imputed.NW.forb.legume.traits.depth.leafN, file = "./Results/forb.legume.imputed.traits.NW.depth.leafN.rds")
+
+
+imputed.NW.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.RTD.SRL)
+# RTD x SRL significant, negative
+
+saveRDS(imputed.NW.forb.legume.traits.RTD.SRL, file = "./Results/forb.legume.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.forb.legume.traits.RTD.SRL)
+# R2 0.08202759 0.03926922 0.02649765 0.1789433
+
+conditional_effects(imputed.NW.forb.legume.traits.RTD.SRL)
+# higher cover with higher RTD and lower SRL or lower RTD with higher SRL
+
+
+imputed.NW.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.leafN.RMF)
+# leafN significant positive
+
+saveRDS(imputed.NW.forb.legume.traits.leafN.RMF, file = "./Results/forb.legume.imputed.traits.NW.leafN.RMF.rds")
+
+#### Forb and Legume Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.forb.legume.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                   family = gaussian(),
+                                                   prior = priors,
+                                                   data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.height.MAP.DSI)
+# height
+
+saveRDS(imputed.NW.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.height.MAP.DSI.rds")
+
+imputed.NW.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                  family = gaussian(),
+                                                  prior = priors,
+                                                  data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.leafN.MAP.DSI)
+# leafN 
+# leafN x DSI
+
+saveRDS(imputed.NW.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.forb.legume.traits.leafN.MAP.DSI)
+# R2 0.1104155 0.04644593 0.04187595 0.2197352
+
+conditional_effects(imputed.NW.forb.legume.traits.leafN.MAP.DSI)
+# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                       family = gaussian(),
+                                                       prior = priors,
+                                                       data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.depth.MAP.DSI.rds")
+
+imputed.NW.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.RTD.MAP.DSI.rds")
+
+imputed.NW.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.SRL.MAP.DSI.rds")
+
+
+imputed.NW.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.forb.legume)
+
+summary(imputed.NW.forb.legume.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.RMF.MAP.DSI.rds")
+
+
 #### impute GRASS traits functional group NW ####
 grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
                               SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
@@ -411,6 +746,128 @@ imputed.NW.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + m
 
 summary(imputed.NW.grass.traits.leafN.RMF)
 # nothing significant
+
+#### impute GRAMINOID traits functional group NW ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+graminoid.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                  SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed.NW.graminoid)
+
+summary(graminoid.traits.NW.model)
+# nothing significant
+
+saveRDS(graminoid.traits.NW.model, file = "./Results/graminoid.imputed.traits.no_woody.rds")
+bayes_R2(graminoid.traits.NW.model)
+# R2 0.1064767 0.03930761 0.04390368 0.1977966
+
+imputed.NW.graminoid.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                               family = gaussian(),
+                                               prior = priors,
+                                               data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.height.leafN)
+# nothing significant
+
+saveRDS(imputed.NW.graminoid.traits.height.leafN, file = "./Results/graminoid.imputed.traits.NW.height.leafN.rds")
+
+
+imputed.NW.graminoid.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.depth.leafN)
+# MAP is positive, significant
+
+saveRDS(imputed.NW.graminoid.traits.depth.leafN, file = "./Results/graminoid.imputed.traits.NW.depth.leafN.rds")
+
+
+imputed.NW.graminoid.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                          family = gaussian(),
+                                          prior = priors,
+                                          data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.RTD.SRL)
+# nothing significant
+
+saveRDS(imputed.NW.graminoid.traits.RTD.SRL, file = "./Results/graminoid.imputed.traits.NW.RTD.SRL.rds")
+
+imputed.NW.graminoid.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                            family = gaussian(),
+                                            prior = priors,
+                                            data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.leafN.RMF)
+# nothing significant
+
+saveRDS(imputed.NW.graminoid.traits.leafN.RMF, file = "./Results/graminoid.imputed.traits.NW.leafN.RMF.rds")
+
+#### Graminoid Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.graminoid.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                 family = gaussian(),
+                                                 prior = priors,
+                                                 data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.height.MAP.DSI)
+
+saveRDS(imputed.NW.graminoid.traits.height.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.height.MAP.DSI.rds")
+
+
+imputed.NW.graminoid.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.leafN.MAP.DSI)
+
+saveRDS(imputed.NW.graminoid.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.leafN.MAP.DSI.rds")
+
+
+imputed.NW.graminoid.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                     family = gaussian(),
+                                                     prior = priors,
+                                                     data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.graminoid.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.depth.MAP.DSI.rds")
+
+
+imputed.NW.graminoid.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.graminoid.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.RTD.MAP.DSI.rds")
+
+
+imputed.NW.graminoid.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.graminoid.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.SRL.MAP.DSI.rds")
+
+
+imputed.NW.graminoid.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.graminoid)
+
+summary(imputed.NW.graminoid.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.graminoid.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.RMF.MAP.DSI.rds")
 
 #### imputed traits ANNUAL FORB NW ####
 
@@ -477,6 +934,147 @@ imputed.NW.annual.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.fin
 summary(imputed.NW.annual.forb.traits.leafN.RMF)
 # MAP significant positive
 
+#### imputed traits ANNUAL FORB LEGUME NW ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+annual.forb.legume.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                           SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                         family = gaussian(),
+                                         prior = priors,
+                                         data = imputed.NW.annual.forb.legume)
+
+summary(annual.forb.legume.traits.NW.model)
+# nothing significant
+
+saveRDS(annual.forb.legume.traits.NW.model, file = "./Results/annual.forb.legume.imputed.traits.no_woody.rds")
+bayes_R2(annual.forb.legume.traits.NW.model)
+# R2 0.2273124 0.06464005 0.1131978 0.3652143
+
+imputed.NW.annual.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                               family = gaussian(),
+                                                               prior = priors,
+                                                               data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.height.leafN)
+# nothing significant
+
+saveRDS(imputed.NW.annual.forb.legume.traits.height.leafN, file = "./Results/annual.forb.legume.imputed.traits.NW.height.leafN.rds")
+
+
+imputed.NW.annual.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                              family = gaussian(),
+                                                              prior = priors,
+                                                              data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.depth.leafN)
+# MAP is positive, significant
+
+saveRDS(imputed.NW.annual.forb.legume.traits.depth.leafN, file = "./Results/annual.forb.legume.imputed.traits.NW.depth.leafN.rds")
+
+
+imputed.NW.annual.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                          family = gaussian(),
+                                                          prior = priors,
+                                                          data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.RTD.SRL)
+# RTD x SRL
+
+saveRDS(imputed.NW.annual.forb.legume.traits.RTD.SRL, file = "./Results/annual.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.annual.forb.legume.traits.RTD.SRL)
+# R2 0.1818185 0.06325504 0.0745352 0.3182902
+
+conditional_effects(imputed.NW.annual.forb.legume.traits.RTD.SRL)
+# higher cover with higher RTD and lower SRL or lower RTD with higher SRL
+
+imputed.NW.annual.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                            family = gaussian(),
+                                                            prior = priors,
+                                                            data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.leafN.RMF)
+# MAP significant positive
+
+saveRDS(imputed.NW.annual.forb.legume.traits.leafN.RMF, file = "./Results/annual.forb.legume.imputed.traits.NW.leafN.RMF.rds")
+
+
+#### Annual forb and legume Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.annual.forb.legume.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                          family = gaussian(),
+                                                          prior = priors,
+                                                          data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.height.MAP.DSI)
+
+saveRDS(imputed.NW.annual.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.height.MAP.DSI.rds")
+
+
+imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                         family = gaussian(),
+                                                         prior = priors,
+                                                         data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
+# leafN x DSI
+
+saveRDS(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
+# R2 0.2487581 0.07176966 0.1201865 0.400603
+
+conditional_effects(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
+# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                              family = gaussian(),
+                                                              prior = priors,
+                                                              data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI)
+# MAP
+
+saveRDS(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.depth.MAP.DSI.rds")
+
+
+imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                       family = gaussian(),
+                                                       prior = priors,
+                                                       data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
+# RTD x MAP
+
+saveRDS(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
+# R2 0.189431 0.0672549 0.07478275 0.3386802
+
+conditional_effects(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
+# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                       family = gaussian(),
+                                                       prior = priors,
+                                                       data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI.rds")
+
+
+imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                       family = gaussian(),
+                                                       prior = priors,
+                                                       data = imputed.NW.annual.forb.legume)
+
+summary(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI)
+# MAP
+
+saveRDS(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI.rds")
+
+
 #### imputed traits PERENNIAL FORB NW ####
 
 perennial.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
@@ -538,10 +1136,128 @@ imputed.NW.perennial.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.
                                                  data = imputed.NW.perennial.forb)
 
 summary(imputed.NW.perennial.forb.traits.leafN.RMF)
-# leafN:RMF significant positive
+# leafN
+
+#### imputed traits PERENNIAL FORB LEGUME NW ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+perennial.forb.legume.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                              SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                            family = gaussian(),
+                                            prior = priors,
+                                            data = imputed.NW.perennial.forb.legume)
+
+summary(perennial.forb.legume.traits.NW.model)
+# RTD significant
+
+saveRDS(perennial.forb.legume.traits.NW.model, file = "./Results/perennial.forb.legume.imputed.traits.no_woody.rds")
+bayes_R2(perennial.forb.legume.traits.NW.model)
+#R2 0.1371829 0.05049297 0.05734497 0.2561353
+
+imputed.NW.perennial.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                                  family = gaussian(),
+                                                                  prior = priors,
+                                                                  data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.height.leafN)
+# nothing significant
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.height.leafN, file = "./Results/perennial.forb.legume.imputed.traits.NW.height.leafN.rds")
+
+imputed.NW.perennial.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                                 family = gaussian(),
+                                                                 prior = priors,
+                                                                 data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.depth.leafN)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.depth.leafN, file = "./Results/perennial.forb.legume.imputed.traits.NW.depth.leafN.rds")
 
 
+imputed.NW.perennial.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                             family = gaussian(),
+                                                             prior = priors,
+                                                             data = imputed.NW.perennial.forb.legume)
 
+summary(imputed.NW.perennial.forb.legume.traits.RTD.SRL)
+# nothing significant
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.RTD.SRL, file = "./Results/perennial.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+
+imputed.NW.perennial.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                               family = gaussian(),
+                                                               prior = priors,
+                                                               data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.leafN.RMF)
+# nothing significant
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.leafN.RMF, file = "./Results/perennial.forb.legume.imputed.traits.NW.leafN.RMF.rds")
+
+
+#### Perennial forb and legume Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.perennial.forb.legume.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                             family = gaussian(),
+                                                             prior = priors,
+                                                             data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.height.MAP.DSI.rds")
+
+
+imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                            family = gaussian(),
+                                                            prior = priors,
+                                                            data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI.rds")
+
+
+imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                                 family = gaussian(),
+                                                                 prior = priors,
+                                                                 data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.depth.MAP.DSI.rds")
+
+
+imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                          family = gaussian(),
+                                                          prior = priors,
+                                                          data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI.rds")
+
+
+imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                          family = gaussian(),
+                                                          prior = priors,
+                                                          data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI.rds")
+
+
+imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                          family = gaussian(),
+                                                          prior = priors,
+                                                          data = imputed.NW.perennial.forb.legume)
+
+summary(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI.rds")
 
 
 #### imputed traits PERENNIAL GRASS NW #####
@@ -605,6 +1321,126 @@ imputed.NW.perennial.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF
                                                   data = imputed.NW.perennial.grass)
 
 summary(imputed.NW.perennial.grass.traits.leafN.RMF)
+
+#### imputed traits PERENNIAL GRAMINOID NW #####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+perennial.graminoid.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                            SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                          family = gaussian(),
+                                          prior = priors,
+                                          data = imputed.NW.perennial.graminoid)
+
+summary(perennial.graminoid.traits.NW.model)
+# nothing significant
+
+saveRDS(perennial.graminoid.traits.NW.model, file = "./Results/perennial.graminoid.imputed.traits.no_woody.rds")
+bayes_R2(perennial.graminoid.traits.NW.model)
+#R2 0.1316797 0.04890526 0.0545399 0.2443937
+
+imputed.NW.perennial.graminoid.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                         family = gaussian(),
+                                                         prior = priors,
+                                                         data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.height.leafN)
+# nothing significant
+
+saveRDS(imputed.NW.perennial.graminoid.traits.height.leafN, file = "./Results/perennial.graminoid.imputed.traits.NW.height.leafN.rds")
+
+imputed.NW.perennial.graminoid.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                        family = gaussian(),
+                                                        prior = priors,
+                                                        data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.depth.leafN)
+# nothing significant
+
+saveRDS(imputed.NW.perennial.graminoid.traits.depth.leafN, file = "./Results/perennial.graminoid.imputed.traits.NW.depth.leafN.rds")
+
+imputed.NW.perennial.graminoid.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                    family = gaussian(),
+                                                    prior = priors,
+                                                    data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.RTD.SRL)
+# nothing significant
+
+saveRDS(imputed.NW.perennial.graminoid.traits.RTD.SRL, file = "./Results/perennial.graminoid.imputed.traits.NW.RTD.SRL.rds")
+
+imputed.NW.perennial.graminoid.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                      family = gaussian(),
+                                                      prior = priors,
+                                                      data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.leafN.RMF)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.leafN.RMF, file = "./Results/perennial.graminoid.imputed.traits.NW.leafN.RMF.rds")
+
+#### Perennial graminoid Environment ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.NW.perennial.graminoid.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + height.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                           family = gaussian(),
+                                                           prior = priors,
+                                                           data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.height.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.height.MAP.DSI.rds")
+
+
+imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                          family = gaussian(),
+                                                          prior = priors,
+                                                          data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI.rds")
+
+
+imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                               family = gaussian(),
+                                                               prior = priors,
+                                                               data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.depth.MAP.DSI.rds")
+
+
+imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                        family = gaussian(),
+                                                        prior = priors,
+                                                        data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI.rds")
+
+
+imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                        family = gaussian(),
+                                                        prior = priors,
+                                                        data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI.rds")
+
+
+imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                                        family = gaussian(),
+                                                        prior = priors,
+                                                        data = imputed.NW.perennial.graminoid)
+
+summary(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI.rds")
+
 
 #### ALL Backtransform ####
 
@@ -940,6 +1776,42 @@ all.leafN.x.RMF.plot
 ggsave("./Plots/all.traits.NW.leafN.RMF.pdf", height = 3, width = 3)
 ggsave("./Plots/all.traits.NW.leafN.RMF.legend.pdf", height = 3, width = 3)
 
+#### ALL environment interactions ####
+
+all.imputed.NW.traits.leafN.DSI = readRDS("./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
+
+leafN.DSI.effect = conditional_effects(all.imputed.NW.traits.leafN.DSI, effects = "leafN.final:mean.DSI")$`leafN.final:mean.DSI`
+leafN.DSI.effect$leafN.bt= (leafN.DSI.effect$leafN.final*7.114868) + 21.16957
+
+# only plot high and low values
+
+leafN.DSI.effect.2 = leafN.DSI.effect %>%
+  dplyr::filter(effect2__ %in% c(-1,1))
+
+# leafN
+x.value = c(-3,0,1,2,3)
+(x.value*7.150147) + 22.84208
+
+# DSI
+x.value = c(-1,1)
+(x.value*0.1950438) + -0.4604709
+
+all.leafN.x.DSI.plot = ggplot(data = leafN.DSI.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
+  labs(x = "Leaf N", y = "Percent Cover Change", color = "DSI") +
+  scale_colour_manual(values = c("black", "#769370"), labels = c("-0.27","-0.66"))+
+  scale_fill_manual(values = c("black", "#769370"))+
+  xlim(2.68951,44.19001)+
+  theme_classic()
+all.leafN.x.DSI.plot
+
+ggsave("./Plots/all.traits.NW.leafN.DSI.pdf", height = 3, width = 3)
+ggsave("./Plots/all.traits.NW.leafN.DSI.legend.pdf", height = 3, width = 3)
+
+
 #### ANNUAL Backtransform ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
@@ -1256,6 +2128,75 @@ annual.leafN.x.RMF.plot
 
 ggsave("./Plots/annual.traits.NW.leafN.RMF.pdf", height = 3, width = 3)
 ggsave("./Plots/annual.traits.NW.leafN.RMF.legend.pdf", height = 3, width = 3)
+
+#### ANNUAL environment interactions ####
+
+annual.imputed.NW.traits.leafN.DSI = readRDS("./Results/imputed.NW.annual.traits.leafN.MAP.DSI.rds")
+
+leafN.DSI.effect = conditional_effects(annual.imputed.NW.traits.leafN.DSI, effects = "leafN.final:mean.DSI")$`leafN.final:mean.DSI`
+leafN.DSI.effect$leafN.bt= (leafN.DSI.effect$leafN.final*7.384253) + 22.54886
+
+# only plot high and low values
+
+leafN.DSI.effect.2 = leafN.DSI.effect %>%
+  dplyr::filter(effect2__ %in% c(-1,1))
+
+# leafN
+x.value = c(-3,0,1,2,3)
+(x.value*7.150147) + 22.84208
+
+# DSI
+x.value = c(-1,1)
+(x.value*0.2300417) + -0.4690337
+
+annual.leafN.x.DSI.plot = ggplot(data = leafN.DSI.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
+  labs(x = "Leaf N", y = "Percent Cover Change", color = "DSI") +
+  scale_colour_manual(values = c("black", "#979461"), labels = c("-0.24","-0.70"))+
+  scale_fill_manual(values = c("black", "#979461"))+
+  xlim(2.68951,44.19001)+
+  theme_classic()
+annual.leafN.x.DSI.plot
+
+ggsave("./Plots/annual.traits.NW.leafN.DSI.pdf", height = 3, width = 3)
+ggsave("./Plots/annual.traits.NW.leafN.DSI.legend.pdf", height = 3, width = 3)
+
+annual.imputed.NW.traits.height.MAP = readRDS("./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
+
+height.MAP.effect = conditional_effects(annual.imputed.NW.traits.height.MAP, effects = "height.final:mean.MAP")$`height.final:mean.MAP`
+height.MAP.effect$height.bt= (height.MAP.effect$height.final*0.2308751) + 0.3156657
+
+# only plot high and low values
+
+height.MAP.effect.2 = height.MAP.effect %>%
+  dplyr::filter(effect2__ %in% c(-1,1))
+
+# height
+x.value = c(-3,0,1,2,3)
+(x.value*7.150147) + 22.84208
+
+# MAP
+x.value = c(-1,1)
+(x.value*293.1676) + 477.7734
+
+annual.height.x.MAP.plot = ggplot(data = height.MAP.effect.2, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
+  labs(x = "Height", y = "Percent Cover Change", color = "MAP") +
+  scale_colour_manual(values = c("black","#979461"), labels = c("770","185"))+
+  scale_fill_manual(values = c("black", "#979461"))+
+  xlim(0.0090000,1.26)+
+  theme_classic()
+annual.height.x.MAP.plot
+
+ggsave("./Plots/annual.traits.NW.height.MAP.pdf", height = 3, width = 3)
+ggsave("./Plots/annual.traits.NW.height.MAP.legend.pdf", height = 3, width = 3)
+
 
 #### PERENNIAL Backtransform ####
 
@@ -1576,24 +2517,24 @@ ggsave("./Plots/perennial.traits.NW.height.leafN.legend.pdf", height = 3, width 
 #### FORB Backtransform ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
-imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
 
-forb.traits.NW.model = readRDS("./Results/forb.imputed.traits.no_woody.rds")
+forb.traits.NW.model = readRDS("./Results/forb.legume.imputed.traits.no_woody.rds")
 
-imputed.NW.forb$leafN.bt =(imputed.NW.forb$leafN.final*6.403163) + 21.66854
-imputed.NW.forb$height.bt = (imputed.NW.forb$height.final*0.2396416) + 0.3214792
-imputed.NW.forb$rootN.bt = (imputed.NW.forb$rootN.final*4.173927) + 10.5821
-imputed.NW.forb$SLA.bt = (imputed.NW.forb$SLA.final*8.362926) + 20.14641
-imputed.NW.forb$Depth.bt = (imputed.NW.forb$root.depth.final*0.6095345) + 0.6503508
-imputed.NW.forb$Diam.bt = (imputed.NW.forb$rootDiam.final*0.1590925) + 0.3579696
-imputed.NW.forb$SRL.bt = (imputed.NW.forb$SRL.final*71.25811) + 105.5323
-imputed.NW.forb$RTD.bt = (imputed.NW.forb$RTD.final*0.1184977) + 0.227384
-imputed.NW.forb$RMF.bt = (imputed.NW.forb$RMF.final*0.1176732) + 0.3992223
-imputed.NW.forb$DSI.bt = (imputed.NW.forb$mean.DSI*0.1949549) + -0.4644806
-imputed.NW.forb$MAP.bt = (imputed.NW.forb$mean.MAP*448.2603) + 657.7821
+imputed.NW.forb$leafN.bt =(imputed.NW.forb$leafN.final*7.150147) + 22.84208
+imputed.NW.forb$height.bt = (imputed.NW.forb$height.final*0.2405401) + 0.3256687
+imputed.NW.forb$rootN.bt = (imputed.NW.forb$rootN.final*4.715357) + 11.3382
+imputed.NW.forb$SLA.bt = (imputed.NW.forb$SLA.final*8.061883) + 20.18927
+imputed.NW.forb$Depth.bt = (imputed.NW.forb$root.depth.final*0.600499) + 0.6551094
+imputed.NW.forb$Diam.bt = (imputed.NW.forb$rootDiam.final*0.152751) + 0.3553141
+imputed.NW.forb$SRL.bt = (imputed.NW.forb$SRL.final*70.41695) + 103.2147
+imputed.NW.forb$RTD.bt = (imputed.NW.forb$RTD.final*0.1178487) + 0.2169321
+imputed.NW.forb$RMF.bt = (imputed.NW.forb$RMF.final*0.1159929) + 0.3917262
+imputed.NW.forb$DSI.bt = (imputed.NW.forb$mean.DSI*0.1957044) + -0.4647529
+imputed.NW.forb$MAP.bt = (imputed.NW.forb$mean.MAP*433.6646) + 664.4671
 
 forb.imputed.NW.2 = imputed.NW.forb %>%
   dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
@@ -1604,7 +2545,7 @@ forb.effects = conditional_effects(forb.traits.NW.model)
 #### Forb leafN ####
 
 leafN.effects = forb.effects$leafN.final
-leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.403163) + 21.66854
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*7.150147) + 22.84208
 
 attr(forb.imputed.NW.2$leafN.final, "scaled:scale")
 attr(forb.imputed.NW.2$leafN.final, "scaled:center")
@@ -1627,7 +2568,7 @@ ggsave("./Plots/forb.traits.NW.leafN.pdf", height = 3, width = 3)
 #### Forb height ####
 
 height.effects = forb.effects$height.final
-height.effects$height.bt= (height.effects$height.final*0.2396416) + 0.3214792
+height.effects$height.bt= (height.effects$height.final*0.2405401) + 0.3256687
 
 attr(forb.imputed.NW.2$height.final, "scaled:scale")
 attr(forb.imputed.NW.2$height.final, "scaled:center")
@@ -1637,7 +2578,7 @@ x.value = c(-1,0,1,2,3,4)
 
 forb.height.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#F17236", size = 1.5) +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Height", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
@@ -1650,7 +2591,7 @@ ggsave("./Plots/forb.traits.NW.height.pdf", height = 3, width = 3)
 #### Forb rootN ####
 
 rootN.effects = forb.effects$rootN.final
-rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.173927) + 10.5821
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.715357) + 11.3382
 
 attr(forb.imputed.NW.2$rootN.final, "scaled:scale")
 attr(forb.imputed.NW.2$rootN.final, "scaled:center")
@@ -1673,7 +2614,7 @@ ggsave("./Plots/forb.traits.NW.rootN.pdf", height = 3, width = 3)
 #### Forb SLA ####
 
 SLA.effects = forb.effects$SLA.final
-SLA.effects$SLA.bt= (SLA.effects$SLA.final*8.362926) + 20.14641
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*8.061883) + 20.18927
 
 attr(forb.imputed.NW.2$SLA.final, "scaled:scale")
 attr(forb.imputed.NW.2$SLA.final, "scaled:center")
@@ -1696,7 +2637,7 @@ ggsave("./Plots/forb.traits.NW.SLA.pdf", height = 3, width = 3)
 #### Forb Depth ####
 
 root.depth.effects = forb.effects$root.depth.final
-root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.6095345) + 0.6503508
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.600499) + 0.6551094
 
 attr(forb.imputed.NW.2$root.depth.final, "scaled:scale")
 attr(forb.imputed.NW.2$root.depth.final, "scaled:center")
@@ -1719,7 +2660,7 @@ ggsave("./Plots/forb.traits.NW.root.depth.pdf", height = 3, width = 3)
 #### Forb Diam ####
 
 rootDiam.effects = forb.effects$rootDiam.final
-rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1590925) + 0.3579696
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.152751) + 0.3553141
 
 attr(forb.imputed.NW.2$rootDiam.final, "scaled:scale")
 attr(forb.imputed.NW.2$rootDiam.final, "scaled:center")
@@ -1742,7 +2683,7 @@ ggsave("./Plots/forb.traits.NW.rootDiam.pdf", height = 3, width = 3)
 #### Forb SRL ####
 
 SRL.effects = forb.effects$SRL.final
-SRL.effects$SRL.bt= (SRL.effects$SRL.final*71.25811) + 105.5323
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*70.41695) + 103.2147
 
 attr(forb.imputed.NW.2$SRL.final, "scaled:scale")
 attr(forb.imputed.NW.2$SRL.final, "scaled:center")
@@ -1765,7 +2706,7 @@ ggsave("./Plots/forb.traits.NW.SRL.pdf", height = 3, width = 3)
 #### Forb RTD ####
 
 RTD.effects = forb.effects$RTD.final
-RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1184977) + 0.227384
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1178487) + 0.2169321
 
 attr(forb.imputed.NW.2$RTD.final, "scaled:scale")
 attr(forb.imputed.NW.2$RTD.final, "scaled:center")
@@ -1775,7 +2716,7 @@ x.value = c(-1,0,1,2,3)
 
 forb.RTD.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#F17236", size = 1.5) +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
@@ -1788,7 +2729,7 @@ ggsave("./Plots/forb.traits.NW.RTD.pdf", height = 3, width = 3)
 #### Forb RMF ####
 
 RMF.effects = forb.effects$RMF.final
-RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1176732) + 0.3992223
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1159929) + 0.3917262
 
 attr(forb.imputed.NW.2$RMF.final, "scaled:scale")
 attr(forb.imputed.NW.2$RMF.final, "scaled:center")
@@ -1811,7 +2752,7 @@ ggsave("./Plots/forb.traits.NW.RMF.pdf", height = 3, width = 3)
 #### Forb DSI ####
 
 DSI.effects = forb.effects$mean.DSI
-DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1949549) + -0.4644806
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1957044) + -0.4647529
 
 attr(forb.imputed.NW.2$mean.DSI, "scaled:scale")
 attr(forb.imputed.NW.2$mean.DSI, "scaled:center")
@@ -1834,7 +2775,7 @@ ggsave("./Plots/forb.traits.NW.DSI.pdf", height = 3, width = 3)
 #### Forb MAP ####
 
 MAP.effects = forb.effects$mean.MAP
-MAP.effects$MAP.bt= (MAP.effects$mean.MAP*448.2603) + 657.7821
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*433.6646) + 664.4671
 
 attr(forb.imputed.NW.2$mean.MAP, "scaled:scale")
 attr(forb.imputed.NW.2$mean.MAP, "scaled:center")
@@ -1856,589 +2797,550 @@ ggsave("./Plots/forb.traits.NW.MAP.pdf", height = 3, width = 3)
 
 #### FORB interactions ####
 
-forb.imputed.NW.traits.RTD.SRL = readRDS("./Results/forb.imputed.traits.NW.RTD.SRL.rds")
+forb.imputed.NW.traits.RTD.SRL = readRDS("./Results/forb.legume.imputed.traits.NW.RTD.SRL.rds")
 
 RTD.SRL.effect = conditional_effects(forb.imputed.NW.traits.RTD.SRL, effects = "RTD.final:SRL.final")$`RTD.final:SRL.final`
-RTD.SRL.effect$RTD.bt= (RTD.SRL.effect$RTD.final*0.1184977) + 0.227384
+RTD.SRL.effect$RTD.bt= (RTD.SRL.effect$RTD.final*0.1178487) + 0.2169321
 
 # only plot high and low values
 
 RTD.SRL.effect.2 = RTD.SRL.effect %>%
-  filter(effect2__ %in% c(-1,1.05))
+  dplyr::filter(effect2__ %in% c(-1,1.04))
 
 # RTD
 x.value = c(-1,0,1,2,3)
 (x.value*0.1184977) + 0.227384
 
 # SRL
-x.value = c(-1,1.05)
-(x.value*71.25811) + 105.5323
+x.value = c(-1,1.04)
+(x.value*70.41695) + 103.2147
 
 forb.RTD.x.SRL.plot = ggplot(data = RTD.SRL.effect.2, aes(x = RTD.bt, y = estimate__, group = as.factor(effect2__))) +
-  geom_line(aes(color = as.factor(effect2__)), size = 1.5) +  
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
   labs(x = "Root Tissue Density", y = "Percent Cover Change", color = "SRL") +
-  scale_colour_manual(values = c("black", "#F17236"), labels = c("180.35","34.27"))+
+  scale_colour_manual(values = c("black", "#F17236"), labels = c("176.45","32.79"))+
   scale_fill_manual(values = c("black", "#F17236"))+
-  xlim(0.02325658,0.61999993)+
+  xlim(0,0.59)+
   theme_classic()
 forb.RTD.x.SRL.plot
 
 ggsave("./Plots/forb.traits.NW.RTD.SRL.pdf", height = 3, width = 3)
 ggsave("./Plots/forb.traits.NW.RTD.SRL.legend.pdf", height = 3, width = 3)
 
-#### GRASS Backtransform ####
+#### FORB environment interactions ####
 
+forb.imputed.NW.traits.leafN.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.leafN.MAP.DSI.rds")
+
+leafN.DSI.effect = conditional_effects(forb.imputed.NW.traits.leafN.DSI, effects = "leafN.final:mean.DSI")$`leafN.final:mean.DSI`
+leafN.DSI.effect$leafN.bt= (leafN.DSI.effect$leafN.final*7.150147) + 22.84208
+
+# only plot high and low values
+
+leafN.DSI.effect.2 = leafN.DSI.effect %>%
+  dplyr::filter(effect2__ %in% c(-1,1))
+
+# leafN
+x.value = c(-3,0,1,2,3)
+(x.value*7.150147) + 22.84208
+
+# DSI
+x.value = c(-1,1)
+(x.value*0.1957044) + -0.4647529
+
+forb.leafN.x.DSI.plot = ggplot(data = leafN.DSI.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5) +  
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Leaf N", y = "Percent Cover Change", color = "DSI") +
+  scale_colour_manual(values = c("black", "#F17236"), labels = c("-0.27","-0.66"))+
+  scale_fill_manual(values = c("black", "#F17236"))+
+  xlim(2.68951,44.19001)+
+  theme_classic()
+forb.leafN.x.DSI.plot
+
+ggsave("./Plots/forb.traits.NW.leafN.DSI.pdf", height = 3, width = 3)
+ggsave("./Plots/forb.traits.NW.leafN.DSI.legend.pdf", height = 3, width = 3)
+
+
+#### Graminoid Backtransform ####
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
-imputed.NW.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.grass.outliersRM.csv", row.names = 1)%>%
+
+imputed.NW.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
 
-grass.traits.NW.model = readRDS("./Results/grass.imputed.traits.no_woody.rds")
+graminoid.traits.NW.model = readRDS("./Results/graminoid.imputed.traits.no_woody.rds")
 
-imputed.NW.grass$leafN.bt =(imputed.NW.grass$leafN.final*6.281442) + 18.41922
-imputed.NW.grass$height.bt = (imputed.NW.grass$height.final*0.2266876) + 0.3988779
-imputed.NW.grass$rootN.bt = (imputed.NW.grass$rootN.final*2.712129) + 7.59045
-imputed.NW.grass$SLA.bt = (imputed.NW.grass$SLA.final*9.570923) + 20.3176
-imputed.NW.grass$Depth.bt = (imputed.NW.grass$root.depth.final*0.3671355) + 0.4529895
-imputed.NW.grass$Diam.bt = (imputed.NW.grass$rootDiam.final*0.1707781) + 0.3486828
-imputed.NW.grass$SRL.bt = (imputed.NW.grass$SRL.final*82.36672) + 115.2106
-imputed.NW.grass$RTD.bt = (imputed.NW.grass$RTD.final*0.1085128) + 0.2621843
-imputed.NW.grass$RMF.bt = (imputed.NW.grass$RMF.final*0.07914561) + 0.4233237
-imputed.NW.grass$DSI.bt = (imputed.NW.grass$mean.DSI*0.2007843) + -0.4496194
-imputed.NW.grass$MAP.bt = (imputed.NW.grass$mean.MAP*441.5584) + 637.2953
+imputed.NW.graminoid$leafN.bt =(imputed.NW.graminoid$leafN.final*6.11409) + 18.36715
+imputed.NW.graminoid$height.bt = (imputed.NW.graminoid$height.final*0.2220977) + 0.3845679
+imputed.NW.graminoid$rootN.bt = (imputed.NW.graminoid$rootN.final*2.612803) + 7.369866
+imputed.NW.graminoid$SLA.bt = (imputed.NW.graminoid$SLA.final*9.389227) + 19.51921
+imputed.NW.graminoid$Depth.bt = (imputed.NW.graminoid$root.depth.final*0.3623682) + 0.4500424
+imputed.NW.graminoid$Diam.bt = (imputed.NW.graminoid$rootDiam.final*0.1710708) + 0.3415072
+imputed.NW.graminoid$SRL.bt = (imputed.NW.graminoid$SRL.final*80.14288) + 111.7918
+imputed.NW.graminoid$RTD.bt = (imputed.NW.graminoid$RTD.final*0.1062242) + 0.2651114
+imputed.NW.graminoid$RMF.bt = (imputed.NW.graminoid$RMF.final*0.08416183) + 0.4159471
+imputed.NW.graminoid$DSI.bt = (imputed.NW.graminoid$mean.DSI*0.1941463) + -0.4534765
+imputed.NW.graminoid$MAP.bt = (imputed.NW.graminoid$mean.MAP*561.8211) + 735.9487
 
-grass.imputed.NW.2 = imputed.NW.grass %>%
+graminoid.imputed.NW.2 = imputed.NW.graminoid %>%
   dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
-grass.effects = conditional_effects(grass.traits.NW.model)
+graminoid.effects = conditional_effects(graminoid.traits.NW.model)
 
-#### Grass leafN ####
+#### graminoid leafN ####
 
-leafN.effects = grass.effects$leafN.final
-leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.281442) + 18.41922
+leafN.effects = graminoid.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.11409) + 18.36715
 
-attr(grass.imputed.NW.2$leafN.final, "scaled:scale")
-attr(grass.imputed.NW.2$leafN.final, "scaled:center")
+attr(graminoid.imputed.NW.2$leafN.final, "scaled:scale")
+attr(graminoid.imputed.NW.2$leafN.final, "scaled:center")
 
 x.value = c(-2,-1,0,1,2,3)
 (x.value*6.281442) + 18.41922
 
-grass.leafN.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.leafN.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(2.68951,44.19001)+
   theme_classic()
-grass.leafN.plot
+graminoid.leafN.plot
 
-ggsave("./Plots/grass.traits.NW.leafN.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.leafN.pdf", height = 3, width = 3)
 
-#### Grass height ####
+#### graminoid height ####
 
-height.effects = grass.effects$height.final
-height.effects$height.bt= (height.effects$height.final*0.2266876) + 0.3988779
+height.effects = graminoid.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2220977) + 0.3845679
 
-attr(grass.imputed.NW.2$height.final, "scaled:scale")
-attr(grass.imputed.NW.2$height.final, "scaled:center")
+attr(graminoid.imputed.NW.2$height.final, "scaled:scale")
+attr(graminoid.imputed.NW.2$height.final, "scaled:center")
 
 x.value = c(-1,0,1,2,3)
 (x.value*0.2266876) + 0.3988779
 
-grass.height.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.height.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Height", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.009000064,1.322333169)+
   theme_classic()
-grass.height.plot
+graminoid.height.plot
 
-ggsave("./Plots/grass.traits.NW.height.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.height.pdf", height = 3, width = 3)
 
-#### Grass rootN ####
+#### graminoid rootN ####
 
-rootN.effects = grass.effects$rootN.final
-rootN.effects$rootN.bt= (rootN.effects$rootN.final*2.712129) + 7.59045
+rootN.effects = graminoid.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*2.612803) + 7.369866
 
-attr(grass.imputed.NW.2$rootN.final, "scaled:scale")
-attr(grass.imputed.NW.2$rootN.final, "scaled:center")
+attr(graminoid.imputed.NW.2$rootN.final, "scaled:scale")
+attr(graminoid.imputed.NW.2$rootN.final, "scaled:center")
 
 x.value = c(-2,-1,0,1,2,3,4)
 (x.value*2.712129) + 7.59045
 
-grass.rootN.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.rootN.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root N", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.3800000,25.6283268)+
   theme_classic()
-grass.rootN.plot
+graminoid.rootN.plot
 
-ggsave("./Plots/grass.traits.NW.rootN.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.rootN.pdf", height = 3, width = 3)
 
-#### Grass SLA ####
+#### graminoid SLA ####
 
-SLA.effects = grass.effects$SLA.final
-SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.570923) + 20.3176
+SLA.effects = graminoid.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.389227) + 19.51921
 
-attr(grass.imputed.NW.2$SLA.final, "scaled:scale")
-attr(grass.imputed.NW.2$SLA.final, "scaled:center")
+attr(graminoid.imputed.NW.2$SLA.final, "scaled:scale")
+attr(graminoid.imputed.NW.2$SLA.final, "scaled:center")
 
 x.value = c(-1,0,1,2,3)
 (x.value*9.570923) + 20.31763
 
-grass.SLA.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.SLA.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(2.617596,46.320001)+
   theme_classic()
-grass.SLA.plot
+graminoid.SLA.plot
 
-ggsave("./Plots/grass.traits.NW.SLA.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.SLA.pdf", height = 3, width = 3)
 
-#### Grass Depth ####
+#### graminoid Depth ####
 
-root.depth.effects = grass.effects$root.depth.final
-root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.3671355) + 0.4529895
+root.depth.effects = graminoid.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.3623682) + 0.4500424
 
-attr(grass.imputed.NW.2$root.depth.final, "scaled:scale")
-attr(grass.imputed.NW.2$root.depth.final, "scaled:center")
-
-x.value = c(-1,0,1,2,3,4,5,6)
-(x.value*0.3671355) + 0.4529895
-
-grass.root.depth.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.root.depth.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.0479999,3.709335)+
   theme_classic()
-grass.root.depth.plot
+graminoid.root.depth.plot
 
-ggsave("./Plots/grass.traits.NW.root.depth.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.root.depth.pdf", height = 3, width = 3)
 
-#### Grass Diam ####
+#### graminoid Diam ####
 
-rootDiam.effects = grass.effects$rootDiam.final
-rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1707781) + 0.3486828
+rootDiam.effects = graminoid.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1710708) + 0.3415072
 
-attr(grass.imputed.NW.2$rootDiam.final, "scaled:scale")
-attr(grass.imputed.NW.2$rootDiam.final, "scaled:center")
-
-x.value = c(-1,0,1,2,3)
-(x.value*0.1707781) + 0.3486828
-
-grass.rootDiam.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.rootDiam.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.07840002,1.12601235)+
   theme_classic()
-grass.rootDiam.plot
+graminoid.rootDiam.plot
 
-ggsave("./Plots/grass.traits.NW.rootDiam.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.rootDiam.pdf", height = 3, width = 3)
 
-#### Grass SRL ####
+#### graminoid SRL ####
 
-SRL.effects = grass.effects$SRL.final
-SRL.effects$SRL.bt= (SRL.effects$SRL.final*82.36672) + 115.2106
+SRL.effects = graminoid.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*80.14288) + 111.7918
 
-attr(grass.imputed.NW.2$SRL.final, "scaled:scale")
-attr(grass.imputed.NW.2$SRL.final, "scaled:center")
-
-x.value = c(-1,0,1,2,3)
-(x.value*82.36672) + 115.2106
-
-grass.SRL.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.SRL.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(2.497203,417.749988)+
   theme_classic()
-grass.SRL.plot
+graminoid.SRL.plot
 
-ggsave("./Plots/grass.traits.NW.SRL.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.SRL.pdf", height = 3, width = 3)
 
-#### Grass RTD ####
+#### graminoid RTD ####
 
-RTD.effects = grass.effects$RTD.final
-RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1085128) + 0.2621843
+RTD.effects = graminoid.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1062242) + 0.2651114
 
-attr(grass.imputed.NW.2$RTD.final, "scaled:scale")
-attr(grass.imputed.NW.2$RTD.final, "scaled:center")
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1085128) + 0.2621843
-
-grass.RTD.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.RTD.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.02325658,0.61999993)+
   theme_classic()
-grass.RTD.plot
+graminoid.RTD.plot
 
-ggsave("./Plots/grass.traits.NW.RTD.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.RTD.pdf", height = 3, width = 3)
 
-#### Grass RMF ####
+#### graminoid RMF ####
 
-RMF.effects = grass.effects$RMF.final
-RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.07914561) + 0.4233237
+RMF.effects = graminoid.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.08416183) + 0.4159471
 
-attr(grass.imputed.NW.2$RMF.final, "scaled:scale")
-attr(grass.imputed.NW.2$RMF.final, "scaled:center")
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.07914561) + 0.4233237
-
-grass.RMF.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.RMF.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.1211193,0.7328659)+
   theme_classic()
-grass.RMF.plot
+graminoid.RMF.plot
 
-ggsave("./Plots/grass.traits.NW.RMF.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.RMF.pdf", height = 3, width = 3)
 
-#### Grass DSI ####
+#### graminoid DSI ####
 
-DSI.effects = grass.effects$mean.DSI
-DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.2007843) + -0.4496194
+DSI.effects = graminoid.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1941463) + -0.4534765
 
-attr(grass.imputed.NW.2$mean.DSI, "scaled:scale")
-attr(grass.imputed.NW.2$mean.DSI, "scaled:center")
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.2007843) + -0.4496194
-
-grass.DSI.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.DSI.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(-0.8722616,0.1242846)+
   theme_classic()
-grass.DSI.plot
+graminoid.DSI.plot
 
-ggsave("./Plots/grass.traits.NW.DSI.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.DSI.pdf", height = 3, width = 3)
 
-#### Grass MAP ####
+#### graminoid MAP ####
 
-MAP.effects = grass.effects$mean.MAP
-MAP.effects$MAP.bt= (MAP.effects$mean.MAP*441.5584) + 637.2953
+MAP.effects = graminoid.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*561.8211) + 735.9487
 
-attr(grass.imputed.NW.2$mean.MAP, "scaled:scale")
-attr(grass.imputed.NW.2$mean.MAP, "scaled:center")
-
-x.value = c(-1,0,1,2,3,4)
-(x.value*441.5584) + 637.2953
-
-grass.MAP.plot = ggplot() +
-  geom_point(data = grass.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+graminoid.MAP.plot = ggplot() +
+  geom_point(data = graminoid.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
   labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(132.7,2366.1)+
   theme_classic()
-grass.MAP.plot
+graminoid.MAP.plot
 
-ggsave("./Plots/grass.traits.NW.MAP.pdf", height = 3, width = 3)
+ggsave("./Plots/graminoid.traits.NW.MAP.pdf", height = 3, width = 3)
 
-#### PERENNIAL GRASS Backtransform ####
+#### PERENNIAL graminoid Backtransform ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
-imputed.NW.perennial.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
 
-perennial.grass.traits.NW.model = readRDS("./Results/perennial.grass.imputed.traits.no_woody.rds")
+perennial.graminoid.traits.NW.model = readRDS("./Results/perennial.graminoid.imputed.traits.no_woody.rds")
 
-imputed.NW.perennial.grass$leafN.bt =(imputed.NW.perennial.grass$leafN.final*5.50471) + 17.71951
-imputed.NW.perennial.grass$height.bt = (imputed.NW.perennial.grass$height.final*0.23344) + 0.4066261
-imputed.NW.perennial.grass$rootN.bt = (imputed.NW.perennial.grass$rootN.final*2.940311) + 7.794231
-imputed.NW.perennial.grass$SLA.bt = (imputed.NW.perennial.grass$SLA.final*9.175084) + 19.32517
-imputed.NW.perennial.grass$Depth.bt = (imputed.NW.perennial.grass$root.depth.final*0.3665233) + 0.4460136
-imputed.NW.perennial.grass$Diam.bt = (imputed.NW.perennial.grass$rootDiam.final*0.1693868) + 0.3418054
-imputed.NW.perennial.grass$SRL.bt = (imputed.NW.perennial.grass$SRL.final*85.10344) + 113.0663
-imputed.NW.perennial.grass$RTD.bt = (imputed.NW.perennial.grass$RTD.final*0.1033287) + 0.2760841
-imputed.NW.perennial.grass$RMF.bt = (imputed.NW.perennial.grass$RMF.final*0.08185729) + 0.4278072
-imputed.NW.perennial.grass$DSI.bt = (imputed.NW.perennial.grass$mean.DSI*0.1851188) + -0.4469141
-imputed.NW.perennial.grass$MAP.bt = (imputed.NW.perennial.grass$mean.MAP*466.5336) + 686.9575
+imputed.NW.perennial.graminoid$leafN.bt =(imputed.NW.perennial.graminoid$leafN.final*5.368206) + 17.71867
+imputed.NW.perennial.graminoid$height.bt = (imputed.NW.perennial.graminoid$height.final*0.2272111) + 0.38957
+imputed.NW.perennial.graminoid$rootN.bt = (imputed.NW.perennial.graminoid$rootN.final*2.803468) + 7.483601
+imputed.NW.perennial.graminoid$SLA.bt = (imputed.NW.perennial.graminoid$SLA.final*8.951075) + 18.54179
+imputed.NW.perennial.graminoid$Depth.bt = (imputed.NW.perennial.graminoid$root.depth.final*0.3617313) + 0.4456165
+imputed.NW.perennial.graminoid$Diam.bt = (imputed.NW.perennial.graminoid$rootDiam.final*0.1696134) + 0.3351268
+imputed.NW.perennial.graminoid$SRL.bt = (imputed.NW.perennial.graminoid$SRL.final*81.21342) + 108.6274
+imputed.NW.perennial.graminoid$RTD.bt = (imputed.NW.perennial.graminoid$RTD.final*0.1008478) + 0.2766672
+imputed.NW.perennial.graminoid$RMF.bt = (imputed.NW.perennial.graminoid$RMF.final*0.08710869) + 0.4175176
+imputed.NW.perennial.graminoid$DSI.bt = (imputed.NW.perennial.graminoid$mean.DSI*0.1788675) + -0.4520457
+imputed.NW.perennial.graminoid$MAP.bt = (imputed.NW.perennial.graminoid$mean.MAP*591.1718) + 800.2379
 
-perennial.grass.imputed.NW.2 = imputed.NW.perennial.grass %>%
+perennial.graminoid.imputed.NW.2 = imputed.NW.perennial.graminoid %>%
   dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
   drop_na()
 
-perennial.grass.effects = conditional_effects(perennial.grass.traits.NW.model)
+perennial.graminoid.effects = conditional_effects(perennial.graminoid.traits.NW.model)
 
-#### Perennial Grass leafN ####
+#### Perennial graminoid leafN ####
 
-leafN.effects = perennial.grass.effects$leafN.final
-leafN.effects$leafN.bt= (leafN.effects$leafN.final*5.50471) + 17.71951
+leafN.effects = perennial.graminoid.effects$leafN.final
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*5.368206) + 17.71867
 
-x.value = c(-2,-1,0,1,2,3)
-(x.value*5.50471) + 17.71951
-
-perennial.grass.leafN.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.leafN.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Leaf N", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(2.68951,44.19001)+
   theme_classic()
-perennial.grass.leafN.plot
+perennial.graminoid.leafN.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.leafN.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.leafN.pdf", height = 3, width = 3)
 
-#### Perennial Grass height ####
+#### Perennial graminoid height ####
 
-height.effects = perennial.grass.effects$height.final
-height.effects$height.bt= (height.effects$height.final*0.23344) + 0.4066261
+height.effects = perennial.graminoid.effects$height.final
+height.effects$height.bt= (height.effects$height.final*0.2272111) + 0.38957
 
-x.value = c(-1,0,1,2,3)
-(x.value*0.23344) + 0.4066261
-
-perennial.grass.height.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.height.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Height", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.009000064,1.322333169)+
   theme_classic()
-perennial.grass.height.plot
+perennial.graminoid.height.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.height.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.height.pdf", height = 3, width = 3)
 
-#### Perennial Grass rootN ####
+#### Perennial graminoid rootN ####
 
-rootN.effects = perennial.grass.effects$rootN.final
-rootN.effects$rootN.bt= (rootN.effects$rootN.final*2.940311) + 7.794231
+rootN.effects = perennial.graminoid.effects$rootN.final
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*2.803468) + 7.483601
 
-x.value = c(-2,-1,0,1,2,3,4)
-(x.value*2.940311) + 7.794231
-
-perennial.grass.rootN.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.rootN.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Root N", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.3800000,25.6283268)+
   theme_classic()
-perennial.grass.rootN.plot
+perennial.graminoid.rootN.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.rootN.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.rootN.pdf", height = 3, width = 3)
 
-#### Perennial Grass SLA ####
+#### Perennial graminoid SLA ####
 
-SLA.effects = perennial.grass.effects$SLA.final
-SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.175084) + 19.32517
+SLA.effects = perennial.graminoid.effects$SLA.final
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*8.951075) + 18.54179
 
-x.value = c(-1,0,1,2,3)
-(x.value*9.175084) + 19.32517
-
-perennial.grass.SLA.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.SLA.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(2.617596,46.320001)+
   theme_classic()
-perennial.grass.SLA.plot
+perennial.graminoid.SLA.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.SLA.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.SLA.pdf", height = 3, width = 3)
 
-#### Perennial Grass depth ####
+#### Perennial graminoid depth ####
 
-root.depth.effects = perennial.grass.effects$root.depth.final
-root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.3665233) + 0.4460136
+root.depth.effects = perennial.graminoid.effects$root.depth.final
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.3617313) + 0.4456165
 
-x.value = c(-1,0,1,2,3,4,5,6)
-(x.value*0.3665233) + 0.4460136
-
-perennial.grass.root.depth.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.root.depth.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Rooting Depth", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.0479999,3.709335)+
   theme_classic()
-perennial.grass.root.depth.plot
+perennial.graminoid.root.depth.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.root.depth.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.root.depth.pdf", height = 3, width = 3)
 
-#### Perennial Grass Diam ####
+#### Perennial graminoid Diam ####
 
-rootDiam.effects = perennial.grass.effects$rootDiam.final
-rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1693868) + 0.3418054
+rootDiam.effects = perennial.graminoid.effects$rootDiam.final
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1696134) + 0.3351268
 
-x.value = c(-1,0,1,2,3)
-(x.value*0.1693868) + 0.3418054
-
-perennial.grass.rootDiam.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.rootDiam.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Root Diameter", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.07840002,1.12601235)+
   theme_classic()
-perennial.grass.rootDiam.plot
+perennial.graminoid.rootDiam.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.rootDiam.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.rootDiam.pdf", height = 3, width = 3)
 
-#### Perennial Grass SRL ####
+#### Perennial graminoid SRL ####
 
-SRL.effects = perennial.grass.effects$SRL.final
-SRL.effects$SRL.bt= (SRL.effects$SRL.final*85.10344) + 113.0663
+SRL.effects = perennial.graminoid.effects$SRL.final
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*81.21342) + 108.6274
 
-x.value = c(-1,0,1,2,3)
-(x.value*85.10344) + 113.0663
-
-perennial.grass.SRL.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.SRL.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Specific Root Length", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(2.497203,417.749988)+
   theme_classic()
-perennial.grass.SRL.plot
+perennial.graminoid.SRL.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.SRL.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.SRL.pdf", height = 3, width = 3)
 
-#### Perennial Grass RTD ####
+#### Perennial graminoid RTD ####
 
-RTD.effects = perennial.grass.effects$RTD.final
-RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1033287) + 0.2760841
+RTD.effects = perennial.graminoid.effects$RTD.final
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1008478) + 0.2766672
 
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1033287) + 0.2760841
-
-perennial.grass.RTD.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.RTD.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.02325658,0.61999993)+
   theme_classic()
-perennial.grass.RTD.plot
+perennial.graminoid.RTD.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.RTD.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.RTD.pdf", height = 3, width = 3)
 
-#### Perennial Grass RMF ####
+#### Perennial graminoid RMF ####
 
-RMF.effects = perennial.grass.effects$RMF.final
-RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.08185729) + 0.4278072
+RMF.effects = perennial.graminoid.effects$RMF.final
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.08710869) + 0.4175176
 
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.08185729) + 0.4278072
-
-perennial.grass.RMF.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.RMF.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(0.1211193,0.7328659)+
   theme_classic()
-perennial.grass.RMF.plot
+perennial.graminoid.RMF.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.RMF.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.RMF.pdf", height = 3, width = 3)
 
-#### Perennial Grass DSI ####
+#### Perennial graminoid DSI ####
 
-DSI.effects = perennial.grass.effects$mean.DSI
-DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1851188) + -0.4469141
+DSI.effects = perennial.graminoid.effects$mean.DSI
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1788675) + -0.4520457
 
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1851188) + -0.4469141
-
-perennial.grass.DSI.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.DSI.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Drought Severity Index", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(-0.8722616,0.1242846)+
   theme_classic()
-perennial.grass.DSI.plot
+perennial.graminoid.DSI.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.DSI.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.DSI.pdf", height = 3, width = 3)
 
-#### Perennial Grass MAP ####
+#### Perennial graminoid MAP ####
 
-MAP.effects = perennial.grass.effects$mean.MAP
-MAP.effects$MAP.bt= (MAP.effects$mean.MAP*466.5336) + 686.9575
+MAP.effects = perennial.graminoid.effects$mean.MAP
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*591.1718) + 800.2379
 
-x.value = c(-1,0,1,2,3,4)
-(x.value*466.5336) + 686.9575
-
-perennial.grass.MAP.plot = ggplot() +
-  geom_point(data = perennial.grass.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
+perennial.graminoid.MAP.plot = ggplot() +
+  geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
   labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
   xlim(132.7,2366.1)+
   theme_classic()
-perennial.grass.MAP.plot
+perennial.graminoid.MAP.plot
 
-ggsave("./Plots/perennial.grass.traits.NW.MAP.pdf", height = 3, width = 3)
+ggsave("./Plots/perennial.graminoid.traits.NW.MAP.pdf", height = 3, width = 3)
 
 #### PERENNIAL forb Backtransform ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
-imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
 
 perennial.forb.traits.NW.model = readRDS("./Results/perennial.forb.imputed.traits.no_woody.rds")
 
-imputed.NW.perennial.forb$leafN.bt =(imputed.NW.perennial.forb$leafN.final*6.163125) + 21.2703
-imputed.NW.perennial.forb$height.bt = (imputed.NW.perennial.forb$height.final*0.2398901) + 0.3335025
-imputed.NW.perennial.forb$rootN.bt = (imputed.NW.perennial.forb$rootN.final*4.060239) + 10.55429
-imputed.NW.perennial.forb$SLA.bt = (imputed.NW.perennial.forb$SLA.final*7.330182) + 18.8354
-imputed.NW.perennial.forb$Depth.bt = (imputed.NW.perennial.forb$root.depth.final*0.6839351) + 0.6887514
-imputed.NW.perennial.forb$Diam.bt = (imputed.NW.perennial.forb$rootDiam.final*0.1702321) + 0.3728557
-imputed.NW.perennial.forb$SRL.bt = (imputed.NW.perennial.forb$SRL.final*66.81515) + 92.88134
-imputed.NW.perennial.forb$RTD.bt = (imputed.NW.perennial.forb$RTD.final*0.1226583) + 0.241658
-imputed.NW.perennial.forb$RMF.bt = (imputed.NW.perennial.forb$RMF.final*0.1195843) + 0.4031475
-imputed.NW.perennial.forb$DSI.bt = (imputed.NW.perennial.forb$mean.DSI*0.1767211) + -0.4540636
-imputed.NW.perennial.forb$MAP.bt = (imputed.NW.perennial.forb$mean.MAP*483.3507) + 751.5249
+imputed.NW.perennial.forb$leafN.bt =(imputed.NW.perennial.forb$leafN.final*7.053831) + 22.60696
+imputed.NW.perennial.forb$height.bt = (imputed.NW.perennial.forb$height.final*0.241945) + 0.3419011
+imputed.NW.perennial.forb$rootN.bt = (imputed.NW.perennial.forb$rootN.final*4.822226) + 11.53761
+imputed.NW.perennial.forb$SLA.bt = (imputed.NW.perennial.forb$SLA.final*7.12074) + 18.92746
+imputed.NW.perennial.forb$Depth.bt = (imputed.NW.perennial.forb$root.depth.final*0.6701013) + 0.7026712
+imputed.NW.perennial.forb$Diam.bt = (imputed.NW.perennial.forb$rootDiam.final*0.1625762) + 0.367839
+imputed.NW.perennial.forb$SRL.bt = (imputed.NW.perennial.forb$SRL.final*65.21507) + 91.01407
+imputed.NW.perennial.forb$RTD.bt = (imputed.NW.perennial.forb$RTD.final*0.1212438) + 0.2290445
+imputed.NW.perennial.forb$RMF.bt = (imputed.NW.perennial.forb$RMF.final*0.1166379) + 0.3939654
+imputed.NW.perennial.forb$DSI.bt = (imputed.NW.perennial.forb$mean.DSI*0.1774911) + -0.4569303
+imputed.NW.perennial.forb$MAP.bt = (imputed.NW.perennial.forb$mean.MAP*460.4944) + 749.6066
 
 perennial.forb.imputed.NW.2 = imputed.NW.perennial.forb %>%
   dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
@@ -2449,10 +3351,7 @@ perennial.forb.effects = conditional_effects(perennial.forb.traits.NW.model)
 #### Perennial forb leafN ####
 
 leafN.effects = perennial.forb.effects$leafN.final
-leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.163125) + 21.2703
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*6.163125) + 21.2703
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*7.053831) + 22.60696
 
 perennial.forb.leafN.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2469,10 +3368,7 @@ ggsave("./Plots/perennial.forb.traits.NW.leafN.pdf", height = 3, width = 3)
 #### Perennial forb height ####
 
 height.effects = perennial.forb.effects$height.final
-height.effects$height.bt= (height.effects$height.final*0.2398901) + 0.3335025
-
-x.value = c(-1,0,1,2,3)
-(x.value*0.2398901) + 0.3335025
+height.effects$height.bt= (height.effects$height.final*0.241945) + 0.3419011
 
 perennial.forb.height.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2489,10 +3385,7 @@ ggsave("./Plots/perennial.forb.traits.NW.height.pdf", height = 3, width = 3)
 #### Perennial forb rootN ####
 
 rootN.effects = perennial.forb.effects$rootN.final
-rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.060239) + 10.55429
-
-x.value = c(-2,-1,0,1,2,3,4)
-(x.value*4.060239) + 10.55429
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.822226) + 11.53761
 
 perennial.forb.rootN.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2509,10 +3402,7 @@ ggsave("./Plots/perennial.forb.traits.NW.rootN.pdf", height = 3, width = 3)
 #### Perennial forb SLA ####
 
 SLA.effects = perennial.forb.effects$SLA.final
-SLA.effects$SLA.bt= (SLA.effects$SLA.final*7.330182) + 18.8354
-
-x.value = c(-1,0,1,2,3)
-(x.value*7.330182) + 18.8354
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*7.12074) + 18.92746
 
 perennial.forb.SLA.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2529,10 +3419,7 @@ ggsave("./Plots/perennial.forb.traits.NW.SLA.pdf", height = 3, width = 3)
 #### Perennial forb depth ####
 
 root.depth.effects = perennial.forb.effects$root.depth.final
-root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.6839351) + 0.6887514
-
-x.value = c(-1,0,1,2,3,4,5,6)
-(x.value*0.6839351) + 0.6887514
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.6701013) + 0.7026712
 
 perennial.forb.root.depth.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2549,10 +3436,7 @@ ggsave("./Plots/perennial.forb.traits.NW.root.depth.pdf", height = 3, width = 3)
 #### Perennial forb Diam ####
 
 rootDiam.effects = perennial.forb.effects$rootDiam.final
-rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1702321) + 0.3728557
-
-x.value = c(-1,0,1,2,3)
-(x.value*0.1702321) + 0.3728557
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1625762) + 0.367839
 
 perennial.forb.rootDiam.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2569,10 +3453,7 @@ ggsave("./Plots/perennial.forb.traits.NW.rootDiam.pdf", height = 3, width = 3)
 #### Perennial forb SRL ####
 
 SRL.effects = perennial.forb.effects$SRL.final
-SRL.effects$SRL.bt= (SRL.effects$SRL.final*66.81515) + 92.88134
-
-x.value = c(-1,0,1,2,3)
-(x.value*66.81515) + 92.88134
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*65.21507) + 91.01407
 
 perennial.forb.SRL.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2589,14 +3470,11 @@ ggsave("./Plots/perennial.forb.traits.NW.SRL.pdf", height = 3, width = 3)
 #### Perennial forb RTD ####
 
 RTD.effects = perennial.forb.effects$RTD.final
-RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1226583) + 0.241658
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1226583) + 0.241658
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1212438) + 0.2290445
 
 perennial.forb.RTD.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
+  geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "black", size = 1.5) +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
   labs(x = "Root Tissue Density", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
@@ -2609,10 +3487,7 @@ ggsave("./Plots/perennial.forb.traits.NW.RTD.pdf", height = 3, width = 3)
 #### Perennial forb RMF ####
 
 RMF.effects = perennial.forb.effects$RMF.final
-RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1195843) + 0.4031475
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1195843) + 0.4031475
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1166379) + 0.3939654
 
 perennial.forb.RMF.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2629,10 +3504,7 @@ ggsave("./Plots/perennial.forb.traits.NW.RMF.pdf", height = 3, width = 3)
 #### Perennial forb DSI ####
 
 DSI.effects = perennial.forb.effects$mean.DSI
-DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1767211) + -0.4540636
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1767211) + -0.4540636
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.1774911) + -0.4569303
 
 perennial.forb.DSI.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2649,10 +3521,7 @@ ggsave("./Plots/perennial.forb.traits.NW.DSI.pdf", height = 3, width = 3)
 #### Perennial forb MAP ####
 
 MAP.effects = perennial.forb.effects$mean.MAP
-MAP.effects$MAP.bt= (MAP.effects$mean.MAP*483.3507) + 751.5249
-
-x.value = c(-1,0,1,2,3,4)
-(x.value*483.3507) + 751.5249
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*460.4944) + 749.6066
 
 perennial.forb.MAP.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2669,24 +3538,24 @@ ggsave("./Plots/perennial.forb.traits.NW.MAP.pdf", height = 3, width = 3)
 #### ANNUAL FORB Backtransform ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
-imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
 
 annual.forb.traits.NW.model = readRDS("./Results/annual.forb.imputed.traits.no_woody.rds")
 
-imputed.NW.annual.forb$leafN.bt =(imputed.NW.annual.forb$leafN.final*6.789956) + 22.1907
-imputed.NW.annual.forb$height.bt = (imputed.NW.annual.forb$height.final*0.2390744) + 0.3002752
-imputed.NW.annual.forb$rootN.bt = (imputed.NW.annual.forb$rootN.final*4.242741) + 10.49856
-imputed.NW.annual.forb$SLA.bt = (imputed.NW.annual.forb$SLA.final*9.43772) + 22.54378
-imputed.NW.annual.forb$Depth.bt = (imputed.NW.annual.forb$root.depth.final*0.4594328) + 0.576239
-imputed.NW.annual.forb$Diam.bt = (imputed.NW.annual.forb$rootDiam.final*0.1309004) + 0.33456
-imputed.NW.annual.forb$SRL.bt = (imputed.NW.annual.forb$SRL.final*73.2686) + 124.8044
-imputed.NW.annual.forb$RTD.bt = (imputed.NW.annual.forb$RTD.final*0.110191) + 0.2068199
-imputed.NW.annual.forb$RMF.bt = (imputed.NW.annual.forb$RMF.final*0.1125971) + 0.3882978
-imputed.NW.annual.forb$DSI.bt = (imputed.NW.annual.forb$mean.DSI*0.2195586) + -0.4745653
-imputed.NW.annual.forb$MAP.bt = (imputed.NW.annual.forb$mean.MAP*297.4522) + 478.9622
+imputed.NW.annual.forb$leafN.bt =(imputed.NW.annual.forb$leafN.final*7.176246) + 22.88502
+imputed.NW.annual.forb$height.bt = (imputed.NW.annual.forb$height.final*0.2374835) + 0.2992857
+imputed.NW.annual.forb$rootN.bt = (imputed.NW.annual.forb$rootN.final*4.499487) + 10.98607
+imputed.NW.annual.forb$SLA.bt = (imputed.NW.annual.forb$SLA.final*9.131592) + 22.54775
+imputed.NW.annual.forb$Depth.bt = (imputed.NW.annual.forb$root.depth.final*0.4510935) + 0.5646051
+imputed.NW.annual.forb$Diam.bt = (imputed.NW.annual.forb$rootDiam.final*0.1283094) + 0.3362157
+imputed.NW.annual.forb$SRL.bt = (imputed.NW.annual.forb$SRL.final*73.50296) + 124.7039
+imputed.NW.annual.forb$RTD.bt = (imputed.NW.annual.forb$RTD.final*0.1100227) + 0.1997673
+imputed.NW.annual.forb$RMF.bt = (imputed.NW.annual.forb$RMF.final*0.1124093) + 0.3868801
+imputed.NW.annual.forb$DSI.bt = (imputed.NW.annual.forb$mean.DSI*0.2225145) + -0.4758213
+imputed.NW.annual.forb$MAP.bt = (imputed.NW.annual.forb$mean.MAP*303.7785) + 484.4501
 
 annual.forb.imputed.NW.2 = imputed.NW.annual.forb %>%
   dplyr::select(cover.change,leafN.bt:MAP.bt) %>%
@@ -2697,10 +3566,7 @@ annual.forb.effects = conditional_effects(annual.forb.traits.NW.model)
 #### annual forb leafN ####
 
 leafN.effects = annual.forb.effects$leafN.final
-leafN.effects$leafN.bt= (leafN.effects$leafN.final*6.789956) + 22.1907
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*6.789956) + 22.1907
+leafN.effects$leafN.bt= (leafN.effects$leafN.final*7.176246) + 22.88502
 
 annual.forb.leafN.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2717,10 +3583,7 @@ ggsave("./Plots/annual.forb.traits.NW.leafN.pdf", height = 3, width = 3)
 #### annual forb height ####
 
 height.effects = annual.forb.effects$height.final
-height.effects$height.bt= (height.effects$height.final*0.2390744) + 0.3002752
-
-x.value = c(-1,0,1,2,3)
-(x.value*0.2390744) + 0.3002752
+height.effects$height.bt= (height.effects$height.final*0.2374835) + 0.2992857
 
 annual.forb.height.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2737,10 +3600,7 @@ ggsave("./Plots/annual.forb.traits.NW.height.pdf", height = 3, width = 3)
 #### annual forb rootN ####
 
 rootN.effects = annual.forb.effects$rootN.final
-rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.242741) + 10.49856
-
-x.value = c(-2,-1,0,1,2,3,4)
-(x.value*4.242741) + 10.49856
+rootN.effects$rootN.bt= (rootN.effects$rootN.final*4.499487) + 10.98607
 
 annual.forb.rootN.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2757,10 +3617,7 @@ ggsave("./Plots/annual.forb.traits.NW.rootN.pdf", height = 3, width = 3)
 #### annual forb SLA ####
 
 SLA.effects = annual.forb.effects$SLA.final
-SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.43772) + 22.54378
-
-x.value = c(-1,0,1,2,3)
-(x.value*9.43772) + 22.54378
+SLA.effects$SLA.bt= (SLA.effects$SLA.final*9.131592) + 22.54775
 
 annual.forb.SLA.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2777,10 +3634,7 @@ ggsave("./Plots/annual.forb.traits.NW.SLA.pdf", height = 3, width = 3)
 #### annual forb depth ####
 
 root.depth.effects = annual.forb.effects$root.depth.final
-root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.4594328) + 0.576239
-
-x.value = c(-1,0,1,2,3,4,5,6)
-(x.value*0.4594328) + 0.576239
+root.depth.effects$Depth.bt= (root.depth.effects$root.depth.final*0.4510935) + 0.5646051
 
 annual.forb.root.depth.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2797,10 +3651,7 @@ ggsave("./Plots/annual.forb.traits.NW.root.depth.pdf", height = 3, width = 3)
 #### annual forb Diam ####
 
 rootDiam.effects = annual.forb.effects$rootDiam.final
-rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1309004) + 0.33456
-
-x.value = c(-1,0,1,2,3)
-(x.value*0.1309004) + 0.33456
+rootDiam.effects$Diam.bt= (rootDiam.effects$rootDiam.final*0.1283094) + 0.3362157
 
 annual.forb.rootDiam.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2817,10 +3668,7 @@ ggsave("./Plots/annual.forb.traits.NW.rootDiam.pdf", height = 3, width = 3)
 #### annual forb SRL ####
 
 SRL.effects = annual.forb.effects$SRL.final
-SRL.effects$SRL.bt= (SRL.effects$SRL.final*73.2686) + 124.8044
-
-x.value = c(-1,0,1,2,3)
-(x.value*73.2686) + 124.8044
+SRL.effects$SRL.bt= (SRL.effects$SRL.final*73.50296) + 124.7039
 
 annual.forb.SRL.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2837,10 +3685,7 @@ ggsave("./Plots/annual.forb.traits.NW.SRL.pdf", height = 3, width = 3)
 #### annual forb RTD ####
 
 RTD.effects = annual.forb.effects$RTD.final
-RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.110191) + 0.2068199
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.110191) + 0.2068199
+RTD.effects$RTD.bt= (RTD.effects$RTD.final*0.1100227) + 0.1997673
 
 annual.forb.RTD.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2857,10 +3702,7 @@ ggsave("./Plots/annual.forb.traits.NW.RTD.pdf", height = 3, width = 3)
 #### annual forb RMF ####
 
 RMF.effects = annual.forb.effects$RMF.final
-RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1125971) + 0.3882978
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.1125971) + 0.3882978
+RMF.effects$RMF.bt= (RMF.effects$RMF.final*0.1124093) + 0.3868801
 
 annual.forb.RMF.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2877,10 +3719,7 @@ ggsave("./Plots/annual.forb.traits.NW.RMF.pdf", height = 3, width = 3)
 #### annual forb DSI ####
 
 DSI.effects = annual.forb.effects$mean.DSI
-DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.2195586) + -0.4745653
-
-x.value = c(-2,-1,0,1,2,3)
-(x.value*0.2195586) + -0.4745653
+DSI.effects$DSI.bt= (DSI.effects$mean.DSI*0.2225145) + -0.4758213
 
 annual.forb.DSI.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
@@ -2897,14 +3736,11 @@ ggsave("./Plots/annual.forb.traits.NW.DSI.pdf", height = 3, width = 3)
 #### annual forb MAP ####
 
 MAP.effects = annual.forb.effects$mean.MAP
-MAP.effects$MAP.bt= (MAP.effects$mean.MAP*297.4522) + 478.9622
-
-x.value = c(-1,0,1,2,3,4)
-(x.value*297.4522) + 478.9622
+MAP.effects$MAP.bt= (MAP.effects$mean.MAP*303.7785) + 484.4501
 
 annual.forb.MAP.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
-  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#B50200", size = 1.5) +  
+  geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
   labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
   ylim(-20.66667,21.24500)+
@@ -2913,7 +3749,6 @@ annual.forb.MAP.plot = ggplot() +
 annual.forb.MAP.plot
 
 ggsave("./Plots/annual.forb.traits.NW.MAP.pdf", height = 3, width = 3)
-
 
 #### Dot Plots ####
 imputed.traits.NW.model = readRDS("./Results/all.imputed.traits.no_woody.rds")
@@ -2987,7 +3822,7 @@ perennial.plot = ggplot(data = coef.perennial,
   labs(y = "",x = "Mean with 95% CI", title = "Perennials")
 perennial.plot
 
-forb.traits.NW.model = readRDS("./Results/forb.imputed.traits.no_woody.rds")
+forb.traits.NW.model = readRDS("./Results/forb.legume.imputed.traits.no_woody.rds")
 
 sum = summary(forb.traits.NW.model)
 coef = sum$fixed
@@ -3011,9 +3846,9 @@ forb.plot = ggplot(data = coef.forb,
   labs(y = "",x = "Mean with 95% CI", title = "Forbs")
 forb.plot
 
-grass.traits.NW.model = readRDS("./Results/grass.imputed.traits.no_woody.rds")
+graminoid.traits.NW.model = readRDS("./Results/graminoid.imputed.traits.no_woody.rds")
 
-sum = summary(grass.traits.NW.model)
+sum = summary(graminoid.traits.NW.model)
 coef = sum$fixed
 row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
                     "SRL", "RTD","RMF","DSI","Precipitation")
@@ -3021,7 +3856,7 @@ coef.grass = coef %>%
   mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
          resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6E687E"))
 
-grass.plot = ggplot(data = coef.grass,
+graminoid.plot = ggplot(data = coef.grass,
                    aes(y = factor(row.names(coef.grass), levels = rev(row.names(coef.grass))),
                        x = Estimate,
                        xmin = `l-95% CI`,
@@ -3032,10 +3867,10 @@ grass.plot = ggplot(data = coef.grass,
   scale_fill_identity() +
   scale_color_identity() +
   theme_classic(base_size = 15)+
-  labs(y = "",x = "Mean with 95% CI", title = "Grasses")
-grass.plot
+  labs(y = "",x = "Mean with 95% CI", title = "Graminoids")
+graminoid.plot
 
-annual.forb.traits.NW.model = readRDS("./Results/annual.forb.imputed.traits.no_woody.rds")
+annual.forb.traits.NW.model = readRDS("./Results/annual.forb.legume.imputed.traits.no_woody.rds")
 
 sum = summary(annual.forb.traits.NW.model)
 coef = sum$fixed
@@ -3059,9 +3894,9 @@ annual.forb.plot = ggplot(data = coef.annual.forb,
   labs(y = "",x = "Mean with 95% CI", title = "Annual Forbs")
 annual.forb.plot
 
-perennial.grass.traits.NW.model = readRDS("./Results/perennial.grass.imputed.traits.no_woody.rds")
+perennial.graminoid.traits.NW.model = readRDS("./Results/perennial.graminoid.imputed.traits.no_woody.rds")
 
-sum = summary(perennial.grass.traits.NW.model)
+sum = summary(perennial.graminoid.traits.NW.model)
 coef = sum$fixed
 row.names(coef) = c("Intercept","Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter",
                     "SRL", "RTD","RMF","DSI","Precipitation")
@@ -3069,7 +3904,7 @@ coef.perennial.grass = coef %>%
   mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
          resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6089B5"))
 
-perennial.grass.plot = ggplot(data = coef.perennial.grass,
+perennial.graminoid.plot = ggplot(data = coef.perennial.grass,
                     aes(y = factor(row.names(coef.perennial.grass), levels = rev(row.names(coef.perennial.grass))),
                         x = Estimate,
                         xmin = `l-95% CI`,
@@ -3080,10 +3915,10 @@ perennial.grass.plot = ggplot(data = coef.perennial.grass,
   scale_fill_identity() +
   scale_color_identity() +
   theme_classic(base_size = 15)+
-  labs(y = "",x = "Mean with 95% CI", title = "Perennial Grasses")
-perennial.grass.plot
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Graminoids")
+perennial.graminoid.plot
 
-perennial.forb.traits.NW.model = readRDS("./Results/perennial.forb.imputed.traits.no_woody.rds")
+perennial.forb.traits.NW.model = readRDS("./Results/perennial.forb.legume.imputed.traits.no_woody.rds")
 
 sum = summary(perennial.forb.traits.NW.model)
 coef = sum$fixed
@@ -3107,13 +3942,833 @@ perennial.forb.plot = ggplot(data = coef.perennial.forb,
   labs(y = "",x = "Mean with 95% CI", title = "Perennial Forbs")
 perennial.forb.plot
 
-library(cowplot)
-
 png(filename = "./Plots/coef.plot.png",  width = 11, 
     height = 11, units = "in", res = 600)
 
-plot_grid(All.species.plot,annual.plot,perennial.plot,grass.plot,forb.plot,
-                     annual.forb.plot,perennial.forb.plot,perennial.grass.plot)
+plot_grid(All.species.plot,annual.plot,perennial.plot,graminoid.plot,forb.plot,
+                     annual.forb.plot,perennial.forb.plot,perennial.graminoid.plot, labels = NULL)
+
+dev.off()
+
+#### Trait Interaction Dot Plots ####
+imputed.NW.traits.height.leafN = readRDS("./Results/all.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.04620861 0.02366104 0.01308091 0.1012018
+imputed.NW.traits.depth.leafN = readRDS("./Results/all.imputed.NW.traits.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.04902346 0.02481235 0.01394253 0.1094119
+imputed.NW.traits.RMF.leafN = readRDS("./Results/all.imputed.NW.traits.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.05056307 0.02389004 0.01587269 0.1095646
+imputed.NW.traits.RTD.SRL = readRDS("./Results/all.imputed.NW.traits.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.04620861 0.02366104 0.01308091 0.1012018
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coefs.2 = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#769370"))
+
+All.species.plot = ggplot(data = coefs.2,
+                          aes(y = factor(row.names(coefs.2), levels = rev(row.names(coefs.2))),
+                              x = Estimate,
+                              xmin = `l-95% CI`,
+                              xmax = `u-95% CI`,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "#769370") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "All-Species")
+All.species.plot
+
+## Annual
+
+imputed.NW.traits.height.leafN = readRDS("./Results/annual.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.1082466 0.04328998 0.03755913 0.2048849
+imputed.NW.traits.depth.leafN = readRDS("./Results/annual.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.1193793 0.04317675 0.04622809 0.2148366
+imputed.NW.traits.RMF.leafN = readRDS("./Results/annual.imputed.NW.traits.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.1310284 0.04710103 0.0522819 0.2401864
+imputed.NW.traits.RTD.SRL = readRDS("./Results/annual.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.1037567 0.0421373 0.03488088 0.1980414
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.annual = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#979461"))
+
+annual.plot = ggplot(data = coef.annual,
+                     aes(y = factor(row.names(coef.annual), levels = rev(row.names(coef.annual))),
+                         x = Estimate,
+                         xmin = `l-95% CI`,
+                         xmax = `u-95% CI`,
+                         fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#979461") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Annuals")
+annual.plot
+
+## perennial
+
+imputed.NW.traits.height.leafN = readRDS("./Results/perennial.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.06295824 0.03318674 0.01677983 0.1430209
+imputed.NW.traits.depth.leafN = readRDS("./Results/perennial.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.05999619 0.03515212 0.01279108 0.1446982
+imputed.NW.traits.RMF.leafN = readRDS("./Results/perennial.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.05835542 0.03305554 0.01291057 0.1367004
+imputed.NW.traits.RTD.SRL = readRDS("./Results/perennial.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.06112001 0.03264814 0.01455853 0.1403494
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.perennial = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#F1C646"))
+
+perennial.plot = ggplot(data = coef.perennial,
+                        aes(y = factor(row.names(coef.perennial), levels = rev(row.names(coef.perennial))),
+                            x = Estimate,
+                            xmin = `l-95% CI`,
+                            xmax = `u-95% CI`,
+                            fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#F1C646") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennials")
+perennial.plot
+
+## forb
+
+imputed.NW.traits.height.leafN = readRDS("./Results/forb.legume.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.09349774 0.04404204 0.02967335 0.1955086
+imputed.NW.traits.depth.leafN = readRDS("./Results/forb.legume.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.09146164 0.04923645 0.02604119 0.2098301
+imputed.NW.traits.RMF.leafN = readRDS("./Results/forb.legume.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.08990255 0.04675457 0.02423598 0.2022656
+imputed.NW.traits.RTD.SRL = readRDS("./Results/forb.legume.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.08990255 0.04675457 0.02423598 0.2022656
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.forb = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#F17236"))
+
+forb.plot = ggplot(data = coef.forb,
+                   aes(y = factor(row.names(coef.forb), levels = rev(row.names(coef.forb))),
+                       x = Estimate,
+                       xmin = `l-95% CI`,
+                       xmax = `u-95% CI`,
+                       fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#F17236") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Forbs")
+forb.plot
+
+## graminoid
+
+imputed.NW.traits.height.leafN = readRDS("./Results/graminoid.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.07519414 0.03773959 0.02012363 0.1623326
+imputed.NW.traits.depth.leafN = readRDS("./Results/graminoid.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.07524507 0.03920688 0.01940286 0.1673162
+imputed.NW.traits.RMF.leafN = readRDS("./Results/graminoid.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.08081603 0.03934892 0.02171268 0.1741477
+imputed.NW.traits.RTD.SRL = readRDS("./Results/graminoid.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.07539285 0.03883973 0.01926746 0.1642017
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.graminoid = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6E687E"))
+
+graminoid.plot = ggplot(data = coef.graminoid,
+                    aes(y = factor(row.names(coef.graminoid), levels = rev(row.names(coef.graminoid))),
+                        x = Estimate,
+                        xmin = `l-95% CI`,
+                        xmax = `u-95% CI`,
+                        fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#6E687E") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Graminoids")
+graminoid.plot
+
+## annual.forb.legume
+
+imputed.NW.traits.height.leafN = readRDS("./Results/annual.forb.legume.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.1879269 0.06705478 0.07328748 0.3352544
+imputed.NW.traits.depth.leafN = readRDS("./Results/annual.forb.legume.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.19025 0.07039582 0.07139912 0.3456307
+imputed.NW.traits.RMF.leafN = readRDS("./Results/annual.forb.legume.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.2055234 0.07505162 0.07897277 0.367604
+imputed.NW.traits.RTD.SRL = readRDS("./Results/annual.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.1818185 0.06325504 0.0745352 0.3182902
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.annual.forb = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#B50200"))
+
+annual.forb.plot = ggplot(data = coef.annual.forb,
+                          aes(y = factor(row.names(coef.annual.forb), levels = rev(row.names(coef.annual.forb))),
+                              x = Estimate,
+                              xmin = `l-95% CI`,
+                              xmax = `u-95% CI`,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#B50200") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Annual Forbs")
+annual.forb.plot
+
+## perennial.graminoid
+
+imputed.NW.traits.height.leafN = readRDS("./Results/perennial.graminoid.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.09954704 0.05277377 0.02366747 0.2251619
+imputed.NW.traits.depth.leafN = readRDS("./Results/perennial.graminoid.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.09243592 0.04775324 0.02259472 0.2015672
+imputed.NW.traits.RMF.leafN = readRDS("./Results/perennial.graminoid.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.1030003 0.05091094 0.0268059 0.2202317
+imputed.NW.traits.RTD.SRL = readRDS("./Results/perennial.graminoid.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.09920834 0.04852001 0.02694776 0.2127798
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.perennial.graminoid = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6089B5"))
+
+perennial.graminoid.plot = ggplot(data = coef.perennial.graminoid,
+                              aes(y = factor(row.names(coef.perennial.graminoid), levels = rev(row.names(coef.perennial.graminoid))),
+                                  x = Estimate,
+                                  xmin = `l-95% CI`,
+                                  xmax = `u-95% CI`,
+                                  fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#6089B5") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Graminoids")
+perennial.graminoid.plot
+
+## perennial.forb.legume
+
+imputed.NW.traits.height.leafN = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.height.leafN.rds")
+bayes_R2(imputed.NW.traits.height.leafN)
+# R2 0.08953688 0.04958045 0.02233369 0.2128223
+imputed.NW.traits.depth.leafN = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.depth.leafN.rds")
+bayes_R2(imputed.NW.traits.depth.leafN)
+#R2 0.08383131 0.04823494 0.01869921 0.198834
+imputed.NW.traits.RMF.leafN = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.leafN.RMF.rds")
+bayes_R2(imputed.NW.traits.RMF.leafN)
+#R2 0.08396547 0.05044191 0.01737544 0.2058153
+imputed.NW.traits.RTD.SRL = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL)
+# R2 0.09020453 0.04950654 0.0222804 0.211576
+
+sum = summary(imputed.NW.traits.height.leafN)$fixed
+sum.2 = summary(imputed.NW.traits.depth.leafN)$fixed
+sum.3 = summary(imputed.NW.traits.RMF.leafN)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.SRL)$fixed
+
+coefs = as.data.frame(sum[6,c(1,3,4)])
+coefs[2,1:3] = sum.2[6,c(1,3,4)]
+coefs[3,1:3] = sum.3[6,c(1,3,4)]
+coefs[4,1:3] = sum.4[6,c(1,3,4)]
+
+row.names(coefs) = c("Leaf N*Height", "Leaf N*Rooting Depth", "Leaf N*RMF", "RTD*SRL")
+
+coef.perennial.forb = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "black"))
+
+perennial.forb.plot = ggplot(data = coef.perennial.forb,
+                             aes(y = factor(row.names(coef.perennial.forb), levels = rev(row.names(coef.perennial.forb))),
+                                 x = Estimate,
+                                 xmin = `l-95% CI`,
+                                 xmax = `u-95% CI`,
+                                 fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "black") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Forbs")
+perennial.forb.plot
+
+png(filename = "./Plots/trait.interaction.coef.plot.png",  width = 13, 
+    height = 11, units = "in", res = 600)
+
+plot_grid(All.species.plot,annual.plot,perennial.plot,graminoid.plot,forb.plot,
+          annual.forb.plot,perennial.forb.plot,perennial.graminoid.plot)
+
+dev.off()
+
+#### Environment Interaction Dot Plots ####
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/all.imputed.NW.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2 0.03778474 0.02205149 0.008083502 0.09329935
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.06092939 0.0258172 0.02256498 0.1241577
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2 0.04165983 0.02175759 0.01154696 0.09635656
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.04314836 0.02442081 0.0106199 0.103889
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.04075575 0.02239753 0.009678036 0.09585312
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2 0.03828717 0.02266265 0.008483114 0.09699009
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coefs.2 = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#769370"))
+
+All.species.plot = ggplot(data = coefs.2,
+                          aes(y = factor(row.names(coefs.2), levels = rev(row.names(coefs.2))),
+                              x = Estimate,
+                              xmin = `l-95% CI`,
+                              xmax = `u-95% CI`,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "#769370") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "All-Species")
+All.species.plot
+
+## Annuals
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2 0.1208656 0.04510458 0.04694877 0.2220583
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.1705448 0.05178855 0.07863608 0.2805161
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2 0.1090259 0.04274418 0.04011061 0.2032013
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.111892 0.04404864 0.03903641 0.2092014
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.1068335 0.04325949 0.03579992 0.2052009
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2 0.1103115 0.04439953 0.03779541 0.2071463
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.annual = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#979461"))
+
+annual.plot = ggplot(data = coef.annual,
+                     aes(y = factor(row.names(coef.annual), levels = rev(row.names(coef.annual))),
+                         x = Estimate,
+                         xmin = `l-95% CI`,
+                         xmax = `u-95% CI`,
+                         fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#979461") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Annuals")
+annual.plot
+
+## perennials
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.perennial.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2 0.05332797 0.03160344 0.01146005 0.13111
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.05879655 0.03407371 0.0125315 0.141046
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2 0.05988846 0.03295912 0.01457783 0.1382209
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.0614589 0.03363447 0.01443582 0.1431149
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.05748926 0.03270784 0.0125087 0.1337565
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2 0.05922796 0.03369339 0.01331522 0.1395166
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.perennial = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#F1C646"))
+
+perennial.plot = ggplot(data = coef.perennial,
+                        aes(y = factor(row.names(coef.perennial), levels = rev(row.names(coef.perennial))),
+                            x = Estimate,
+                            xmin = `l-95% CI`,
+                            xmax = `u-95% CI`,
+                            fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#F1C646") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennials")
+perennial.plot
+
+## forb.legumes
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.forb.legume.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2 0.07520765 0.0402359 0.01865661 0.172068
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.1104155 0.04644593 0.04187595 0.2197352
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2  0.07414734 0.04162549 0.01818971 0.1759422
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.07357648 0.04117196 0.01686191 0.1750251
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.06303201 0.03884063 0.01470552 0.1649587
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2 0.06886695 0.04259294 0.0134793 0.1755777
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.forb = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#F17236"))
+
+forb.plot = ggplot(data = coef.forb,
+                   aes(y = factor(row.names(coef.forb), levels = rev(row.names(coef.forb))),
+                       x = Estimate,
+                       xmin = `l-95% CI`,
+                       xmax = `u-95% CI`,
+                       fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#F17236") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Forbs")
+forb.plot
+
+## graminoids
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.graminoid.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2 0.07257722 0.03807303 0.01785619 0.1639368
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.08168753 0.04139105 0.02202018 0.1794329
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2  0.06667337 0.03725247 0.01497841 0.153952
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.07071695 0.0389249 0.01555127 0.163423
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.08167805 0.03947151 0.02165621 0.171412
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2 0.07350117 0.03865609 0.01877043 0.1640502
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.graminoid = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6E687E"))
+
+graminoid.plot = ggplot(data = coef.graminoid,
+                        aes(y = factor(row.names(coef.graminoid), levels = rev(row.names(coef.graminoid))),
+                            x = Estimate,
+                            xmin = `l-95% CI`,
+                            xmax = `u-95% CI`,
+                            fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#6E687E") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Graminoids")
+graminoid.plot
+
+## annual.forb.legumes
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.annual.forb.legume.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2  0.193955 0.06927718 0.07696936 0.3484241
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.2487581 0.07176966 0.1201865 0.400603
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2  0.1750077 0.06859499 0.06367586 0.3316238
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.189431 0.0672549 0.07478275 0.3386802
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.1601988 0.06443742 0.05627058 0.3042982
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2  0.1818622 0.07089922 0.06765313 0.3469543
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.annual.forb = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#B50200"))
+
+annual.forb.plot = ggplot(data = coef.annual.forb,
+                          aes(y = factor(row.names(coef.annual.forb), levels = rev(row.names(coef.annual.forb))),
+                              x = Estimate,
+                              xmin = `l-95% CI`,
+                              xmax = `u-95% CI`,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#B50200") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Annual Forbs")
+annual.forb.plot
+
+## perennial.graminoids
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.perennial.graminoid.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2  0.09514321 0.05076139 0.02167901 0.2094033
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.09001695 0.05015101 0.02085408 0.2087146
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2  0.09170852 0.04970511 0.02077364 0.2091623
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.09152688 0.0483271 0.02238516 0.2055615
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.1011934 0.04889843 0.02797906 0.2149136
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2  0.1039792 0.05003459 0.02738343 0.221052
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.perennial.graminoid = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "#6089B5"))
+
+perennial.graminoid.plot = ggplot(data = coef.perennial.graminoid,
+                                  aes(y = factor(row.names(coef.perennial.graminoid), levels = rev(row.names(coef.perennial.graminoid))),
+                                      x = Estimate,
+                                      xmin = `l-95% CI`,
+                                      xmax = `u-95% CI`,
+                                      fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "#6089B5") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Graminoids")
+perennial.graminoid.plot
+
+## perennial.forb.legumes
+
+imputed.NW.traits.height.MAP.DSI= readRDS("./Results/imputed.NW.perennial.forb.legume.traits.height.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.height.MAP.DSI)
+# R2  0.09176607 0.05293895 0.02110338 0.223103
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+#R2 0.08968503 0.05285282 0.01864453 0.2213102
+imputed.NW.traits.depth.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.depth.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.depth.MAP.DSI)
+#R2  0.09036111 0.04854217 0.02345889 0.2111724
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RTD.MAP.DSI)
+# R2 0.09019763 0.05142541 0.02031147 0.2162557
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.SRL.MAP.DSI)
+# R2 0.07678711 0.04832567 0.0155648 0.1989975
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.RMF.MAP.DSI)
+# R2  0.08799672 0.05499119 0.01528511 0.2228772
+
+sum = summary(imputed.NW.traits.height.MAP.DSI)$fixed
+sum.2 = summary(imputed.NW.traits.leafN.MAP.DSI)$fixed
+sum.3 = summary(imputed.NW.traits.depth.MAP.DSI)$fixed
+sum.4 = summary(imputed.NW.traits.RTD.MAP.DSI)$fixed
+sum.5 = summary(imputed.NW.traits.SRL.MAP.DSI)$fixed
+sum.6 = summary(imputed.NW.traits.RMF.MAP.DSI)$fixed
+
+coefs = as.data.frame(sum[c(5,6),c(1,3,4)])
+coefs[c(3,4),1:3] = sum.2[c(5,6),c(1,3,4)]
+coefs[c(5,6),1:3] = sum.3[c(5,6),c(1,3,4)]
+coefs[c(7,8),1:3] = sum.4[c(5,6),c(1,3,4)]
+coefs[c(9,10),1:3] = sum.5[c(5,6),c(1,3,4)]
+coefs[c(11,12),1:3] = sum.6[c(5,6),c(1,3,4)]
+
+row.names(coefs) = c("Height*MAP","Height*DSI","Leaf N*MAP","Leaf N*DSI","Rooting Depth*MAP","Rooting Depth*DSI",
+                     "RTD*MAP","RTD*DSI","SRL*MAP","SRL*DSI","RMF*MAP","RMF*DSI")
+
+coef.perennial.forb = coefs %>%
+  mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(coef.zero == TRUE, true = "white", false = "black"))
+
+perennial.forb.plot = ggplot(data = coef.perennial.forb,
+                             aes(y = factor(row.names(coef.perennial.forb), levels = rev(row.names(coef.perennial.forb))),
+                                 x = Estimate,
+                                 xmin = `l-95% CI`,
+                                 xmax = `u-95% CI`,
+                                 fill = resp.fill)) +
+  geom_pointrange(size = 1,shape = 21,color = "black") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Perennial Forbs")
+perennial.forb.plot
+
+png(filename = "./Plots/enviro.interaction.coef.plot.png",  width = 13, 
+    height = 11, units = "in", res = 600)
+
+plot_grid(All.species.plot,annual.plot,perennial.plot,graminoid.plot,forb.plot,
+          annual.forb.plot,perennial.forb.plot,perennial.graminoid.plot)
 
 dev.off()
 

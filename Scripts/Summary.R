@@ -21,23 +21,23 @@ imputed.NW.perennial = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.t
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
-imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
-imputed.NW.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
-imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
-imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
-imputed.NW.perennial.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
@@ -84,10 +84,6 @@ woody.2 = imputed.traits.2 %>%
 # 28% of populations removed, 23% of species removed as outliers
 # out of all outliers removed (94 populations) 50 were woody (53%)
 
-
-
-
-
 #### Load imputed data without woody species not scaled ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
@@ -102,19 +98,19 @@ imputed.NW.annual = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.trai
 imputed.NW.perennial = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennials.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.perennial.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
 
@@ -129,7 +125,7 @@ imputed.NW.annual.2 = imputed.NW.annual %>%
 imputed.NW.perennial.2 = imputed.NW.perennial %>%
   select(cover.change,site_code,Taxon,functional_group,leafN.final:mean.MAP) %>%
   drop_na()
-imputed.NW.grass.2 = imputed.NW.grass %>%
+imputed.NW.graminoid.2 = imputed.NW.graminoid %>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.forb.2 = imputed.NW.forb %>%
@@ -141,7 +137,7 @@ imputed.NW.annual.forb.2 = imputed.NW.annual.forb %>%
 imputed.NW.perennial.forb.2 = imputed.NW.perennial.forb%>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
-imputed.NW.perennial.grass.2 = imputed.NW.perennial.grass %>%
+imputed.NW.perennial.graminoid.2 = imputed.NW.perennial.graminoid %>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 
@@ -276,44 +272,44 @@ range(imputed.NW.perennial.2$mean.MAP, na.rm = TRUE)
 range(imputed.NW.perennial.2$mean.DSI, na.rm = TRUE)
 range(imputed.NW.perennial.2$cover.change)
 
-mean(imputed.NW.grass.2$leafN.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$height.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$rootN.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$SLA.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$RMF.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$root.depth.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$RTD.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$SRL.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$rootDiam.final, na.rm = TRUE)
-mean(imputed.NW.grass.2$mean.MAP, na.rm = TRUE)
-mean(imputed.NW.grass.2$mean.DSI, na.rm = TRUE)
-mean(imputed.NW.grass.2$cover.change)
+mean(imputed.NW.graminoid.2$leafN.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$height.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$rootN.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$SLA.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$RMF.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$root.depth.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$RTD.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$SRL.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$rootDiam.final, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$mean.MAP, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$mean.DSI, na.rm = TRUE)
+mean(imputed.NW.graminoid.2$cover.change)
 
-sd(imputed.NW.grass.2$leafN.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$height.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$rootN.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$SLA.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$RMF.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$root.depth.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$RTD.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$SRL.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$rootDiam.final, na.rm = TRUE)
-sd(imputed.NW.grass.2$mean.MAP, na.rm = TRUE)
-sd(imputed.NW.grass.2$mean.DSI, na.rm = TRUE)
-sd(imputed.NW.grass.2$cover.change)
+sd(imputed.NW.graminoid.2$leafN.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$height.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$rootN.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$SLA.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$RMF.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$root.depth.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$RTD.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$SRL.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$rootDiam.final, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$mean.MAP, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$mean.DSI, na.rm = TRUE)
+sd(imputed.NW.graminoid.2$cover.change)
 
-range(imputed.NW.grass.2$leafN.final, na.rm = TRUE)
-range(imputed.NW.grass.2$height.final, na.rm = TRUE)
-range(imputed.NW.grass.2$rootN.final, na.rm = TRUE)
-range(imputed.NW.grass.2$SLA.final, na.rm = TRUE)
-range(imputed.NW.grass.2$RMF.final, na.rm = TRUE)
-range(imputed.NW.grass.2$root.depth.final, na.rm = TRUE)
-range(imputed.NW.grass.2$RTD.final, na.rm = TRUE)
-range(imputed.NW.grass.2$SRL.final, na.rm = TRUE)
-range(imputed.NW.grass.2$rootDiam.final, na.rm = TRUE)
-range(imputed.NW.grass.2$mean.MAP, na.rm = TRUE)
-range(imputed.NW.grass.2$mean.DSI, na.rm = TRUE)
-range(imputed.NW.grass.2$cover.change)
+range(imputed.NW.graminoid.2$leafN.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$height.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$rootN.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$SLA.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$RMF.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$root.depth.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$RTD.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$SRL.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$rootDiam.final, na.rm = TRUE)
+range(imputed.NW.graminoid.2$mean.MAP, na.rm = TRUE)
+range(imputed.NW.graminoid.2$mean.DSI, na.rm = TRUE)
+range(imputed.NW.graminoid.2$cover.change)
 
 mean(imputed.NW.forb.2$leafN.final, na.rm = TRUE)
 mean(imputed.NW.forb.2$height.final, na.rm = TRUE)
@@ -393,44 +389,44 @@ range(imputed.NW.annual.forb.2$mean.MAP, na.rm = TRUE)
 range(imputed.NW.annual.forb.2$mean.DSI, na.rm = TRUE)
 range(imputed.NW.annual.forb.2$cover.change)
 
-mean(imputed.NW.perennial.grass.2$leafN.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$height.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$rootN.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$SLA.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$RMF.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$root.depth.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$RTD.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$SRL.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$rootDiam.final, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$mean.MAP, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$mean.DSI, na.rm = TRUE)
-mean(imputed.NW.perennial.grass.2$cover.change)
+mean(imputed.NW.perennial.graminoid.2$leafN.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$height.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$rootN.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$SLA.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$RMF.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$root.depth.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$RTD.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$SRL.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$rootDiam.final, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$mean.MAP, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$mean.DSI, na.rm = TRUE)
+mean(imputed.NW.perennial.graminoid.2$cover.change)
 
-sd(imputed.NW.perennial.grass.2$leafN.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$height.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$rootN.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$SLA.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$RMF.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$root.depth.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$RTD.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$SRL.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$rootDiam.final, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$mean.MAP, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$mean.DSI, na.rm = TRUE)
-sd(imputed.NW.perennial.grass.2$cover.change)
+sd(imputed.NW.perennial.graminoid.2$leafN.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$height.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$rootN.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$SLA.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$RMF.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$root.depth.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$RTD.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$SRL.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$rootDiam.final, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$mean.MAP, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$mean.DSI, na.rm = TRUE)
+sd(imputed.NW.perennial.graminoid.2$cover.change)
 
-range(imputed.NW.perennial.grass.2$leafN.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$height.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$rootN.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$SLA.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$RMF.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$root.depth.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$RTD.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$SRL.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$rootDiam.final, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$mean.MAP, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$mean.DSI, na.rm = TRUE)
-range(imputed.NW.perennial.grass.2$cover.change)
+range(imputed.NW.perennial.graminoid.2$leafN.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$height.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$rootN.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$SLA.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$RMF.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$root.depth.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$RTD.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$SRL.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$rootDiam.final, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$mean.MAP, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$mean.DSI, na.rm = TRUE)
+range(imputed.NW.perennial.graminoid.2$cover.change)
 
 mean(imputed.NW.perennial.forb.2$leafN.final, na.rm = TRUE)
 mean(imputed.NW.perennial.forb.2$height.final, na.rm = TRUE)
@@ -474,9 +470,9 @@ range(imputed.NW.perennial.forb.2$cover.change)
 # get functional groups in annuals and perennials
 
 table(imputed.NW.annual.2$functional_group)
-# forb 124, grass 44 legume 10
+# forb 124, graminoid 44 legume 10
 table(imputed.NW.perennial.2$functional_group)
-# forb 224, graminoid 31, grass 174, legume 33
+# forb 224, graminoid 31, graminoid 174, legume 33
 
 ### Correlation Plots ####
 
@@ -492,19 +488,19 @@ imputed.NW.annual = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.trai
 imputed.NW.perennial = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennials.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv", row.names = 1)%>%
+imputed.NW.annual.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.forb = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
-imputed.NW.perennial.grass = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv", row.names = 1)%>%
+imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv", row.names = 1)%>%
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000)
 
@@ -519,7 +515,7 @@ imputed.NW.annual.2 = imputed.NW.annual %>%
 imputed.NW.perennial.2 = imputed.NW.perennial %>%
   select(cover.change,site_code,Taxon,leafN.final:mean.MAP) %>%
   drop_na()
-imputed.NW.grass.2 = imputed.NW.grass %>%
+imputed.NW.graminoid.2 = imputed.NW.graminoid %>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.forb.2 = imputed.NW.forb %>%
@@ -531,7 +527,7 @@ imputed.NW.annual.forb.2 = imputed.NW.annual.forb %>%
 imputed.NW.perennial.forb.2 = imputed.NW.perennial.forb%>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
-imputed.NW.perennial.grass.2 = imputed.NW.perennial.grass %>%
+imputed.NW.perennial.graminoid.2 = imputed.NW.perennial.graminoid %>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 
@@ -543,11 +539,11 @@ colnames(imputed.NW.perennial.2)[4:14] = c("Leaf N","Height","Root N","SLA","Roo
                                  "DSI","Precipitation")
 colnames(imputed.NW.forb.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
                                  "DSI","Precipitation")
-colnames(imputed.NW.grass.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
+colnames(imputed.NW.graminoid.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
                                  "DSI","Precipitation")
 colnames(imputed.NW.annual.forb.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
                                  "DSI","Precipitation")
-colnames(imputed.NW.perennial.grass.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
+colnames(imputed.NW.perennial.graminoid.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
                                              "DSI","Precipitation")
 colnames(imputed.NW.perennial.forb.2)[4:14] = c("Leaf N","Height","Root N","SLA","Rooting Depth","Root Diameter","SRL","RTD","RMF",
                                              "DSI","Precipitation")
@@ -557,44 +553,56 @@ corrplot(all.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
 # highest correlation is -0.28 and 0.34
 
+write.csv(all.traits.cor, file = "./Results/all.traits.cor.csv")
+
 annual.traits.cor = cor(imputed.NW.annual.2[,c(4:14)],use = "pairwise") 
 corrplot(annual.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
 # highest correlation is -0.31 and 0.35
+
+write.csv(annual.traits.cor, file = "./Results/annual.traits.cor.csv")
 
 perennial.traits.cor = cor(imputed.NW.perennial.2[,c(4:14)],use = "pairwise") 
 corrplot(perennial.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
 # highest correlation is -0.29 and 0.39
 
+write.csv(perennial.traits.cor, file = "./Results/perennial.traits.cor.csv")
+
 forb.traits.cor = cor(imputed.NW.forb.2[,c(4:14)],use = "pairwise") 
 corrplot(forb.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.28 and 0.34
+# highest correlation is -0.24 and 0.33
 
-grass.traits.cor = cor(imputed.NW.grass.2[,c(4:14)],use = "pairwise") 
-corrplot(grass.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
+write.csv(forb.traits.cor, file = "./Results/forb.traits.cor.csv")
+
+graminoid.traits.cor = cor(imputed.NW.graminoid.2[,c(4:14)],use = "pairwise") 
+corrplot(graminoid.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.48 and 0.29
+# highest correlation is -0.47 and 0.25
+
+write.csv(graminoid.traits.cor, file = "./Results/graminoid.traits.cor.csv")
 
 annual.forb.traits.cor = cor(imputed.NW.annual.forb.2[,c(4:14)],use = "pairwise") 
 corrplot(annual.forb.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.43 and 0.33
+# highest correlation is -0.43 and 0.35
+
+write.csv(annual.forb.traits.cor, file = "./Results/annual.forb.traits.cor.csv")
 
 perennial.forb.traits.cor = cor(imputed.NW.perennial.forb.2[,c(4:14)],use = "pairwise") 
 corrplot(perennial.forb.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.29 and 0.31
+# highest correlation is -0.27 and 0.38
 
-ggsave("./Plots/perennial.forb.traits.NW.corr.pdf", height = 8, width = 8)
+write.csv(perennial.forb.traits.cor, file = "./Results/perennial.forb.traits.cor.csv")
 
-perennial.grass.traits.cor = cor(imputed.NW.perennial.grass.2[,c(4:14)],use = "pairwise") 
-corrplot(perennial.grass.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
+perennial.graminoid.traits.cor = cor(imputed.NW.perennial.graminoid.2[,c(4:14)],use = "pairwise") 
+corrplot(perennial.graminoid.traits.cor, method="number",tl.col = "black", bg = "gray70",is.corr = TRUE,
          col.lim = c(-1,1), col = COL2('BrBG', 200), addgrid.col = "black")
-# highest correlation is -0.46 and 0.24
+# highest correlation is -0.44 and 0.25
 
-
+write.csv(perennial.graminoid.traits.cor, file = "./Results/perennial.graminoid.traits.cor.csv")
 
 
 #### Height of covers ####
@@ -618,6 +626,6 @@ site.data.2 = site.data %>%
   filter(site_code %in% unq.sites)
 
 table(site.data.2$habitat.type)
-# Grassland Shrubland 
+# graminoidland Shrubland 
 # 44        19 
 

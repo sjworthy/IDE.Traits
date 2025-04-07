@@ -645,32 +645,59 @@ table(imputed.traits.NW.2$functional_group)
 imputed.traits.NW.forb = imputed.traits.NW.2 %>%
   filter(functional_group == "FORB")
 
+imputed.traits.NW.forb.legume = imputed.traits.NW.2 %>%
+  filter(functional_group %in% c("FORB","LEGUME"))
+
 imputed.traits.NW.grass = imputed.traits.NW.2 %>%
   filter(functional_group == "GRASS")
 
+imputed.traits.NW.graminoid = imputed.traits.NW.2 %>%
+  filter(functional_group %in% c("GRASS","GRAMINOID"))
+
 #write.csv(imputed.traits.NW.forb, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.outliersRM.csv")
 #write.csv(imputed.traits.NW.grass, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.grass.outliersRM.csv")
+#write.csv(imputed.traits.NW.forb.legume, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.forbs.legume.outliersRM.csv")
+#write.csv(imputed.traits.NW.graminoid, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.graminoid.outliersRM.csv")
 
 # split by lifespan and functional group
 
 table(imputed.traits.NW.2$local_lifespan,imputed.traits.NW.2$functional_group)
-# annual forb (139), perennial forb (242), perennial grass (184)
+# annual forb (139), annual legume (10), annual grass (52), annual graminoid (2)
+# perennial forb (242), perennial legume (33) 
+# perennial grass (184), perennial graminoid (36)
 
 imputed.traits.NW.annual.forb = imputed.traits.NW.2 %>%
   filter(local_lifespan == "ANNUAL") %>%
   filter(functional_group == "FORB")
 
+imputed.traits.NW.annual.forb.legume = imputed.traits.NW.2 %>%
+  filter(local_lifespan == "ANNUAL") %>%
+  filter(functional_group %in% c("FORB","LEGUME"))
+
 imputed.traits.NW.perennial.forb = imputed.traits.NW.2 %>%
   filter(local_lifespan == "PERENNIAL") %>%
   filter(functional_group == "FORB")
+
+imputed.traits.NW.perennial.forb.legume = imputed.traits.NW.2 %>%
+  filter(local_lifespan == "PERENNIAL") %>%
+  filter(functional_group %in% c("FORB","LEGUME"))
 
 imputed.traits.NW.perennial.grass = imputed.traits.NW.2 %>%
   filter(local_lifespan == "PERENNIAL") %>%
   filter(functional_group == "GRASS")
 
-write.csv(imputed.traits.NW.annual.forb, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv")
-write.csv(imputed.traits.NW.perennial.forb, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv")
-write.csv(imputed.traits.NW.perennial.grass, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv")
+imputed.traits.NW.perennial.graminoid = imputed.traits.NW.2 %>%
+  filter(local_lifespan == "PERENNIAL") %>%
+  filter(functional_group %in% c("GRASS","GRAMINOID"))
+
+#write.csv(imputed.traits.NW.annual.forb, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forbs.outliersRM.csv")
+#write.csv(imputed.traits.NW.perennial.forb, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.outliersRM.csv")
+#write.csv(imputed.traits.NW.perennial.grass, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.grass.outliersRM.csv")
+
+#write.csv(imputed.traits.NW.annual.forb.legume, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.annual.forb.legume.outliersRM.csv")
+#write.csv(imputed.traits.NW.perennial.forb.legume, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv")
+#write.csv(imputed.traits.NW.perennial.graminoid, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv")
+
 
 # how many annual grass species would have been in the model
 imputed.traits.NW.annual.grass = imputed.traits.NW.2 %>%
