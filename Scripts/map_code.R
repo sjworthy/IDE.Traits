@@ -15,7 +15,7 @@ library(tidyverse)
 library(stringr)
 
 # read in the lat/longs for the 83 IDE sites included
-sites.65 = read.csv("./Formatted.Data/IDE.sites.65.csv")
+sites.63 = read.csv("./Formatted.Data/Revisions/IDE.sites.63.csv")
 
 # get the whole world
 world_sf = gisco_get_countries()
@@ -87,7 +87,7 @@ map1 = ggplot(data = mswep_df) +
   scale_fill_gradient2(name = str_wrap("Mean Annual Precipitation (mm) 1979-2022", 20),
                        low = "red3", mid = "#E2E2E2",high = "blue3",
                        trans = "log10",midpoint = log10(500))+
-  geom_point(data = sites.65,
+  geom_point(data = sites.63,
              aes(x = longitud, y = latitud), color = "black", size = 1.5,alpha = 0.7,
              position=position_jitter(h=0.50,w=0.50))+
   guides(fill = guide_colorbar(title.position = "top", 

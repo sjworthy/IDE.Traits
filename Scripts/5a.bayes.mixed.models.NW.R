@@ -1497,7 +1497,7 @@ all.leafN.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#769370", size = 1.5) +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(2.68951,44.19001)+
   theme_classic()
@@ -1521,7 +1521,7 @@ all.height.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(0.009000064,1.322333169)+
   theme_classic()
@@ -1541,7 +1541,7 @@ all.rootN.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(0.3800000,25.6283268)+
   theme_classic()
@@ -1561,7 +1561,7 @@ all.SLA.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(2.617596, 46.320001)+
   theme_classic()
@@ -1581,7 +1581,7 @@ all.root.depth.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(0.0479999,3.709335)+
   theme_classic()
@@ -1601,7 +1601,7 @@ all.rootDiam.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(0.07840002,1.12601235)+
   theme_classic()
@@ -1621,7 +1621,7 @@ all.SRL.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(2.497203,417.749988)+
   theme_classic()
@@ -1641,7 +1641,7 @@ all.RTD.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(0.02325658, 0.61999993)+
   theme_classic()
@@ -1661,7 +1661,7 @@ all.RMF.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(0.1211193,0.7328659)+
   theme_classic()
@@ -1681,7 +1681,7 @@ all.DSI.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(-0.8722616,0.1242846)+
    theme_classic()
@@ -1701,7 +1701,7 @@ all.MAP.plot = ggplot() +
   geom_point(data = imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#769370", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#769370") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(132.7,2366.1)+
   theme_classic()
@@ -1733,9 +1733,9 @@ x.value = c(-0.98,1.03)
 all.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Height", y = "Percent Cover Change", color = "Leaf N") +
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Height (m)", y = "Cover Change (%)", color = "Leaf N (mg/g)") +
   scale_colour_manual(values = c("black", "#769370"), labels = c("28.5","14.2"))+
   scale_fill_manual(values = c("black", "#769370"))+
   theme_classic()
@@ -1764,9 +1764,9 @@ x.value = c(-1.02,0.99)
 all.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Leaf N", y = "Percent Cover Change", color = "RMF") +
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)", color = "RMF (g/g)") +
   scale_colour_manual(values = c("black", "#769370"), labels = c("0.5","0.3"))+
   scale_fill_manual(values = c("black", "#769370"))+
   xlim(2.68951,44.19001)+
@@ -1799,9 +1799,9 @@ x.value = c(-1,1)
 all.leafN.x.DSI.plot = ggplot(data = leafN.DSI.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Leaf N", y = "Percent Cover Change", color = "DSI") +
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)", color = "DSI") +
   scale_colour_manual(values = c("black", "#769370"), labels = c("-0.27","-0.66"))+
   scale_fill_manual(values = c("black", "#769370"))+
   xlim(2.68951,44.19001)+
@@ -1856,7 +1856,7 @@ annual.leafN.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
   xlim(2.68951,44.19001)+
   theme_classic()
@@ -1879,9 +1879,9 @@ annual.height.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
+  #xlim(0.009000064,1.322333169)+
   theme_classic()
 annual.height.plot
 
@@ -1902,9 +1902,9 @@ annual.rootN.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268)+
+  #xlim(0.3800000,25.6283268)+
   theme_classic()
 annual.rootN.plot
 
@@ -1925,9 +1925,9 @@ annual.SLA.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 annual.SLA.plot
 
@@ -1948,9 +1948,9 @@ annual.root.depth.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 annual.root.depth.plot
 
@@ -1971,9 +1971,9 @@ annual.rootDiam.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 annual.rootDiam.plot
 
@@ -1994,9 +1994,9 @@ annual.SRL.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 annual.SRL.plot
 
@@ -2017,9 +2017,9 @@ annual.RTD.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 annual.RTD.plot
 
@@ -2040,9 +2040,9 @@ annual.RMF.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 annual.RMF.plot
 
@@ -2063,9 +2063,9 @@ annual.DSI.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#979461", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 annual.DSI.plot
 
@@ -2086,9 +2086,9 @@ annual.MAP.plot = ggplot() +
   geom_point(data = annual.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#979461", size = 1.5) +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#979461") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 annual.MAP.plot
 
@@ -2119,10 +2119,10 @@ annual.leafN.x.RMF.plot = ggplot(data = leafN.RMF.effect.2, aes(x = leafN.bit, y
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
   geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Leaf N", y = "Percent Cover Change", color = "RMF") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)", color = "RMF (g/g)") +
   scale_colour_manual(values = c("black", "#979461"), labels = c("0.49","0.28"))+
   scale_fill_manual(values = c("black", "#979461"))+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 annual.leafN.x.RMF.plot
 
@@ -2154,10 +2154,10 @@ annual.leafN.x.DSI.plot = ggplot(data = leafN.DSI.effect.2, aes(x = leafN.bt, y 
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
   geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Leaf N", y = "Percent Cover Change", color = "DSI") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)", color = "DSI") +
   scale_colour_manual(values = c("black", "#979461"), labels = c("-0.24","-0.70"))+
   scale_fill_manual(values = c("black", "#979461"))+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 annual.leafN.x.DSI.plot
 
@@ -2187,10 +2187,10 @@ annual.height.x.MAP.plot = ggplot(data = height.MAP.effect.2, aes(x = height.bt,
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
   geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Height", y = "Percent Cover Change", color = "MAP") +
+  labs(x = "Height (m)", y = "Cover Change (%)", color = "MAP (mm)") +
   scale_colour_manual(values = c("black","#979461"), labels = c("770","185"))+
   scale_fill_manual(values = c("black", "#979461"))+
-  xlim(0.0090000,1.26)+
+  #xlim(0.0090000,1.26)+
   theme_classic()
 annual.height.x.MAP.plot
 
@@ -2241,9 +2241,9 @@ perennial.leafN.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 perennial.leafN.plot
 
@@ -2264,9 +2264,9 @@ perennial.height.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
+  #xlim(0.009000064,1.322333169)+
   theme_classic()
 perennial.height.plot
 
@@ -2287,9 +2287,9 @@ perennial.rootN.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268)+
+  #xlim(0.3800000,25.6283268)+
   theme_classic()
 perennial.rootN.plot
 
@@ -2310,9 +2310,9 @@ perennial.SLA.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 perennial.SLA.plot
 
@@ -2333,9 +2333,9 @@ perennial.root.depth.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 perennial.root.depth.plot
 
@@ -2356,9 +2356,9 @@ perennial.rootDiam.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 perennial.rootDiam.plot
 
@@ -2379,9 +2379,9 @@ perennial.SRL.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 perennial.SRL.plot
 
@@ -2402,9 +2402,9 @@ perennial.RTD.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 perennial.RTD.plot
 
@@ -2425,9 +2425,9 @@ perennial.RMF.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 perennial.RMF.plot
 
@@ -2448,9 +2448,9 @@ perennial.DSI.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 perennial.DSI.plot
 
@@ -2471,9 +2471,9 @@ perennial.MAP.plot = ggplot() +
   geom_point(data = perennial.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#F1C646", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F1C646") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 perennial.MAP.plot
 
@@ -2502,12 +2502,12 @@ x.value = c(-0.97,1.02)
 perennial.height.x.leafN.plot = ggplot(data = height.leafN.effect.2, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Height", y = "Percent Cover Change", color = "Leaf N") +
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Height (m)", y = "Cover Change (%)", color = "Leaf N (mg/g)") +
   scale_colour_manual(values = c("black", "#F1C646"), labels = c("27.41","13.86"))+
   scale_fill_manual(values = c("black", "#F1C646"))+
-  xlim(0.009000064,1.322333169)+
+  #xlim(0.009000064,1.322333169)+
   theme_classic()
 perennial.height.x.leafN.plot
 
@@ -2557,9 +2557,9 @@ forb.leafN.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#F17236", size = 1.5) +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 forb.leafN.plot
 
@@ -2580,9 +2580,9 @@ forb.height.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#F17236", size = 1.5) +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
+  #xlim(0.009000064,1.322333169)+
   theme_classic()
 forb.height.plot
 
@@ -2603,9 +2603,9 @@ forb.rootN.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268) +
+  #xlim(0.3800000,25.6283268) +
   theme_classic()
 forb.rootN.plot
 
@@ -2626,9 +2626,9 @@ forb.SLA.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 forb.SLA.plot
 
@@ -2649,9 +2649,9 @@ forb.root.depth.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 forb.root.depth.plot
 
@@ -2672,9 +2672,9 @@ forb.rootDiam.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 forb.rootDiam.plot
 
@@ -2695,9 +2695,9 @@ forb.SRL.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 forb.SRL.plot
 
@@ -2718,9 +2718,9 @@ forb.RTD.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#F17236", size = 1.5) +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") + 
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 forb.RTD.plot
 
@@ -2741,9 +2741,9 @@ forb.RMF.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 forb.RMF.plot
 
@@ -2764,9 +2764,9 @@ forb.DSI.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 forb.DSI.plot
 
@@ -2787,9 +2787,9 @@ forb.MAP.plot = ggplot() +
   geom_point(data = forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#F17236", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#F17236") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 forb.MAP.plot
 
@@ -2818,12 +2818,12 @@ x.value = c(-1,1.04)
 forb.RTD.x.SRL.plot = ggplot(data = RTD.SRL.effect.2, aes(x = RTD.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Root Tissue Density", y = "Percent Cover Change", color = "SRL") +
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)", color = "SRL (m/g)") +
   scale_colour_manual(values = c("black", "#F17236"), labels = c("176.45","32.79"))+
   scale_fill_manual(values = c("black", "#F17236"))+
-  xlim(0,0.59)+
+  #xlim(0,0.59)+
   theme_classic()
 forb.RTD.x.SRL.plot
 
@@ -2851,14 +2851,14 @@ x.value = c(-1,1)
 (x.value*0.1957044) + -0.4647529
 
 forb.leafN.x.DSI.plot = ggplot(data = leafN.DSI.effect.2, aes(x = leafN.bt, y = estimate__, group = as.factor(effect2__))) +
-  geom_line(aes(color = as.factor(effect2__)), size = 1.5) +  
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
   geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
   geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
-  labs(x = "Leaf N", y = "Percent Cover Change", color = "DSI") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)", color = "DSI") +
   scale_colour_manual(values = c("black", "#F17236"), labels = c("-0.27","-0.66"))+
   scale_fill_manual(values = c("black", "#F17236"))+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 forb.leafN.x.DSI.plot
 
@@ -2909,9 +2909,9 @@ graminoid.leafN.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 graminoid.leafN.plot
 
@@ -2932,10 +2932,11 @@ graminoid.height.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
-  theme_classic()
+  #xlim(0.009000064,1.322333169)+
+  theme_classic() +
+  theme(plot.margin = margin(t = 5, r = 15, b = 5, l = 5))
 graminoid.height.plot
 
 ggsave("./Plots/graminoid.traits.NW.height.pdf", height = 3, width = 3)
@@ -2955,9 +2956,9 @@ graminoid.rootN.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268)+
+  #xlim(0.3800000,25.6283268)+
   theme_classic()
 graminoid.rootN.plot
 
@@ -2978,9 +2979,9 @@ graminoid.SLA.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 graminoid.SLA.plot
 
@@ -2995,9 +2996,9 @@ graminoid.root.depth.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 graminoid.root.depth.plot
 
@@ -3012,9 +3013,9 @@ graminoid.rootDiam.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 graminoid.rootDiam.plot
 
@@ -3029,9 +3030,9 @@ graminoid.SRL.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 graminoid.SRL.plot
 
@@ -3046,9 +3047,9 @@ graminoid.RTD.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 graminoid.RTD.plot
 
@@ -3063,9 +3064,9 @@ graminoid.RMF.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 graminoid.RMF.plot
 
@@ -3080,9 +3081,9 @@ graminoid.DSI.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 graminoid.DSI.plot
 
@@ -3097,9 +3098,9 @@ graminoid.MAP.plot = ggplot() +
   geom_point(data = graminoid.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#6E687E", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6E687E") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 graminoid.MAP.plot
 
@@ -3142,9 +3143,9 @@ perennial.graminoid.leafN.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 perennial.graminoid.leafN.plot
 
@@ -3159,10 +3160,11 @@ perennial.graminoid.height.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
-  theme_classic()
+  #xlim(0.009000064,1.322333169)+
+  theme_classic() +
+  theme(plot.margin = margin(t = 5, r = 15, b = 5, l = 5))
 perennial.graminoid.height.plot
 
 ggsave("./Plots/perennial.graminoid.traits.NW.height.pdf", height = 3, width = 3)
@@ -3176,9 +3178,9 @@ perennial.graminoid.rootN.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268)+
+  #xlim(0.3800000,25.6283268)+
   theme_classic()
 perennial.graminoid.rootN.plot
 
@@ -3193,9 +3195,9 @@ perennial.graminoid.SLA.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 perennial.graminoid.SLA.plot
 
@@ -3210,9 +3212,9 @@ perennial.graminoid.root.depth.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 perennial.graminoid.root.depth.plot
 
@@ -3227,9 +3229,9 @@ perennial.graminoid.rootDiam.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 perennial.graminoid.rootDiam.plot
 
@@ -3244,9 +3246,9 @@ perennial.graminoid.SRL.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 perennial.graminoid.SRL.plot
 
@@ -3261,9 +3263,9 @@ perennial.graminoid.RTD.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 perennial.graminoid.RTD.plot
 
@@ -3278,9 +3280,9 @@ perennial.graminoid.RMF.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 perennial.graminoid.RMF.plot
 
@@ -3295,9 +3297,9 @@ perennial.graminoid.DSI.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 perennial.graminoid.DSI.plot
 
@@ -3312,9 +3314,9 @@ perennial.graminoid.MAP.plot = ggplot() +
   geom_point(data = perennial.graminoid.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#6089B5", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#6089B5") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 perennial.graminoid.MAP.plot
 
@@ -3357,9 +3359,9 @@ perennial.forb.leafN.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 perennial.forb.leafN.plot
 
@@ -3374,9 +3376,9 @@ perennial.forb.height.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
+  #xlim(0.009000064,1.322333169)+
   theme_classic()
 perennial.forb.height.plot
 
@@ -3391,9 +3393,9 @@ perennial.forb.rootN.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268)+
+  #xlim(0.3800000,25.6283268)+
   theme_classic()
 perennial.forb.rootN.plot
 
@@ -3408,9 +3410,9 @@ perennial.forb.SLA.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 perennial.forb.SLA.plot
 
@@ -3425,9 +3427,9 @@ perennial.forb.root.depth.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 perennial.forb.root.depth.plot
 
@@ -3442,9 +3444,9 @@ perennial.forb.rootDiam.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 perennial.forb.rootDiam.plot
 
@@ -3459,9 +3461,9 @@ perennial.forb.SRL.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 perennial.forb.SRL.plot
 
@@ -3476,9 +3478,9 @@ perennial.forb.RTD.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "black", size = 1.5) +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 perennial.forb.RTD.plot
 
@@ -3493,9 +3495,9 @@ perennial.forb.RMF.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 perennial.forb.RMF.plot
 
@@ -3510,9 +3512,9 @@ perennial.forb.DSI.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 perennial.forb.DSI.plot
 
@@ -3527,9 +3529,9 @@ perennial.forb.MAP.plot = ggplot() +
   geom_point(data = perennial.forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "black", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "black") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 perennial.forb.MAP.plot
 
@@ -3572,9 +3574,9 @@ annual.forb.leafN.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = leafN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = leafN.effects, aes(x = leafN.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = leafN.effects, aes(x = leafN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Leaf N", y = "Percent Cover Change") +
+  labs(x = "Leaf N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.68951,44.19001)+
+  #xlim(2.68951,44.19001)+
   theme_classic()
 annual.forb.leafN.plot
 
@@ -3589,9 +3591,9 @@ annual.forb.height.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = height.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = height.effects, aes(x = height.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = height.effects, aes(x = height.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Height", y = "Percent Cover Change") +
+  labs(x = "Height (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.009000064,1.322333169)+
+  #xlim(0.009000064,1.322333169)+
   theme_classic()
 annual.forb.height.plot
 
@@ -3606,9 +3608,9 @@ annual.forb.rootN.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = rootN.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootN.effects, aes(x = rootN.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootN.effects, aes(x = rootN.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Root N", y = "Percent Cover Change") +
+  labs(x = "Root N (mg/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.3800000,25.6283268)+
+  #xlim(0.3800000,25.6283268)+
   theme_classic()
 annual.forb.rootN.plot
 
@@ -3623,9 +3625,9 @@ annual.forb.SLA.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = SLA.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SLA.effects, aes(x = SLA.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SLA.effects, aes(x = SLA.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Specific Leaf Area", y = "Percent Cover Change") +
+  labs(x = expression("Specific Leaf Area (m"^2*"/kg)"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.617596,46.320001)+
+  #xlim(2.617596,46.320001)+
   theme_classic()
 annual.forb.SLA.plot
 
@@ -3640,9 +3642,9 @@ annual.forb.root.depth.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = Depth.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = root.depth.effects, aes(x = Depth.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = root.depth.effects, aes(x = Depth.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Rooting Depth", y = "Percent Cover Change") +
+  labs(x = "Rooting Depth (m)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.0479999,3.709335)+
+  #xlim(0.0479999,3.709335)+
   theme_classic()
 annual.forb.root.depth.plot
 
@@ -3657,9 +3659,9 @@ annual.forb.rootDiam.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = Diam.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = rootDiam.effects, aes(x = Diam.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = rootDiam.effects, aes(x = Diam.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Root Diameter", y = "Percent Cover Change") +
+  labs(x = "Root Diameter (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.07840002,1.12601235)+
+  #xlim(0.07840002,1.12601235)+
   theme_classic()
 annual.forb.rootDiam.plot
 
@@ -3674,9 +3676,9 @@ annual.forb.SRL.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = SRL.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = SRL.effects, aes(x = SRL.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = SRL.effects, aes(x = SRL.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Specific Root Length", y = "Percent Cover Change") +
+  labs(x = "Specific Root Length (m/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(2.497203,417.749988)+
+  #xlim(2.497203,417.749988)+
   theme_classic()
 annual.forb.SRL.plot
 
@@ -3691,9 +3693,9 @@ annual.forb.RTD.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = RTD.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RTD.effects, aes(x = RTD.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RTD.effects, aes(x = RTD.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Root Tissue Density", y = "Percent Cover Change") +
+  labs(x = expression("Root Tissue Density (g/cm"^3*")"), y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.02325658,0.61999993)+
+  #xlim(0.02325658,0.61999993)+
   theme_classic()
 annual.forb.RTD.plot
 
@@ -3708,9 +3710,9 @@ annual.forb.RMF.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = RMF.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = RMF.effects, aes(x = RMF.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = RMF.effects, aes(x = RMF.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Root Mass Fraction", y = "Percent Cover Change") +
+  labs(x = "Root Mass Fraction (g/g)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(0.1211193,0.7328659)+
+  #xlim(0.1211193,0.7328659)+
   theme_classic()
 annual.forb.RMF.plot
 
@@ -3725,9 +3727,9 @@ annual.forb.DSI.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = DSI.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = DSI.effects, aes(x = DSI.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = DSI.effects, aes(x = DSI.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Drought Severity Index", y = "Percent Cover Change") +
+  labs(x = "Drought Severity Index", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(-0.8722616,0.1242846)+
+  #xlim(-0.8722616,0.1242846)+
   theme_classic()
 annual.forb.DSI.plot
 
@@ -3742,9 +3744,9 @@ annual.forb.MAP.plot = ggplot() +
   geom_point(data = annual.forb.imputed.NW.2, aes(x = MAP.bt, y = cover.change), color = "black", alpha = 0.5) +
   geom_line(data = MAP.effects, aes(x = MAP.bt, y = estimate__), color = "#B50200", size = 1.5, linetype = "dashed") +  
   geom_ribbon(data = MAP.effects, aes(x = MAP.bt, ymin = lower__, ymax = upper__), alpha = 0.2, fill = "#B50200") +  
-  labs(x = "Mean Annual Precipitation", y = "Percent Cover Change") +
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)") +
   ylim(-20.66667,21.24500)+
-  xlim(132.7,2366.1)+
+  #xlim(132.7,2366.1)+
   theme_classic()
 annual.forb.MAP.plot
 

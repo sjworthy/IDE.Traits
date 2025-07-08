@@ -117,28 +117,28 @@ imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data
 # Remove NAs
 
 imputed.NW.2 = imputed.NW %>%
-  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.annual.2 = imputed.NW.annual %>%
-  select(cover.change,site_code,Taxon, functional_group,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, functional_group,leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.perennial.2 = imputed.NW.perennial %>%
-  select(cover.change,site_code,Taxon,functional_group,leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon,functional_group,leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.graminoid.2 = imputed.NW.graminoid %>%
-  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.forb.2 = imputed.NW.forb %>%
-  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.annual.forb.2 = imputed.NW.annual.forb %>%
-  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.perennial.forb.2 = imputed.NW.perennial.forb%>%
-  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 imputed.NW.perennial.graminoid.2 = imputed.NW.perennial.graminoid %>%
-  select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
+  dplyr::select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 
 #### Table S2-S6 ####
@@ -473,6 +473,14 @@ table(imputed.NW.annual.2$functional_group)
 # forb 124, graminoid 44 legume 10
 table(imputed.NW.perennial.2$functional_group)
 # forb 224, graminoid 31, graminoid 174, legume 33
+
+#### T-test of cover differences ####
+t.test(imputed.NW.annual.2$cover.change,imputed.NW.perennial.2$cover.change)
+# t = 0.59583, df = 324.25, p-value = 0.5517
+t.test(imputed.NW.graminoid.2$cover.change,imputed.NW.forb.2$cover.change)
+# t = -0.89215, df = 420.74, p-value = 0.3728
+
+
 
 ### Correlation Plots ####
 

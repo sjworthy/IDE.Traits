@@ -271,7 +271,7 @@ height = ggplot(all.data, aes(x = height.m, y = impute.height.m))+
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 3.2, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 3.3, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 3.2, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed Height", x = "Observed Height")
 height # R2 = 0.93
@@ -280,7 +280,7 @@ rootN = ggplot(all.data, aes(x = rootN.mg.g, y = impute.rootN.mg.g))+
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 55, aes(label = after_stat(eq.label)), size = 5) +
-  stat_regline_equation(label.y = 38, aes(label = after_stat(rr.label)), size = 5)+
+  stat_regline_equation(label.y = 39, aes(label = after_stat(rr.label)), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed Root N", x = "Observed Root N")
 rootN # R2 = 0.99
@@ -289,7 +289,7 @@ SLA = ggplot(all.data, aes(x = SLA_m2.kg, y = impute.SLA_m2.kg))+
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 40, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 65, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 65, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed SLA", x = "Observed SLA")
 SLA # R2 = 0.94
@@ -298,7 +298,7 @@ root.depth = ggplot(all.data, aes(x = root.depth_m, y = impute.root.depth_m))+
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 7, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 3.3, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 3.3, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed Rooting Depth", x = "Observed Rooting Depth")
 root.depth # R2 = 0.94
@@ -307,7 +307,7 @@ rootDiam = ggplot(all.data, aes(x = rootDiam.mm, y = impute.rootDiam.mm))+
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 5, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 3.3, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 3.3, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed Root Diameter", x = "Observed Root Diameter")
 rootDiam # R2 = 0.89
@@ -316,7 +316,7 @@ SRL = ggplot(all.data, aes(x = SRL.groot.cahill.merge, y = impute.SRL.groot.cahi
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 760, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 675, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 676, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed SRL", x = "Observed SRL")
 SRL # R2 = 0.98
@@ -325,7 +325,7 @@ RTD = ggplot(all.data, aes(x = RTD.groot.cahill.merge, y = impute.RTD.groot.cahi
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 1.1, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 0.85, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 0.95, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed RTD", x = "Observed RTD")
 RTD # R2 = 0.99
@@ -334,13 +334,12 @@ RMF = ggplot(all.data, aes(x = RMF.g.g, y = impute.RMF.g.g))+
   geom_point(color = "gray50")+
   geom_smooth(method = "lm", color = "black")+
   #stat_regline_equation(label.y = 0.85, aes(label = ..eq.label..), size = 3) +
-  stat_regline_equation(label.y = 0.83, aes(label = ..rr.label..), size = 3)+
+  stat_regline_equation(label.y = 0.83, aes(label = ..rr.label..), size = 5)+
   theme_classic(base_size = 15)+
   labs(y = "Imputed RMF", x = "Observed RMF")
 RMF # R2 = 0.99
 
-impute.eval.plot = plot_grid(leafN,height,rootN,SLA,RMF,root.depth,RTD,SRL,rootDiam, 
-                             labels = c("A","B","C","D","E","F","G","H","I"))
+impute.eval.plot = plot_grid(leafN,height,rootN,SLA,RMF,root.depth,RTD,SRL,rootDiam)
 impute.eval.plot
 
 ggsave("./Plots/impute.traits.eval.plot.png", height = 11, width = 8.5)

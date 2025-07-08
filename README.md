@@ -1,4 +1,4 @@
-### Repository for the paper "*Growth form and phenology mediate the role of traits in short-term drought response: A global study on herbaceous species*"
+### Repository for the paper "*Growth form and lifespan mediate the role of traits in short-term drought response: A global study on herbaceous species*"
 
 ### The files
 
