@@ -4,6 +4,7 @@
 # load libraries 
 library(tidyverse)
 library(brms)
+library(emmeans)
 library(cowplot)
 
 #### Load imputed data without woody species ####
@@ -77,6 +78,448 @@ imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data
   left_join(., enviro, by = "site_code") %>%
   filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
   mutate_at(vars(26:36),scale)
+
+
+#### All categories together model ####
+# this model will included fewer data points since some populations
+# were not annual or perennial
+
+# change forbs and legumes to just forbs
+# change grass and graminoids to graminoids
+
+imputed.NW$functional_group[imputed.NW$functional_group == "LEGUME"] <- "FORB"
+imputed.NW$functional_group[imputed.NW$functional_group == "GRASS"] <- "GRAMINOID"
+
+# remove all rows that are not annual or perennial
+imputed.NW.2 = imputed.NW %>%
+  filter(local_lifespan %in% c("ANNUAL","PERENNIAL"))
+# make them factors
+imputed.NW.2$local_lifespan = as.factor(imputed.NW.2$local_lifespan)
+imputed.NW.2$functional_group = as.factor(imputed.NW.2$functional_group)
+
+# subset for columns we need
+imputed.NW.3 = imputed.NW.2 %>%
+  select(cover.change,local_lifespan,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
+         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
+  drop_na()
+
+imputed.NW.NA = imputed.NW %>%
+  select(cover.change,local_lifespan,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
+         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
+  drop_na()
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.all.cats.model = brm(cover.change ~ local_lifespan + functional_group + local_lifespan*functional_group + 
+                                         leafN.final*local_lifespan*functional_group + height.final*local_lifespan*functional_group + 
+                                         rootN.final*local_lifespan*functional_group + SLA.final*local_lifespan*functional_group +
+                                         root.depth.final*local_lifespan*functional_group + rootDiam.final*local_lifespan*functional_group +
+                                         SRL.final*local_lifespan*functional_group + RTD.final*local_lifespan*functional_group + 
+                                         RMF.final*local_lifespan*functional_group + mean.DSI*local_lifespan*functional_group + 
+                                         mean.MAP*local_lifespan*functional_group + (1|site_code) + (1|Taxon), 
+                              family = gaussian(),
+                              prior = priors,
+                              data = imputed.NW.3)
+
+summary(imputed.traits.NW.all.cats.model)
+bayes_R2(imputed.traits.NW.all.cats.model)
+# 0.1451649 0.02516069 0.1009502 0.1995333
+
+# test for differences overall
+pairs(emmeans(imputed.traits.NW.all.cats.model, ~ local_lifespan))
+# not significantly different
+pairs(emmeans(imputed.traits.NW.all.cats.model, ~ functional_group))
+# not significantly different
+# annual has significant positive slope
+
+# test for differences between combinations of lifespan and functional group
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+                   ~ local_lifespan*functional_group,
+                   var = "leafN.final"))
+# not significant
+
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "height.final"))
+# annual graminoid significant negative
+# annual forbs and annual graminoids significantly differ
+# perennial forbs and annual graminoids significantly differ
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "rootN.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "SLA.final"))
+# annual graminoid significant negative
+# perennial forbs and annual graminoids significantly differ
+# annual graminoids and perennial graminoids significantly differ
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "root.depth.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "rootDiam.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "SRL.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "RTD.final"))
+# perennial forb alone significant, positive
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "RMF.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "mean.DSI"))
+# not significant
+pairs(emtrends(imputed.traits.NW.all.cats.model,
+               ~ local_lifespan*functional_group,
+               var = "mean.MAP"))
+# not significant
+
+saveRDS(imputed.traits.NW.all.cats.model, file = "./Results/all.cats.imputed.traits.no_woody.rds")
+
+### Just lifespan model ####
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.lifespan.model = brm(cover.change ~ local_lifespan + 
+                                         leafN.final*local_lifespan + height.final*local_lifespan + 
+                                         rootN.final*local_lifespan + SLA.final*local_lifespan +
+                                         root.depth.final*local_lifespan + rootDiam.final*local_lifespan +
+                                         SRL.final*local_lifespan + RTD.final*local_lifespan + 
+                                         RMF.final*local_lifespan + mean.DSI*local_lifespan + 
+                                         mean.MAP*local_lifespan + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.3)
+
+summary(imputed.traits.NW.lifespan.model)
+fixef(imputed.traits.NW.lifespan.model)
+bayes_R2(imputed.traits.NW.lifespan.model)
+# R2 0.09073373 0.02491132 0.04998194 0.1476335
+
+# test for differences overall
+pairs(emmeans(imputed.traits.NW.lifespan.model, ~ local_lifespan))
+# not significantly different
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "leafN.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "height.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "rootN.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "SLA.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "root.depth.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "rootDiam.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "SRL.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "RTD.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "RMF.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "mean.DSI"))
+# not significant
+pairs(emtrends(imputed.traits.NW.lifespan.model,
+               ~ local_lifespan,
+               var = "mean.MAP"))
+# not significant
+# annual significant, positive
+
+saveRDS(imputed.traits.NW.lifespan.model, file = "./Results/lifespan.cats.imputed.traits.no_woody.rds")
+
+#### Lifespan interaction model ####
+
+priors <- c(prior(normal(0, 10), class = b))
+imputed.NW.traits.height.leafN.lifespan = brm(cover.change ~ local_lifespan + height.final*leafN.final*local_lifespan + 
+                                                mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.NW.3)
+
+summary(imputed.NW.traits.height.leafN.lifespan)
+bayes_R2(imputed.NW.traits.height.leafN.lifespan)
+# R2 0.05374738 0.02257641 0.01989944 0.1089797
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.NW.traits.height.leafN.lifespan, 
+               ~ local_lifespan | height.final,
+               var = "leafN.final",
+               at = list(height.final = c(mean(imputed.NW.3$height.final),min(imputed.NW.3$height.final),
+                                                                              max(imputed.NW.3$height.final)))))
+# height x leafN significant for Perennial
+# annual and perennial not significantly different
+
+# saveRDS(imputed.NW.traits.height.leafN.lifespan, file = "./Results/imputed.traits.NW.height.leafN.lifespan.rds")
+
+conditional_effects(imputed.NW.traits.height.leafN.lifespan)
+conditional_effects(imputed.NW.traits.height.leafN.lifespan,
+  effects = "leafN.final:height.final",
+  conditions = data.frame(local_lifespan = c("ANNUAL", "PERENNIAL")))
+# positive cover change with taller height and higher leafN
+
+imputed.NW.traits.depth.leafN.lifespan = brm(cover.change ~ local_lifespan + root.depth.final*leafN.final*local_lifespan + 
+                                               mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.NW.3)
+
+summary(imputed.NW.traits.depth.leafN.lifespan)
+saveRDS(imputed.NW.traits.depth.leafN.lifespan, file = "./Results/imputed.NW.traits.depth.leafN.lifespan.rds")
+bayes_R2(imputed.NW.traits.depth.leafN.lifespan)
+# R2 0.05340336 0.02401003 0.01838627 0.1112438
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.NW.traits.depth.leafN.lifespan, 
+               ~ local_lifespan | leafN.final,
+               var = "root.depth.final",
+               at = list(leafN.final = c(mean(imputed.NW.3$leafN.final),min(imputed.NW.3$leafN.final),
+                                          max(imputed.NW.3$leafN.final)))))
+# lifespans not different
+
+imputed.NW.traits.RTD.SRL.lifespan = brm(cover.change ~ local_lifespan + RTD.final*SRL.final*local_lifespan +
+                                           mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                family = gaussian(),
+                                prior = priors,
+                                data = imputed.NW.3)
+
+summary(imputed.NW.traits.RTD.SRL.lifespan)
+saveRDS(imputed.NW.traits.RTD.SRL.lifespan, file = "./Results/imputed.NW.traits.RTD.SRL.lifespan.rds")
+bayes_R2(imputed.NW.traits.RTD.SRL.lifespan)
+# R2 0.05214755 0.02356031 0.0186025 0.1091153
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.NW.traits.RTD.SRL.lifespan, 
+               ~ local_lifespan | SRL.final,
+               var = "RTD.final",
+               at = list(SRL.final = c(mean(imputed.NW.3$SRL.final),min(imputed.NW.3$SRL.final),
+                                         max(imputed.NW.3$SRL.final)))))
+# lifespans not different
+# Perennials significant interaction
+
+conditional_effects(imputed.NW.traits.RTD.SRL.lifespan,
+                    effects = "RTD.final:SRL.final",
+                    conditions = data.frame(local_lifespan = c("ANNUAL", "PERENNIAL")))
+# positive cover change with taller height and higher leafN
+
+imputed.NW.traits.leafN.RMF.lifespan = brm(cover.change ~ local_lifespan + leafN.final*RMF.final*local_lifespan +
+                                             mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed.NW.3)
+
+summary(imputed.NW.traits.leafN.RMF.lifespan)
+saveRDS(imputed.NW.traits.leafN.RMF.lifespan, file = "./Results/imputed.NW.traits.leafN.RMF.lifespan.rds")
+bayes_R2(imputed.NW.traits.leafN.RMF.lifespan)
+# R2 0.05891678 0.02582159 0.02123988 0.1184489
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.NW.traits.leafN.RMF.lifespan, 
+               ~ local_lifespan | leafN.final,
+               var = "RMF.final",
+               at = list(leafN.final = c(mean(imputed.NW.3$leafN.final),min(imputed.NW.3$leafN.final),
+                                       max(imputed.NW.3$leafN.final)))))
+# lifespans don't differ
+
+## Environment Interactions
+
+imputed.NW.traits.height.MAP.DSI.lifespan = brm(cover.change ~ local_lifespan + height.final*mean.MAP*local_lifespan +
+                                                  height.final*mean.DSI*local_lifespan + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.3)
+
+summary(imputed.NW.traits.height.MAP.DSI.lifespan)
+bayes_R2(imputed.NW.traits.height.MAP.DSI.lifespan)
+# R2 0.0612661 0.02346778 0.02552157 0.1157723
+saveRDS(imputed.NW.traits.height.MAP.DSI.lifespan, file = "./Results/imputed.NW.traits.height.MAP.DSI.lifespan.rds")
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.NW.traits.height.MAP.DSI.lifespan, 
+               ~ local_lifespan | height.final,
+               var = "mean.MAP",
+               at = list(height.final = c(mean(imputed.NW.3$height.final),min(imputed.NW.3$height.final),
+                                       max(imputed.NW.3$height.final)))))
+# significant different in MAP x height relationship between annuals and perennials
+# annuals are taller with higher MAP
+
+conditional_effects(imputed.NW.traits.height.MAP.DSI.lifespan,
+                    effects = "height.final:mean.MAP",
+                    conditions = data.frame(local_lifespan = c("ANNUAL", "PERENNIAL")))
+# positive cover change with taller height and higher leafN
+
+pairs(emtrends(imputed.NW.traits.height.MAP.DSI.lifespan, 
+               ~ local_lifespan | height.final,
+               var = "mean.DSI",
+               at = list(height.final = c(mean(imputed.NW.3$height.final),min(imputed.NW.3$height.final),
+                                          max(imputed.NW.3$height.final)))))
+# not significant
+
+imputed.NW.traits.leafN.MAP.DSI.lifespan = brm(cover.change ~ local_lifespan + leafN.final*mean.MAP*local_lifespan +
+                                                 leafN.final*mean.DSI*local_lifespan + (1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.NW.3)
+
+summary(imputed.NW.traits.leafN.MAP.DSI)
+# leafN 
+# leafN x DSI
+
+saveRDS(imputed.NW.traits.leafN.MAP.DSI, file = "./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
+bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
+# R2 0.06092939 0.0258172 0.02256498 0.1241577
+
+conditional_effects(imputed.NW.traits.leafN.MAP.DSI)
+# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                           family = gaussian(),
+                                           prior = priors,
+                                           data = imputed.NW)
+
+summary(imputed.NW.traits.root.depth.MAP.DSI)
+
+saveRDS(imputed.NW.traits.root.depth.MAP.DSI, file = "./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
+
+imputed.NW.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.NW)
+
+summary(imputed.NW.traits.RTD.MAP.DSI)
+
+saveRDS(imputed.NW.traits.RTD.MAP.DSI, file = "./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
+
+
+imputed.NW.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.NW)
+
+summary(imputed.NW.traits.SRL.MAP.DSI)
+
+saveRDS(imputed.NW.traits.SRL.MAP.DSI, file = "./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
+
+imputed.NW.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
+                                    family = gaussian(),
+                                    prior = priors,
+                                    data = imputed.NW)
+
+summary(imputed.NW.traits.RMF.MAP.DSI)
+
+saveRDS(imputed.NW.traits.RMF.MAP.DSI, file = "./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
+
+
+
+#### Just functional group model ####
+
+imputed.NW.functional.group = imputed.NW %>%
+  select(cover.change,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
+         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
+  drop_na()
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.functional.group.model = brm(cover.change ~ functional_group + 
+                                                 leafN.final*functional_group + height.final*functional_group + 
+                                                 rootN.final*functional_group + SLA.final*functional_group +
+                                                 root.depth.final*functional_group + rootDiam.final*functional_group +
+                                                 SRL.final*functional_group + RTD.final*functional_group + 
+                                                 RMF.final*functional_group + mean.DSI*functional_group + 
+                                                 mean.MAP*functional_group + (1|site_code) + (1|Taxon), 
+                                               family = gaussian(),
+                                               prior = priors,
+                                               data = imputed.NW.functional.group)
+
+summary(imputed.traits.NW.functional.group.model)
+bayes_R2(imputed.traits.NW.functional.group.model)
+#R2 0.09205296 0.02386955 0.05216027 0.1479578
+
+# test for differences overall
+pairs(emmeans(imputed.traits.NW.functional.group.model, ~ functional_group))
+# not significantly different
+
+# test for differences between annuals and perennials for each trait
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "leafN.final"))
+# not significant
+# forb significant, positive
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "height.final"))
+# forb and graminoid significantly different
+# height is significant, positive
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "rootN.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "SLA.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "root.depth.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "rootDiam.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "SRL.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "RTD.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "RMF.final"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "mean.DSI"))
+# not significant
+pairs(emtrends(imputed.traits.NW.functional.group.model,
+               ~ functional_group,
+               var = "mean.MAP"))
+# not significant
+# annual significant, positive
+
+saveRDS(imputed.traits.NW.functional.group.model, file = "./Results/functional.group.cats.imputed.traits.no_woody.rds")
 
 
 #### imputed traits model NW ####
@@ -297,6 +740,8 @@ summary(imputed.NW.annual.traits.height.MAP.DSI)
 saveRDS(imputed.NW.annual.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
 bayes_R2(imputed.NW.annual.traits.height.MAP.DSI)
 # R2 0.1208656 0.04510458 0.04694877 0.2220583
+
+imputed.NW.annual.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
 
 conditional_effects(imputed.NW.annual.traits.height.MAP.DSI)
 # higher height x higher MAP

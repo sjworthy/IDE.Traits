@@ -49,6 +49,11 @@ imputed.NW.2 = imputed.NW %>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
 
+imputed.NW.2 = imputed.NW %>%
+  select(cover.change,site_code,Taxon, leafN.final:mean.MAP, local_lifeform,
+         functional_group) %>%
+  drop_na()
+
 # number of sites
 
 unique(imputed.NW.2$site_code) # 63 sites
