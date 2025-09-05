@@ -23,7 +23,6 @@ taxon.df=as.data.frame(table(data$Taxon))
 # 35977 rows
 
 # excluded species with sp.
-
 data.2=subset(data, !(data$Taxon %in% c("ADESMIA SP.(eea.br)","AGOSERIS SP.(OREAC.US)","AGROSTIS sp.","AGROSTIS SP.",
                                 "AGROSTIS SP.(SCRUZH.US)","ALLIUM SP.", "ALLIUM SP.(BFL.US)","ALOPECURUS  SP.(LCSOUTH.CL)",
                                 "ALOPECURUS SP.(LCNORTH.CL)","ALOPECURUS SP.(PURDUE.US)","AMBROSIA SP.(PURDUE.US)",
@@ -104,14 +103,10 @@ data.2[c(23264,23320,23616,23627),13] = "LYTHRUM HYSSOPIFOLIA"
 which(data.2$Taxon == "BRACHYCOME CAMPYLOCARPA")
 data.2[c(12661,12704),13] = "BRACHYSCOME CAMPYLOCARPA"
 
-
-
 # get taxon list
 taxon.2=as.data.frame(table(data.2$Taxon))
 # 1600 species
 # 33970 rows
-
-# write.csv(taxon.2, "IDE.species.check.csv")
 
 #### verify species names ####
 # https://cran.r-project.org/web/packages/Taxonstand/Taxonstand.pdf
@@ -195,9 +190,18 @@ all.data.2[is.na(all.data.2)] = 0
 all.data.3 = all.data.2 %>%
   mutate(drought.after.minus.before = mean.after.drought - mean.before.drought,
          control.after.minus.before = mean.after.control - mean.before.control,
-         cover.change = drought.after.minus.before - control.after.minus.before)
+         cover.change = drought.after.minus.before - control.after.minus.before,
+         mean.after.drought.plus = mean.after.drought + 0.0000001,
+         mean.before.drought.plus = mean.before.drought + 0.0000001,
+         mean.after.control.plus = mean.after.control + 0.0000001,
+         mean.before.control.plus = mean.before.control + 0.0000001,
+         drought.after.minus.before.plus = mean.after.drought.plus - mean.before.drought.plus,
+         control.after.minus.before.plus = mean.after.control.plus - mean.before.control.plus,
+         cover.change.plus = drought.after.minus.before.plus - control.after.minus.before.plus,
+         relative.cover.change = cover.change.plus/mean.before.drought.plus,
+         log.fold.change.cover = (mean.after.drought.plus/mean.before.drought.plus)/(mean.after.control.plus/mean.before.control.plus))
 
-write.csv(all.data.3[,c(2:10)], file = "./Formatted.Data/Revisions/BACI.data.final.csv")
+write.csv(all.data.3[,c(2:19)], file = "./Formatted.Data/Revisions/BACI.data.final.csv")
 
 #### AusTraits ####
 # getting trait data from AusTraits
@@ -243,7 +247,7 @@ austraits.summary = austraits_wide %>%
 austraits.summary$LMA.kg.m2 = austraits.summary$mean.LMA.g.m2/1000
 austraits.summary$SLA.m2.kg= 1/austraits.summary$LMA.kg.m2
 
-#write.csv(austraits.summary, file="./Raw.Data/AusTraits.subset.traits.csv")
+#write.csv(austraits.summary, file="./Raw.Data/austraits/AusTraits.subset.traits.csv")
 
 # get plant height
 
@@ -257,8 +261,7 @@ max.summary = max_wide %>%
   summarise(mean.height.m = mean(plant_height, na.rm = TRUE),
             mean.root.diam.mm = mean(root_diameter, na.rm = TRUE))
 
-# write.csv(max.summary, file="./Raw.Data/AusTraits.subset.traits.2.csv")
-
+# write.csv(max.summary, file="./Raw.Data/austraits/AusTraits.subset.traits.2.csv")
 
 #### Calculate drought severity index for sites ####
 

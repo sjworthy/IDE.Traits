@@ -485,8 +485,6 @@ t.test(imputed.NW.annual.2$cover.change,imputed.NW.perennial.2$cover.change)
 t.test(imputed.NW.graminoid.2$cover.change,imputed.NW.forb.2$cover.change)
 # t = -0.89215, df = 420.74, p-value = 0.3728
 
-
-
 ### Correlation Plots ####
 
 enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)

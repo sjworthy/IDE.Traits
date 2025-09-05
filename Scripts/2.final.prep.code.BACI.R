@@ -456,7 +456,7 @@ imputed.traits.2 = imputed.traits %>%
   filter(round(rootDiam.final, 5) < 1.200000) %>% # 6
   filter(round(RMF.final, 5) < 0.7670084) # 10
 
-write.csv(imputed.traits.2, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.outliersRM.csv")
+#write.csv(imputed.traits.2, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.outliersRM.csv")
 
 # split by lifespan
 

@@ -5,6 +5,7 @@
 library(tidyverse)
 library(brms)
 library(emmeans)
+library(performance)
 library(cowplot)
 
 #### Load imputed data without woody species ####
@@ -80,448 +81,6 @@ imputed.NW.perennial.graminoid = read.csv("./Formatted.Data/Revisions/Final.Data
   mutate_at(vars(26:36),scale)
 
 
-#### All categories together model ####
-# this model will included fewer data points since some populations
-# were not annual or perennial
-
-# change forbs and legumes to just forbs
-# change grass and graminoids to graminoids
-
-imputed.NW$functional_group[imputed.NW$functional_group == "LEGUME"] <- "FORB"
-imputed.NW$functional_group[imputed.NW$functional_group == "GRASS"] <- "GRAMINOID"
-
-# remove all rows that are not annual or perennial
-imputed.NW.2 = imputed.NW %>%
-  filter(local_lifespan %in% c("ANNUAL","PERENNIAL"))
-# make them factors
-imputed.NW.2$local_lifespan = as.factor(imputed.NW.2$local_lifespan)
-imputed.NW.2$functional_group = as.factor(imputed.NW.2$functional_group)
-
-# subset for columns we need
-imputed.NW.3 = imputed.NW.2 %>%
-  select(cover.change,local_lifespan,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
-         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
-  drop_na()
-
-imputed.NW.NA = imputed.NW %>%
-  select(cover.change,local_lifespan,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
-         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
-  drop_na()
-
-priors <- c(prior(normal(0, 10), class = b))
-
-imputed.traits.NW.all.cats.model = brm(cover.change ~ local_lifespan + functional_group + local_lifespan*functional_group + 
-                                         leafN.final*local_lifespan*functional_group + height.final*local_lifespan*functional_group + 
-                                         rootN.final*local_lifespan*functional_group + SLA.final*local_lifespan*functional_group +
-                                         root.depth.final*local_lifespan*functional_group + rootDiam.final*local_lifespan*functional_group +
-                                         SRL.final*local_lifespan*functional_group + RTD.final*local_lifespan*functional_group + 
-                                         RMF.final*local_lifespan*functional_group + mean.DSI*local_lifespan*functional_group + 
-                                         mean.MAP*local_lifespan*functional_group + (1|site_code) + (1|Taxon), 
-                              family = gaussian(),
-                              prior = priors,
-                              data = imputed.NW.3)
-
-summary(imputed.traits.NW.all.cats.model)
-bayes_R2(imputed.traits.NW.all.cats.model)
-# 0.1451649 0.02516069 0.1009502 0.1995333
-
-# test for differences overall
-pairs(emmeans(imputed.traits.NW.all.cats.model, ~ local_lifespan))
-# not significantly different
-pairs(emmeans(imputed.traits.NW.all.cats.model, ~ functional_group))
-# not significantly different
-# annual has significant positive slope
-
-# test for differences between combinations of lifespan and functional group
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-                   ~ local_lifespan*functional_group,
-                   var = "leafN.final"))
-# not significant
-
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "height.final"))
-# annual graminoid significant negative
-# annual forbs and annual graminoids significantly differ
-# perennial forbs and annual graminoids significantly differ
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "rootN.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "SLA.final"))
-# annual graminoid significant negative
-# perennial forbs and annual graminoids significantly differ
-# annual graminoids and perennial graminoids significantly differ
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "root.depth.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "rootDiam.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "SRL.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "RTD.final"))
-# perennial forb alone significant, positive
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "RMF.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "mean.DSI"))
-# not significant
-pairs(emtrends(imputed.traits.NW.all.cats.model,
-               ~ local_lifespan*functional_group,
-               var = "mean.MAP"))
-# not significant
-
-saveRDS(imputed.traits.NW.all.cats.model, file = "./Results/all.cats.imputed.traits.no_woody.rds")
-
-### Just lifespan model ####
-
-priors <- c(prior(normal(0, 10), class = b))
-
-imputed.traits.NW.lifespan.model = brm(cover.change ~ local_lifespan + 
-                                         leafN.final*local_lifespan + height.final*local_lifespan + 
-                                         rootN.final*local_lifespan + SLA.final*local_lifespan +
-                                         root.depth.final*local_lifespan + rootDiam.final*local_lifespan +
-                                         SRL.final*local_lifespan + RTD.final*local_lifespan + 
-                                         RMF.final*local_lifespan + mean.DSI*local_lifespan + 
-                                         mean.MAP*local_lifespan + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.3)
-
-summary(imputed.traits.NW.lifespan.model)
-fixef(imputed.traits.NW.lifespan.model)
-bayes_R2(imputed.traits.NW.lifespan.model)
-# R2 0.09073373 0.02491132 0.04998194 0.1476335
-
-# test for differences overall
-pairs(emmeans(imputed.traits.NW.lifespan.model, ~ local_lifespan))
-# not significantly different
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "leafN.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "height.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "rootN.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "SLA.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "root.depth.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "rootDiam.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "SRL.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "RTD.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "RMF.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "mean.DSI"))
-# not significant
-pairs(emtrends(imputed.traits.NW.lifespan.model,
-               ~ local_lifespan,
-               var = "mean.MAP"))
-# not significant
-# annual significant, positive
-
-saveRDS(imputed.traits.NW.lifespan.model, file = "./Results/lifespan.cats.imputed.traits.no_woody.rds")
-
-#### Lifespan interaction model ####
-
-priors <- c(prior(normal(0, 10), class = b))
-imputed.NW.traits.height.leafN.lifespan = brm(cover.change ~ local_lifespan + height.final*leafN.final*local_lifespan + 
-                                                mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                     family = gaussian(),
-                                     prior = priors,
-                                     data = imputed.NW.3)
-
-summary(imputed.NW.traits.height.leafN.lifespan)
-bayes_R2(imputed.NW.traits.height.leafN.lifespan)
-# R2 0.05374738 0.02257641 0.01989944 0.1089797
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.NW.traits.height.leafN.lifespan, 
-               ~ local_lifespan | height.final,
-               var = "leafN.final",
-               at = list(height.final = c(mean(imputed.NW.3$height.final),min(imputed.NW.3$height.final),
-                                                                              max(imputed.NW.3$height.final)))))
-# height x leafN significant for Perennial
-# annual and perennial not significantly different
-
-# saveRDS(imputed.NW.traits.height.leafN.lifespan, file = "./Results/imputed.traits.NW.height.leafN.lifespan.rds")
-
-conditional_effects(imputed.NW.traits.height.leafN.lifespan)
-conditional_effects(imputed.NW.traits.height.leafN.lifespan,
-  effects = "leafN.final:height.final",
-  conditions = data.frame(local_lifespan = c("ANNUAL", "PERENNIAL")))
-# positive cover change with taller height and higher leafN
-
-imputed.NW.traits.depth.leafN.lifespan = brm(cover.change ~ local_lifespan + root.depth.final*leafN.final*local_lifespan + 
-                                               mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                    family = gaussian(),
-                                    prior = priors,
-                                    data = imputed.NW.3)
-
-summary(imputed.NW.traits.depth.leafN.lifespan)
-saveRDS(imputed.NW.traits.depth.leafN.lifespan, file = "./Results/imputed.NW.traits.depth.leafN.lifespan.rds")
-bayes_R2(imputed.NW.traits.depth.leafN.lifespan)
-# R2 0.05340336 0.02401003 0.01838627 0.1112438
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.NW.traits.depth.leafN.lifespan, 
-               ~ local_lifespan | leafN.final,
-               var = "root.depth.final",
-               at = list(leafN.final = c(mean(imputed.NW.3$leafN.final),min(imputed.NW.3$leafN.final),
-                                          max(imputed.NW.3$leafN.final)))))
-# lifespans not different
-
-imputed.NW.traits.RTD.SRL.lifespan = brm(cover.change ~ local_lifespan + RTD.final*SRL.final*local_lifespan +
-                                           mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                family = gaussian(),
-                                prior = priors,
-                                data = imputed.NW.3)
-
-summary(imputed.NW.traits.RTD.SRL.lifespan)
-saveRDS(imputed.NW.traits.RTD.SRL.lifespan, file = "./Results/imputed.NW.traits.RTD.SRL.lifespan.rds")
-bayes_R2(imputed.NW.traits.RTD.SRL.lifespan)
-# R2 0.05214755 0.02356031 0.0186025 0.1091153
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.NW.traits.RTD.SRL.lifespan, 
-               ~ local_lifespan | SRL.final,
-               var = "RTD.final",
-               at = list(SRL.final = c(mean(imputed.NW.3$SRL.final),min(imputed.NW.3$SRL.final),
-                                         max(imputed.NW.3$SRL.final)))))
-# lifespans not different
-# Perennials significant interaction
-
-conditional_effects(imputed.NW.traits.RTD.SRL.lifespan,
-                    effects = "RTD.final:SRL.final",
-                    conditions = data.frame(local_lifespan = c("ANNUAL", "PERENNIAL")))
-# positive cover change with taller height and higher leafN
-
-imputed.NW.traits.leafN.RMF.lifespan = brm(cover.change ~ local_lifespan + leafN.final*RMF.final*local_lifespan +
-                                             mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                  family = gaussian(),
-                                  prior = priors,
-                                  data = imputed.NW.3)
-
-summary(imputed.NW.traits.leafN.RMF.lifespan)
-saveRDS(imputed.NW.traits.leafN.RMF.lifespan, file = "./Results/imputed.NW.traits.leafN.RMF.lifespan.rds")
-bayes_R2(imputed.NW.traits.leafN.RMF.lifespan)
-# R2 0.05891678 0.02582159 0.02123988 0.1184489
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.NW.traits.leafN.RMF.lifespan, 
-               ~ local_lifespan | leafN.final,
-               var = "RMF.final",
-               at = list(leafN.final = c(mean(imputed.NW.3$leafN.final),min(imputed.NW.3$leafN.final),
-                                       max(imputed.NW.3$leafN.final)))))
-# lifespans don't differ
-
-## Environment Interactions
-
-imputed.NW.traits.height.MAP.DSI.lifespan = brm(cover.change ~ local_lifespan + height.final*mean.MAP*local_lifespan +
-                                                  height.final*mean.DSI*local_lifespan + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.3)
-
-summary(imputed.NW.traits.height.MAP.DSI.lifespan)
-bayes_R2(imputed.NW.traits.height.MAP.DSI.lifespan)
-# R2 0.0612661 0.02346778 0.02552157 0.1157723
-saveRDS(imputed.NW.traits.height.MAP.DSI.lifespan, file = "./Results/imputed.NW.traits.height.MAP.DSI.lifespan.rds")
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.NW.traits.height.MAP.DSI.lifespan, 
-               ~ local_lifespan | height.final,
-               var = "mean.MAP",
-               at = list(height.final = c(mean(imputed.NW.3$height.final),min(imputed.NW.3$height.final),
-                                       max(imputed.NW.3$height.final)))))
-# significant different in MAP x height relationship between annuals and perennials
-# annuals are taller with higher MAP
-
-conditional_effects(imputed.NW.traits.height.MAP.DSI.lifespan,
-                    effects = "height.final:mean.MAP",
-                    conditions = data.frame(local_lifespan = c("ANNUAL", "PERENNIAL")))
-# positive cover change with taller height and higher leafN
-
-pairs(emtrends(imputed.NW.traits.height.MAP.DSI.lifespan, 
-               ~ local_lifespan | height.final,
-               var = "mean.DSI",
-               at = list(height.final = c(mean(imputed.NW.3$height.final),min(imputed.NW.3$height.final),
-                                          max(imputed.NW.3$height.final)))))
-# not significant
-
-imputed.NW.traits.leafN.MAP.DSI.lifespan = brm(cover.change ~ local_lifespan + leafN.final*mean.MAP*local_lifespan +
-                                                 leafN.final*mean.DSI*local_lifespan + (1|site_code) + (1|Taxon), 
-                                      family = gaussian(),
-                                      prior = priors,
-                                      data = imputed.NW.3)
-
-summary(imputed.NW.traits.leafN.MAP.DSI)
-# leafN 
-# leafN x DSI
-
-saveRDS(imputed.NW.traits.leafN.MAP.DSI, file = "./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
-bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
-# R2 0.06092939 0.0258172 0.02256498 0.1241577
-
-conditional_effects(imputed.NW.traits.leafN.MAP.DSI)
-# higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
-
-imputed.NW.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
-                                           family = gaussian(),
-                                           prior = priors,
-                                           data = imputed.NW)
-
-summary(imputed.NW.traits.root.depth.MAP.DSI)
-
-saveRDS(imputed.NW.traits.root.depth.MAP.DSI, file = "./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
-
-imputed.NW.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
-                                    family = gaussian(),
-                                    prior = priors,
-                                    data = imputed.NW)
-
-summary(imputed.NW.traits.RTD.MAP.DSI)
-
-saveRDS(imputed.NW.traits.RTD.MAP.DSI, file = "./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
-
-
-imputed.NW.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
-                                    family = gaussian(),
-                                    prior = priors,
-                                    data = imputed.NW)
-
-summary(imputed.NW.traits.SRL.MAP.DSI)
-
-saveRDS(imputed.NW.traits.SRL.MAP.DSI, file = "./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
-
-imputed.NW.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
-                                    family = gaussian(),
-                                    prior = priors,
-                                    data = imputed.NW)
-
-summary(imputed.NW.traits.RMF.MAP.DSI)
-
-saveRDS(imputed.NW.traits.RMF.MAP.DSI, file = "./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
-
-
-
-#### Just functional group model ####
-
-imputed.NW.functional.group = imputed.NW %>%
-  select(cover.change,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
-         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
-  drop_na()
-
-priors <- c(prior(normal(0, 10), class = b))
-
-imputed.traits.NW.functional.group.model = brm(cover.change ~ functional_group + 
-                                                 leafN.final*functional_group + height.final*functional_group + 
-                                                 rootN.final*functional_group + SLA.final*functional_group +
-                                                 root.depth.final*functional_group + rootDiam.final*functional_group +
-                                                 SRL.final*functional_group + RTD.final*functional_group + 
-                                                 RMF.final*functional_group + mean.DSI*functional_group + 
-                                                 mean.MAP*functional_group + (1|site_code) + (1|Taxon), 
-                                               family = gaussian(),
-                                               prior = priors,
-                                               data = imputed.NW.functional.group)
-
-summary(imputed.traits.NW.functional.group.model)
-bayes_R2(imputed.traits.NW.functional.group.model)
-#R2 0.09205296 0.02386955 0.05216027 0.1479578
-
-# test for differences overall
-pairs(emmeans(imputed.traits.NW.functional.group.model, ~ functional_group))
-# not significantly different
-
-# test for differences between annuals and perennials for each trait
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "leafN.final"))
-# not significant
-# forb significant, positive
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "height.final"))
-# forb and graminoid significantly different
-# height is significant, positive
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "rootN.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "SLA.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "root.depth.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "rootDiam.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "SRL.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "RTD.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "RMF.final"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "mean.DSI"))
-# not significant
-pairs(emtrends(imputed.traits.NW.functional.group.model,
-               ~ functional_group,
-               var = "mean.MAP"))
-# not significant
-# annual significant, positive
-
-saveRDS(imputed.traits.NW.functional.group.model, file = "./Results/functional.group.cats.imputed.traits.no_woody.rds")
-
-
 #### imputed traits model NW ####
 
 priors <- c(prior(normal(0, 10), class = b))
@@ -538,6 +97,32 @@ summary(imputed.traits.NW.model)
 bayes_R2(imputed.traits.NW.model)
 # R2 0.06008998 0.02492269 0.02400752 0.1181871
 
+imputed.traits.NW.model = readRDS("./Results/all.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals: All Species",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.traits.NW.model) # p = 0.753
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values: All Species") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.traits.NW.model)
+
 imputed.NW.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                      family = gaussian(),
                                      prior = priors,
@@ -546,12 +131,38 @@ imputed.NW.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + m
 summary(imputed.NW.traits.height.leafN)
 # height x leafN
 
-saveRDS(imputed.NW.traits.height.leafN, file = "./Results/all.imputed.traits.NW.height.leafN.rds")
+#saveRDS(imputed.NW.traits.height.leafN, file = "./Results/all.imputed.traits.NW.height.leafN.rds")
 bayes_R2(imputed.NW.traits.height.leafN)
 # R2 0.04979303 0.02318114 0.01594568 0.1060524
 
 conditional_effects(imputed.NW.traits.height.leafN)
 # positive cover change with taller height and higher leafN
+
+imputed.NW.traits.height.leafN = readRDS("./Results/all.imputed.traits.NW.height.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.height.leafN) # p = 0.676
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.height.leafN)
 
 imputed.NW.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                     family = gaussian(),
@@ -565,6 +176,32 @@ saveRDS(imputed.NW.traits.depth.leafN, file = "./Results/all.imputed.NW.traits.d
 bayes_R2(imputed.NW.traits.depth.leafN)
 # 0.04902346 0.02481235 0.01394253 0.1094119
 
+imputed.NW.traits.depth.leafN = readRDS("./Results/all.imputed.NW.traits.depth.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.depth.leafN) # p = 0.713
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.depth.leafN)
+
 imputed.NW.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
                                 prior = priors,
@@ -576,6 +213,32 @@ summary(imputed.NW.traits.RTD.SRL)
 saveRDS(imputed.NW.traits.RTD.SRL, file = "./Results/all.imputed.NW.traits.RTD.SRL.rds")
 bayes_R2(imputed.NW.traits.RTD.SRL)
 # R2 0.04620861 0.02366104 0.01308091 0.1012018
+
+imputed.NW.traits.RTD.SRL = readRDS("./Results/all.imputed.NW.traits.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.RTD.SRL) # p = 0.782
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.RTD.SRL)
 
 imputed.NW.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                   family = gaussian(),
@@ -594,6 +257,32 @@ bayes_R2(imputed.NW.traits.leafN.RMF)
 conditional_effects(imputed.NW.traits.leafN.RMF)
 # higher cover change with high leafN and high RMF or low leafN and low RMF
 
+imputed.NW.traits.leafN.RMF = readRDS("./Results/all.imputed.NW.traits.leafN.RMF.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.leafN.RMF) # p = 0.682
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.leafN.RMF)
+
 #### All-species Environment ####
 
 priors <- c(prior(normal(0, 10), class = b))
@@ -605,7 +294,33 @@ imputed.NW.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.MAP + he
 
 summary(imputed.NW.traits.height.MAP.DSI)
 
-saveRDS(imputed.NW.traits.height.MAP.DSI, file = "./Results/all.imputed.NW.traits.height.MAP.DSI.rds")
+# saveRDS(imputed.NW.traits.height.MAP.DSI, file = "./Results/all.imputed.NW.traits.height.MAP.DSI.rds")
+
+imputed.NW.traits.height.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.height.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.height.MAP.DSI) # p = 0.791
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.height.MAP.DSI)
 
 imputed.NW.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                   family = gaussian(),
@@ -616,12 +331,38 @@ summary(imputed.NW.traits.leafN.MAP.DSI)
 # leafN 
 # leafN x DSI
 
-saveRDS(imputed.NW.traits.leafN.MAP.DSI, file = "./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
+#saveRDS(imputed.NW.traits.leafN.MAP.DSI, file = "./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
 bayes_R2(imputed.NW.traits.leafN.MAP.DSI)
 # R2 0.06092939 0.0258172 0.02256498 0.1241577
 
 conditional_effects(imputed.NW.traits.leafN.MAP.DSI)
 # higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.traits.leafN.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.leafN.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.leafN.MAP.DSI) # p = 0.712
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.leafN.MAP.DSI)
 
 imputed.NW.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                        family = gaussian(),
@@ -629,8 +370,33 @@ imputed.NW.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.
                                        data = imputed.NW)
 
 summary(imputed.NW.traits.root.depth.MAP.DSI)
+#saveRDS(imputed.NW.traits.root.depth.MAP.DSI, file = "./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.traits.root.depth.MAP.DSI, file = "./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
+imputed.NW.traits.root.depth.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.depth.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.root.depth.MAP.DSI) # p = 0.815
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.root.depth.MAP.DSI)
 
 imputed.NW.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
@@ -638,9 +404,33 @@ imputed.NW.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.fina
                                 data = imputed.NW)
 
 summary(imputed.NW.traits.RTD.MAP.DSI)
+# saveRDS(imputed.NW.traits.RTD.MAP.DSI, file = "./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.traits.RTD.MAP.DSI, file = "./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
+imputed.NW.traits.RTD.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.RTD.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.RTD.MAP.DSI) # p = 0.779
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.RTD.MAP.DSI)
 
 imputed.NW.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
@@ -648,8 +438,33 @@ imputed.NW.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.fina
                                 data = imputed.NW)
 
 summary(imputed.NW.traits.SRL.MAP.DSI)
+#saveRDS(imputed.NW.traits.SRL.MAP.DSI, file = "./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.traits.SRL.MAP.DSI, file = "./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
+imputed.NW.traits.SRL.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.SRL.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.SRL.MAP.DSI) # p = 0.830
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.SRL.MAP.DSI)
 
 imputed.NW.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                 family = gaussian(),
@@ -657,8 +472,33 @@ imputed.NW.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.fina
                                 data = imputed.NW)
 
 summary(imputed.NW.traits.RMF.MAP.DSI)
+#saveRDS(imputed.NW.traits.RMF.MAP.DSI, file = "./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.traits.RMF.MAP.DSI, file = "./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
+imputed.NW.traits.RMF.MAP.DSI = readRDS("./Results/all.imputed.NW.traits.RMF.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.traits.RMF.MAP.DSI) # p = 0.811
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.traits.RMF.MAP.DSI)
 
 #### imputed ANNUAL traits lifespan model NW ####
 
@@ -672,9 +512,35 @@ annual.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.f
 
 summary(annual.traits.NW.model)
 # MAP
-saveRDS(annual.traits.NW.model, file = "./Results/annual.imputed.traits.no_woody.rds")
+#saveRDS(annual.traits.NW.model, file = "./Results/annual.imputed.traits.no_woody.rds")
 bayes_R2(annual.traits.NW.model)
 # R2 0.1542627 0.04448325 0.07546093 0.2476329
+
+annual.traits.NW.model = readRDS("./Results/annual.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(annual.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(annual.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(annual.traits.NW.model) # p = 0.831
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(annual.traits.NW.model)
 
 imputed.NW.annual.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                             family = gaussian(),
@@ -683,9 +549,33 @@ imputed.NW.annual.traits.height.leafN = brm(cover.change ~ height.final*leafN.fi
 
 summary(imputed.NW.annual.traits.height.leafN)
 # MAP
+#saveRDS(imputed.NW.annual.traits.height.leafN, file = "./Results/annual.imputed.traits.NW.height.leafN.rds")
 
-saveRDS(imputed.NW.annual.traits.height.leafN, file = "./Results/annual.imputed.traits.NW.height.leafN.rds")
+imputed.NW.annual.traits.height.leafN = readRDS("./Results/annual.imputed.traits.NW.height.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.height.leafN) # p = 0.737
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.height.leafN)
 
 imputed.NW.annual.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                            family = gaussian(),
@@ -694,9 +584,33 @@ imputed.NW.annual.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN
 
 summary(imputed.NW.annual.traits.depth.leafN)
 # MAP is positive, significant
+#saveRDS(imputed.NW.annual.traits.depth.leafN, file = "./Results/annual.imputed.traits.NW.depth.leafN.rds")
 
-saveRDS(imputed.NW.annual.traits.depth.leafN, file = "./Results/annual.imputed.traits.NW.depth.leafN.rds")
+imputed.NW.annual.traits.depth.leafN = readRDS("./Results/annual.imputed.traits.NW.depth.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.depth.leafN) # p = 0.845
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.depth.leafN)
 
 imputed.NW.annual.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                        family = gaussian(),
@@ -705,9 +619,33 @@ imputed.NW.annual.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean
 
 summary(imputed.NW.annual.traits.RTD.SRL)
 # nothing significant
+# saveRDS(imputed.NW.annual.traits.RTD.SRL, file = "./Results/annual.imputed.traits.NW.RTD.SRL.rds")
 
-saveRDS(imputed.NW.annual.traits.RTD.SRL, file = "./Results/annual.imputed.traits.NW.RTD.SRL.rds")
+imputed.NW.annual.traits.RTD.SRL = readRDS("./Results/annual.imputed.traits.NW.RTD.SRL.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.RTD.SRL) # p = 0.889
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.RTD.SRL)
 
 imputed.NW.annual.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                          family = gaussian(),
@@ -718,12 +656,38 @@ summary(imputed.NW.annual.traits.leafN.RMF)
 # MAP significant positive
 # leafN:RMF significant positive
 
-saveRDS(imputed.NW.annual.traits.leafN.RMF, file = "./Results/annual.imputed.NW.traits.leafN.RMF.rds")
+#saveRDS(imputed.NW.annual.traits.leafN.RMF, file = "./Results/annual.imputed.NW.traits.leafN.RMF.rds")
 bayes_R2(imputed.NW.annual.traits.leafN.RMF)
 # R2 0.1310284 0.04710103 0.0522819 0.2401864
 
 conditional_effects(imputed.NW.annual.traits.leafN.RMF)
 # higher cover change with high leafN and high RMF or low leafN and low RMF
+
+imputed.NW.annual.traits.leafN.RMF = readRDS("./Results/annual.imputed.NW.traits.leafN.RMF.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.leafN.RMF) # p = 0.765
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.leafN.RMF)
 
 #### Annuals Environment ####
 
@@ -737,11 +701,35 @@ imputed.NW.annual.traits.height.MAP.DSI = brm(cover.change ~ height.final*mean.M
 summary(imputed.NW.annual.traits.height.MAP.DSI)
 # height x MAP
 
-saveRDS(imputed.NW.annual.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
+#saveRDS(imputed.NW.annual.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
 bayes_R2(imputed.NW.annual.traits.height.MAP.DSI)
 # R2 0.1208656 0.04510458 0.04694877 0.2220583
 
 imputed.NW.annual.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.height.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.height.MAP.DSI) # p = 0.877
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.height.MAP.DSI)
 
 conditional_effects(imputed.NW.annual.traits.height.MAP.DSI)
 # higher height x higher MAP
@@ -754,12 +742,38 @@ imputed.NW.annual.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP
 summary(imputed.NW.annual.traits.leafN.MAP.DSI)
 # leafN x DSI
 
-saveRDS(imputed.NW.annual.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.annual.traits.leafN.MAP.DSI.rds")
+#saveRDS(imputed.NW.annual.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.annual.traits.leafN.MAP.DSI.rds")
 bayes_R2(imputed.NW.annual.traits.leafN.MAP.DSI)
 # R2 0.1705448 0.05178855 0.07863608 0.2805161
 
 conditional_effects(imputed.NW.annual.traits.leafN.MAP.DSI)
 # higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.annual.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.leafN.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.leafN.MAP.DSI) # p = 0.759
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.leafN.MAP.DSI)
 
 imputed.NW.annual.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                   family = gaussian(),
@@ -768,9 +782,33 @@ imputed.NW.annual.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.fina
 
 summary(imputed.NW.annual.traits.root.depth.MAP.DSI)
 # MAP
+#saveRDS(imputed.NW.annual.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.annual.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.annual.traits.depth.MAP.DSI.rds")
+imputed.NW.annual.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.depth.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.root.depth.MAP.DSI) # p = 0.939
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.root.depth.MAP.DSI)
 
 imputed.NW.annual.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                            family = gaussian(),
@@ -778,9 +816,33 @@ imputed.NW.annual.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + R
                                            data = imputed.NW.annual)
 
 summary(imputed.NW.annual.traits.RTD.MAP.DSI)
+#saveRDS(imputed.NW.annual.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.annual.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.annual.traits.RTD.MAP.DSI.rds")
+imputed.NW.annual.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.RTD.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.RTD.MAP.DSI) # p = 0.824
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.RTD.MAP.DSI)
 
 imputed.NW.annual.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                            family = gaussian(),
@@ -789,8 +851,33 @@ imputed.NW.annual.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + S
 
 summary(imputed.NW.annual.traits.SRL.MAP.DSI)
 # MAP
+#saveRDS(imputed.NW.annual.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.annual.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.annual.traits.SRL.MAP.DSI.rds")
+imputed.NW.annual.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.SRL.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.SRL.MAP.DSI) # p = 0.915
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.SRL.MAP.DSI)
 
 imputed.NW.annual.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                            family = gaussian(),
@@ -799,8 +886,33 @@ imputed.NW.annual.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + R
 
 summary(imputed.NW.annual.traits.RMF.MAP.DSI)
 # MAP
+#saveRDS(imputed.NW.annual.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.annual.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.annual.traits.RMF.MAP.DSI.rds")
+imputed.NW.annual.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.annual.traits.RMF.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.traits.RMF.MAP.DSI) # p = 0.876
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.traits.RMF.MAP.DSI)
 
 #### imputed PERENNIAL traits lifespan model NW ####
 
@@ -815,9 +927,35 @@ perennial.traits.NW.model = brm(cover.change ~ leafN.final + height.final + root
 summary(perennial.traits.NW.model)
 # nothing significant
 
-saveRDS(perennial.traits.NW.model, file = "./Results/perennial.imputed.traits.no_woody.rds")
+#saveRDS(perennial.traits.NW.model, file = "./Results/perennial.imputed.traits.no_woody.rds")
 bayes_R2(perennial.traits.NW.model)
 # R2 0.081794 0.03372474 0.03279104 0.1602133
+
+perennial.traits.NW.model = readRDS("./Results/perennial.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(perennial.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(perennial.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(perennial.traits.NW.model) # p = 0.790
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(perennial.traits.NW.model)
 
 imputed.NW.perennial.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                family = gaussian(),
@@ -827,12 +965,38 @@ imputed.NW.perennial.traits.height.leafN = brm(cover.change ~ height.final*leafN
 summary(imputed.NW.perennial.traits.height.leafN)
 # height x leafN significant positive
 
-saveRDS(imputed.NW.perennial.traits.height.leafN, file = "./Results/perennial.imputed.traits.NW.height.leafN.rds")
+#saveRDS(imputed.NW.perennial.traits.height.leafN, file = "./Results/perennial.imputed.traits.NW.height.leafN.rds")
 bayes_R2(imputed.NW.perennial.traits.height.leafN)
 #R2 0.06295824 0.03318674 0.01677983 0.1430209
 
 conditional_effects(imputed.NW.perennial.traits.height.leafN)
 # higher cover for taller plants with higher leafN
+
+imputed.NW.perennial.traits.height.leafN = readRDS("./Results/perennial.imputed.traits.NW.height.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.height.leafN) # p = 0.726
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.height.leafN)
 
 imputed.NW.perennial.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -841,8 +1005,33 @@ imputed.NW.perennial.traits.depth.leafN = brm(cover.change ~ root.depth.final*le
 
 summary(imputed.NW.perennial.traits.depth.leafN)
 # nothing significant
+#saveRDS(imputed.NW.perennial.traits.depth.leafN, file = "./Results/perennial.imputed.traits.NW.depth.leafN.rds")
 
-saveRDS(imputed.NW.perennial.traits.depth.leafN, file = "./Results/perennial.imputed.traits.NW.depth.leafN.rds")
+imputed.NW.perennial.traits.depth.leafN = readRDS("./Results/perennial.imputed.traits.NW.depth.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.depth.leafN) # p = 0.711
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.depth.leafN)
 
 imputed.NW.perennial.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                           family = gaussian(),
@@ -851,8 +1040,33 @@ imputed.NW.perennial.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + m
 
 summary(imputed.NW.perennial.traits.RTD.SRL)
 # nothing significant
+#saveRDS(imputed.NW.perennial.traits.RTD.SRL, file = "./Results/perennial.imputed.traits.NW.RTD.SRL.rds")
 
-saveRDS(imputed.NW.perennial.traits.RTD.SRL, file = "./Results/perennial.imputed.traits.NW.RTD.SRL.rds")
+imputed.NW.perennial.traits.RTD.SRL = readRDS("./Results/perennial.imputed.traits.NW.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.RTD.SRL) # p = 0.735
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.RTD.SRL)
 
 imputed.NW.perennial.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                             family = gaussian(),
@@ -861,8 +1075,33 @@ imputed.NW.perennial.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final
 
 summary(imputed.NW.perennial.traits.leafN.RMF)
 # nothing significant
+#saveRDS(imputed.NW.perennial.traits.leafN.RMF, file = "./Results/perennial.imputed.traits.NW.leafN.RMF.rds")
 
-saveRDS(imputed.NW.perennial.traits.leafN.RMF, file = "./Results/perennial.imputed.traits.NW.leafN.RMF.rds")
+imputed.NW.perennial.traits.leafN.RMF = readRDS("./Results/perennial.imputed.traits.NW.leafN.RMF.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.leafN.RMF) # p = 0.716
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.leafN.RMF)
 
 #### Perennial Environment ####
 
@@ -874,9 +1113,33 @@ imputed.NW.perennial.traits.height.MAP.DSI = brm(cover.change ~ height.final*mea
                                                  data = imputed.NW.perennial)
 
 summary(imputed.NW.perennial.traits.height.MAP.DSI)
+#saveRDS(imputed.NW.perennial.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.height.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.height.MAP.DSI.rds")
+imputed.NW.perennial.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.height.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.height.MAP.DSI) # p = 0.809
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.height.MAP.DSI)
 
 imputed.NW.perennial.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                 family = gaussian(),
@@ -884,8 +1147,33 @@ imputed.NW.perennial.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.
                                                 data = imputed.NW.perennial)
 
 summary(imputed.NW.perennial.traits.leafN.MAP.DSI)
+#saveRDS(imputed.NW.perennial.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.leafN.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.leafN.MAP.DSI.rds")
+imputed.NW.perennial.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.leafN.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.leafN.MAP.DSI) # p = 0.719
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.leafN.MAP.DSI)
 
 imputed.NW.perennial.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                      family = gaussian(),
@@ -893,8 +1181,33 @@ imputed.NW.perennial.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.f
                                                      data = imputed.NW.perennial)
 
 summary(imputed.NW.perennial.traits.root.depth.MAP.DSI)
+#saveRDS(imputed.NW.perennial.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.depth.MAP.DSI.rds")
+imputed.NW.perennial.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.depth.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.root.depth.MAP.DSI) # p = 0.775
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.root.depth.MAP.DSI)
 
 imputed.NW.perennial.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -902,8 +1215,33 @@ imputed.NW.perennial.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP 
                                               data = imputed.NW.perennial)
 
 summary(imputed.NW.perennial.traits.RTD.MAP.DSI)
+#saveRDS(imputed.NW.perennial.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.RTD.MAP.DSI.rds")
+imputed.NW.perennial.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.RTD.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.RTD.MAP.DSI) # p = 0.778
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.RTD.MAP.DSI)
 
 imputed.NW.perennial.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -911,8 +1249,33 @@ imputed.NW.perennial.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP 
                                               data = imputed.NW.perennial)
 
 summary(imputed.NW.perennial.traits.SRL.MAP.DSI)
+#saveRDS(imputed.NW.perennial.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.SRL.MAP.DSI.rds")
+imputed.NW.perennial.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.SRL.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.SRL.MAP.DSI) # p = 0.857
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.SRL.MAP.DSI)
 
 imputed.NW.perennial.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -920,80 +1283,33 @@ imputed.NW.perennial.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP 
                                               data = imputed.NW.perennial)
 
 summary(imputed.NW.perennial.traits.RMF.MAP.DSI)
+#saveRDS(imputed.NW.perennial.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.traits.RMF.MAP.DSI.rds")
+imputed.NW.perennial.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.perennial.traits.RMF.MAP.DSI.rds")
 
-#### impute FORB traits functional group NW ####
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.traits.RMF.MAP.DSI) # p = 0.759
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
 
-priors <- c(prior(normal(0, 10), class = b))
-
-forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
-                             SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                           family = gaussian(),
-                           prior = priors,
-                           data = imputed.NW.forb)
-
-summary(forb.traits.NW.model)
-# leafN significant
-
-saveRDS(forb.traits.NW.model, file = "./Results/forb.imputed.traits.no_woody.rds")
-bayes_R2(forb.traits.NW.model)
-# R2 0.1148149 0.04304049 0.04828436 0.2129581
-
-imputed.NW.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                          family = gaussian(),
-                                          prior = priors,
-                                          data = imputed.NW.forb)
-
-summary(imputed.NW.forb.traits.height.leafN)
-# leafN
-
-imputed.NW.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                      family = gaussian(),
-                                      prior = priors,
-                                      data = imputed.NW.forb)
-
-summary(imputed.NW.forb.traits.depth.SLA)
-# nothing significant
-
-imputed.NW.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                         family = gaussian(),
-                                         prior = priors,
-                                         data = imputed.NW.forb)
-
-summary(imputed.NW.forb.traits.depth.leafN)
-# leafN
-
-imputed.NW.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                     family = gaussian(),
-                                     prior = priors,
-                                     data = imputed.NW.forb)
-
-summary(imputed.NW.forb.traits.RTD.SRL)
-# RTD x SRL significant, negative
-
-saveRDS(imputed.NW.forb.traits.RTD.SRL, file = "./Results/forb.imputed.traits.NW.RTD.SRL.rds")
-bayes_R2(imputed.NW.forb.traits.RTD.SRL)
-# R2 0.0804646 0.04240653 0.02177166 0.1872374
-
-conditional_effects(imputed.NW.forb.traits.RTD.SRL)
-# higher cover with higher RTD and lower SRL or lower RTD with higher SRL
-
-imputed.NW.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                     family = gaussian(),
-                                     prior = priors,
-                                     data = imputed.NW.forb)
-
-summary(imputed.NW.forb.traits.SLA.RMF)
-# nothing significant
-
-imputed.NW.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.forb)
-
-summary(imputed.NW.forb.traits.leafN.RMF)
-# leafN significant positive
+# variance inflation
+check_collinearity(imputed.NW.perennial.traits.RMF.MAP.DSI)
 
 #### impute FORB and LEGUME traits functional group NW ####
 
@@ -1010,9 +1326,35 @@ summary(forb.legume.traits.NW.model)
 # height significant
 # RTD significant
 
-saveRDS(forb.legume.traits.NW.model, file = "./Results/forb.legume.imputed.traits.no_woody.rds")
+#saveRDS(forb.legume.traits.NW.model, file = "./Results/forb.legume.imputed.traits.no_woody.rds")
 bayes_R2(forb.legume.traits.NW.model)
 # R2 0.1206621 0.04300289 0.05401455 0.2241898
+
+forb.legume.traits.NW.model = readRDS("./Results/forb.legume.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(forb.legume.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(forb.legume.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(forb.legume.traits.NW.model) # p = 0.508
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(forb.legume.traits.NW.model)
 
 imputed.NW.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                           family = gaussian(),
@@ -1021,9 +1363,33 @@ imputed.NW.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*lea
 
 summary(imputed.NW.forb.legume.traits.height.leafN)
 # leafN
+#saveRDS(imputed.NW.forb.legume.traits.height.leafN, file = "./Results/forb.legume.imputed.traits.NW.height.leafN.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.height.leafN, file = "./Results/forb.legume.imputed.traits.NW.height.leafN.rds")
+imputed.NW.forb.legume.traits.height.leafN = readRDS("./Results/forb.legume.imputed.traits.NW.height.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.height.leafN) # p = 0.452
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.height.leafN)
 
 imputed.NW.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                          family = gaussian(),
@@ -1032,9 +1398,33 @@ imputed.NW.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*
 
 summary(imputed.NW.forb.legume.traits.depth.leafN)
 # leafN
+#saveRDS(imputed.NW.forb.legume.traits.depth.leafN, file = "./Results/forb.legume.imputed.traits.NW.depth.leafN.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.depth.leafN, file = "./Results/forb.legume.imputed.traits.NW.depth.leafN.rds")
+imputed.NW.forb.legume.traits.depth.leafN = readRDS("./Results/forb.legume.imputed.traits.NW.depth.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.depth.leafN) # p = 0.397
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.depth.leafN)
 
 imputed.NW.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                      family = gaussian(),
@@ -1051,6 +1441,31 @@ bayes_R2(imputed.NW.forb.legume.traits.RTD.SRL)
 conditional_effects(imputed.NW.forb.legume.traits.RTD.SRL)
 # higher cover with higher RTD and lower SRL or lower RTD with higher SRL
 
+imputed.NW.forb.legume.traits.RTD.SRL = readRDS("./Results/forb.legume.imputed.traits.NW.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.RTD.SRL) # p = 0.532
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.RTD.SRL)
 
 imputed.NW.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                        family = gaussian(),
@@ -1059,8 +1474,33 @@ imputed.NW.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.fin
 
 summary(imputed.NW.forb.legume.traits.leafN.RMF)
 # leafN significant positive
+#saveRDS(imputed.NW.forb.legume.traits.leafN.RMF, file = "./Results/forb.legume.imputed.traits.NW.leafN.RMF.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.leafN.RMF, file = "./Results/forb.legume.imputed.traits.NW.leafN.RMF.rds")
+imputed.NW.forb.legume.traits.leafN.RMF = readRDS("./Results/forb.legume.imputed.traits.NW.leafN.RMF.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.leafN.RMF) # p = 0.391
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.leafN.RMF)
 
 #### Forb and Legume Environment ####
 
@@ -1073,8 +1513,33 @@ imputed.NW.forb.legume.traits.height.MAP.DSI = brm(cover.change ~ height.final*m
 
 summary(imputed.NW.forb.legume.traits.height.MAP.DSI)
 # height
+#saveRDS(imputed.NW.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.height.MAP.DSI.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.height.MAP.DSI.rds")
+imputed.NW.forb.legume.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.height.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.height.MAP.DSI) # p = 0.559
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.height.MAP.DSI)
 
 imputed.NW.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                   family = gaussian(),
@@ -1092,14 +1557,65 @@ bayes_R2(imputed.NW.forb.legume.traits.leafN.MAP.DSI)
 conditional_effects(imputed.NW.forb.legume.traits.leafN.MAP.DSI)
 # higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
 
+imputed.NW.forb.legume.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.leafN.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.leafN.MAP.DSI) # p = 0.470
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.leafN.MAP.DSI)
+
 imputed.NW.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                        family = gaussian(),
                                                        prior = priors,
                                                        data = imputed.NW.forb.legume)
 
 summary(imputed.NW.forb.legume.traits.root.depth.MAP.DSI)
+#saveRDS(imputed.NW.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.depth.MAP.DSI.rds")
+imputed.NW.forb.legume.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.depth.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.root.depth.MAP.DSI) # p = 0.520
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.root.depth.MAP.DSI)
 
 imputed.NW.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                 family = gaussian(),
@@ -1107,8 +1623,33 @@ imputed.NW.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MA
                                                 data = imputed.NW.forb.legume)
 
 summary(imputed.NW.forb.legume.traits.RTD.MAP.DSI)
+#saveRDS(imputed.NW.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.RTD.MAP.DSI.rds")
+imputed.NW.forb.legume.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.RTD.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.RTD.MAP.DSI) # p = 0.538
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.RTD.MAP.DSI)
 
 imputed.NW.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                 family = gaussian(),
@@ -1119,6 +1660,31 @@ summary(imputed.NW.forb.legume.traits.SRL.MAP.DSI)
 
 saveRDS(imputed.NW.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.SRL.MAP.DSI.rds")
 
+imputed.NW.forb.legume.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.SRL.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.SRL.MAP.DSI) # p = 0.515
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.SRL.MAP.DSI)
 
 imputed.NW.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                 family = gaussian(),
@@ -1126,71 +1692,33 @@ imputed.NW.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MA
                                                 data = imputed.NW.forb.legume)
 
 summary(imputed.NW.forb.legume.traits.RMF.MAP.DSI)
+#saveRDS(imputed.NW.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.forb.legume.traits.RMF.MAP.DSI.rds")
+imputed.NW.forb.legume.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.forb.legume.traits.RMF.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.forb.legume.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.forb.legume.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.forb.legume.traits.RMF.MAP.DSI) # p = 0.493
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
 
-#### impute GRASS traits functional group NW ####
-grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
-                              SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                            family = gaussian(),
-                            prior = priors,
-                            data = imputed.NW.grass)
-
-summary(grass.traits.NW.model)
-# nothing significant
-
-saveRDS(grass.traits.NW.model, file = "./Results/grass.imputed.traits.no_woody.rds")
-bayes_R2(grass.traits.NW.model)
-# R2 0.1131223 0.04113157 0.04815195 0.2051698
-
-imputed.NW.grass.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                           family = gaussian(),
-                                           prior = priors,
-                                           data = imputed.NW.grass)
-
-summary(imputed.NW.grass.traits.height.leafN)
-# nothing significant
-
-imputed.NW.grass.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.grass)
-
-summary(imputed.NW.grass.traits.depth.SLA)
-# nothing significant
-
-imputed.NW.grass.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                          family = gaussian(),
-                                          prior = priors,
-                                          data = imputed.NW.grass)
-
-summary(imputed.NW.grass.traits.depth.leafN)
-# MAP is positive, significant
-
-imputed.NW.grass.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                      family = gaussian(),
-                                      prior = priors,
-                                      data = imputed.NW.grass)
-
-summary(imputed.NW.grass.traits.RTD.SRL)
-# nothing significant
-
-imputed.NW.grass.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                      family = gaussian(),
-                                      prior = priors,
-                                      data = imputed.NW.grass)
-
-summary(imputed.NW.grass.traits.SLA.RMF)
-# nothing significant
-
-imputed.NW.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                        family = gaussian(),
-                                        prior = priors,
-                                        data = imputed.NW.grass)
-
-summary(imputed.NW.grass.traits.leafN.RMF)
-# nothing significant
+# variance inflation
+check_collinearity(imputed.NW.forb.legume.traits.RMF.MAP.DSI)
 
 #### impute GRAMINOID traits functional group NW ####
 
@@ -1205,9 +1733,35 @@ graminoid.traits.NW.model = brm(cover.change ~ leafN.final + height.final + root
 summary(graminoid.traits.NW.model)
 # nothing significant
 
-saveRDS(graminoid.traits.NW.model, file = "./Results/graminoid.imputed.traits.no_woody.rds")
+#saveRDS(graminoid.traits.NW.model, file = "./Results/graminoid.imputed.traits.no_woody.rds")
 bayes_R2(graminoid.traits.NW.model)
 # R2 0.1064767 0.03930761 0.04390368 0.1977966
+
+graminoid.traits.NW.model = readRDS("./Results/graminoid.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(graminoid.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(graminoid.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(graminoid.traits.NW.model) # p = 0.919
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(graminoid.traits.NW.model)
 
 imputed.NW.graminoid.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                family = gaussian(),
@@ -1216,9 +1770,33 @@ imputed.NW.graminoid.traits.height.leafN = brm(cover.change ~ height.final*leafN
 
 summary(imputed.NW.graminoid.traits.height.leafN)
 # nothing significant
-
 saveRDS(imputed.NW.graminoid.traits.height.leafN, file = "./Results/graminoid.imputed.traits.NW.height.leafN.rds")
 
+imputed.NW.graminoid.traits.height.leafN = readRDS("./Results/graminoid.imputed.traits.NW.height.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.height.leafN) # p = 0.890
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.height.leafN)
 
 imputed.NW.graminoid.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -1227,9 +1805,33 @@ imputed.NW.graminoid.traits.depth.leafN = brm(cover.change ~ root.depth.final*le
 
 summary(imputed.NW.graminoid.traits.depth.leafN)
 # MAP is positive, significant
-
 saveRDS(imputed.NW.graminoid.traits.depth.leafN, file = "./Results/graminoid.imputed.traits.NW.depth.leafN.rds")
 
+imputed.NW.graminoid.traits.depth.leafN = readRDS("./Results/graminoid.imputed.traits.NW.depth.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.depth.leafN) # p = 0.917
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.depth.leafN)
 
 imputed.NW.graminoid.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                           family = gaussian(),
@@ -1238,8 +1840,33 @@ imputed.NW.graminoid.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + m
 
 summary(imputed.NW.graminoid.traits.RTD.SRL)
 # nothing significant
+#saveRDS(imputed.NW.graminoid.traits.RTD.SRL, file = "./Results/graminoid.imputed.traits.NW.RTD.SRL.rds")
 
-saveRDS(imputed.NW.graminoid.traits.RTD.SRL, file = "./Results/graminoid.imputed.traits.NW.RTD.SRL.rds")
+imputed.NW.graminoid.traits.RTD.SRL = readRDS("./Results/graminoid.imputed.traits.NW.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.RTD.SRL) # p = 0.922
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.RTD.SRL)
 
 imputed.NW.graminoid.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                             family = gaussian(),
@@ -1248,8 +1875,33 @@ imputed.NW.graminoid.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final
 
 summary(imputed.NW.graminoid.traits.leafN.RMF)
 # nothing significant
-
 saveRDS(imputed.NW.graminoid.traits.leafN.RMF, file = "./Results/graminoid.imputed.traits.NW.leafN.RMF.rds")
+
+imputed.NW.graminoid.traits.leafN.RMF = readRDS("./Results/graminoid.imputed.traits.NW.leafN.RMF.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.leafN.RMF) # p = 0.891
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.leafN.RMF)
 
 #### Graminoid Environment ####
 
@@ -1261,9 +1913,33 @@ imputed.NW.graminoid.traits.height.MAP.DSI = brm(cover.change ~ height.final*mea
                                                  data = imputed.NW.graminoid)
 
 summary(imputed.NW.graminoid.traits.height.MAP.DSI)
+#saveRDS(imputed.NW.graminoid.traits.height.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.height.MAP.DSI.rds")
 
-saveRDS(imputed.NW.graminoid.traits.height.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.height.MAP.DSI.rds")
+imputed.NW.graminoid.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.height.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.height.MAP.DSI) # p = 0.901
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.height.MAP.DSI)
 
 imputed.NW.graminoid.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                 family = gaussian(),
@@ -1271,9 +1947,33 @@ imputed.NW.graminoid.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.
                                                 data = imputed.NW.graminoid)
 
 summary(imputed.NW.graminoid.traits.leafN.MAP.DSI)
-
 saveRDS(imputed.NW.graminoid.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.leafN.MAP.DSI.rds")
 
+imputed.NW.graminoid.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.leafN.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.leafN.MAP.DSI) # p = 0.948
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.leafN.MAP.DSI)
 
 imputed.NW.graminoid.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                      family = gaussian(),
@@ -1281,9 +1981,33 @@ imputed.NW.graminoid.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.f
                                                      data = imputed.NW.graminoid)
 
 summary(imputed.NW.graminoid.traits.root.depth.MAP.DSI)
+#saveRDS(imputed.NW.graminoid.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.graminoid.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.depth.MAP.DSI.rds")
+imputed.NW.graminoid.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.depth.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.root.depth.MAP.DSI) # p = 0.901
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.root.depth.MAP.DSI)
 
 imputed.NW.graminoid.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -1291,9 +2015,33 @@ imputed.NW.graminoid.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP 
                                               data = imputed.NW.graminoid)
 
 summary(imputed.NW.graminoid.traits.RTD.MAP.DSI)
+#saveRDS(imputed.NW.graminoid.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.graminoid.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.RTD.MAP.DSI.rds")
+imputed.NW.graminoid.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.RTD.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.RTD.MAP.DSI) # p = 0.924
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.RTD.MAP.DSI)
 
 imputed.NW.graminoid.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -1301,9 +2049,33 @@ imputed.NW.graminoid.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP 
                                               data = imputed.NW.graminoid)
 
 summary(imputed.NW.graminoid.traits.SRL.MAP.DSI)
+#saveRDS(imputed.NW.graminoid.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.graminoid.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.SRL.MAP.DSI.rds")
+imputed.NW.graminoid.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.SRL.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.SRL.MAP.DSI) # p = 0.929
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.SRL.MAP.DSI)
 
 imputed.NW.graminoid.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                               family = gaussian(),
@@ -1311,73 +2083,33 @@ imputed.NW.graminoid.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP 
                                               data = imputed.NW.graminoid)
 
 summary(imputed.NW.graminoid.traits.RMF.MAP.DSI)
+#saveRDS(imputed.NW.graminoid.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.graminoid.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.graminoid.traits.RMF.MAP.DSI.rds")
+imputed.NW.graminoid.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.graminoid.traits.RMF.MAP.DSI.rds")
 
-#### imputed traits ANNUAL FORB NW ####
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.graminoid.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.graminoid.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.graminoid.traits.RMF.MAP.DSI) # p = 0.921
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
 
-priors <- c(prior(normal(0, 10), class = b))
-
-annual.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
-                                    SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
-                                  family = gaussian(),
-                                  prior = priors,
-                                  data = imputed.NW.annual.forb)
-
-summary(annual.forb.traits.NW.model)
-# MAP significant
-
-saveRDS(annual.forb.traits.NW.model, file = "./Results/annual.forb.imputed.traits.no_woody.rds")
-bayes_R2(annual.forb.traits.NW.model)
-# R2 0.2252887 0.0659826 0.1116487 0.3650369
-
-imputed.NW.annual.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                 family = gaussian(),
-                                                 prior = priors,
-                                                 data = imputed.NW.annual.forb)
-
-summary(imputed.NW.annual.forb.traits.height.leafN)
-# nothing significant
-
-imputed.NW.annual.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                             family = gaussian(),
-                                             prior = priors,
-                                             data = imputed.NW.annual.forb)
-
-summary(imputed.NW.annual.forb.traits.depth.SLA)
-# MAP
-
-imputed.NW.annual.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                family = gaussian(),
-                                                prior = priors,
-                                                data = imputed.NW.annual.forb)
-
-summary(imputed.NW.annual.forb.traits.depth.leafN)
-# MAP is positive, significant
-
-imputed.NW.annual.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                            family = gaussian(),
-                                            prior = priors,
-                                            data = imputed.NW.annual.forb)
-
-summary(imputed.NW.annual.forb.traits.RTD.SRL)
-# nothing significant
-
-imputed.NW.annual.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                            family = gaussian(),
-                                            prior = priors,
-                                            data = imputed.NW.annual.forb)
-
-summary(imputed.NW.annual.forb.traits.SLA.RMF)
-# MAP
-
-imputed.NW.annual.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                              family = gaussian(),
-                                              prior = priors,
-                                              data = imputed.NW.annual.forb)
-
-summary(imputed.NW.annual.forb.traits.leafN.RMF)
-# MAP significant positive
+# variance inflation
+check_collinearity(imputed.NW.graminoid.traits.RMF.MAP.DSI)
 
 #### imputed traits ANNUAL FORB LEGUME NW ####
 
@@ -1392,9 +2124,35 @@ annual.forb.legume.traits.NW.model = brm(cover.change ~ leafN.final + height.fin
 summary(annual.forb.legume.traits.NW.model)
 # nothing significant
 
-saveRDS(annual.forb.legume.traits.NW.model, file = "./Results/annual.forb.legume.imputed.traits.no_woody.rds")
+#saveRDS(annual.forb.legume.traits.NW.model, file = "./Results/annual.forb.legume.imputed.traits.no_woody.rds")
 bayes_R2(annual.forb.legume.traits.NW.model)
 # R2 0.2273124 0.06464005 0.1131978 0.3652143
+
+annual.forb.legume.traits.NW.model = readRDS("./Results/annual.forb.legume.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(annual.forb.legume.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(annual.forb.legume.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(annual.forb.legume.traits.NW.model) # p = 0.758
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(annual.forb.legume.traits.NW.model)
 
 imputed.NW.annual.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                                family = gaussian(),
@@ -1403,9 +2161,33 @@ imputed.NW.annual.forb.legume.traits.height.leafN = brm(cover.change ~ height.fi
 
 summary(imputed.NW.annual.forb.legume.traits.height.leafN)
 # nothing significant
+#saveRDS(imputed.NW.annual.forb.legume.traits.height.leafN, file = "./Results/annual.forb.legume.imputed.traits.NW.height.leafN.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.height.leafN, file = "./Results/annual.forb.legume.imputed.traits.NW.height.leafN.rds")
+imputed.NW.annual.forb.legume.traits.height.leafN = readRDS("./Results/annual.forb.legume.imputed.traits.NW.height.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.height.leafN) # p = 0.652
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.height.leafN)
 
 imputed.NW.annual.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                               family = gaussian(),
@@ -1414,9 +2196,33 @@ imputed.NW.annual.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth
 
 summary(imputed.NW.annual.forb.legume.traits.depth.leafN)
 # MAP is positive, significant
+#saveRDS(imputed.NW.annual.forb.legume.traits.depth.leafN, file = "./Results/annual.forb.legume.imputed.traits.NW.depth.leafN.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.depth.leafN, file = "./Results/annual.forb.legume.imputed.traits.NW.depth.leafN.rds")
+imputed.NW.annual.forb.legume.traits.depth.leafN = readRDS("./Results/annual.forb.legume.imputed.traits.NW.depth.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.depth.leafN) # p = 0.605
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.depth.leafN)
 
 imputed.NW.annual.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                           family = gaussian(),
@@ -1425,13 +2231,38 @@ imputed.NW.annual.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.
 
 summary(imputed.NW.annual.forb.legume.traits.RTD.SRL)
 # RTD x SRL
-
-saveRDS(imputed.NW.annual.forb.legume.traits.RTD.SRL, file = "./Results/annual.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+#saveRDS(imputed.NW.annual.forb.legume.traits.RTD.SRL, file = "./Results/annual.forb.legume.imputed.traits.NW.RTD.SRL.rds")
 bayes_R2(imputed.NW.annual.forb.legume.traits.RTD.SRL)
 # R2 0.1818185 0.06325504 0.0745352 0.3182902
 
 conditional_effects(imputed.NW.annual.forb.legume.traits.RTD.SRL)
 # higher cover with higher RTD and lower SRL or lower RTD with higher SRL
+
+imputed.NW.annual.forb.legume.traits.RTD.SRL = readRDS("./Results/annual.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.RTD.SRL) # p = 0.769
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.RTD.SRL)
 
 imputed.NW.annual.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                             family = gaussian(),
@@ -1440,9 +2271,33 @@ imputed.NW.annual.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*
 
 summary(imputed.NW.annual.forb.legume.traits.leafN.RMF)
 # MAP significant positive
+#saveRDS(imputed.NW.annual.forb.legume.traits.leafN.RMF, file = "./Results/annual.forb.legume.imputed.traits.NW.leafN.RMF.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.leafN.RMF, file = "./Results/annual.forb.legume.imputed.traits.NW.leafN.RMF.rds")
+imputed.NW.annual.forb.legume.traits.leafN.RMF = readRDS("./Results/annual.forb.legume.imputed.traits.NW.leafN.RMF.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.leafN.RMF) # p = 0.0.580
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.leafN.RMF)
 
 #### Annual forb and legume Environment ####
 
@@ -1454,9 +2309,33 @@ imputed.NW.annual.forb.legume.traits.height.MAP.DSI = brm(cover.change ~ height.
                                                           data = imputed.NW.annual.forb.legume)
 
 summary(imputed.NW.annual.forb.legume.traits.height.MAP.DSI)
+#saveRDS(imputed.NW.annual.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.height.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.height.MAP.DSI.rds")
+imputed.NW.annual.forb.legume.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.height.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.height.MAP.DSI) # p = 0.725
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.height.MAP.DSI)
 
 imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                          family = gaussian(),
@@ -1465,13 +2344,38 @@ imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.fi
 
 summary(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
 # leafN x DSI
-
-saveRDS(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI.rds")
+#saveRDS(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI.rds")
 bayes_R2(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
 # R2 0.2487581 0.07176966 0.1201865 0.400603
 
 conditional_effects(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
 # higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI) # p = 0.567
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.leafN.MAP.DSI)
 
 imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                               family = gaussian(),
@@ -1480,9 +2384,33 @@ imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ roo
 
 summary(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI)
 # MAP
+#saveRDS(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.depth.MAP.DSI.rds")
+imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.depth.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI) # p = 0.667
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.root.depth.MAP.DSI)
 
 imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                        family = gaussian(),
@@ -1491,13 +2419,38 @@ imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*
 
 summary(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
 # RTD x MAP
-
-saveRDS(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI.rds")
+#saveRDS(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI.rds")
 bayes_R2(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
 # R2 0.189431 0.0672549 0.07478275 0.3386802
 
 conditional_effects(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
 # higher leafN x less drought (higher DSI) or lower leafN x more drought (lower DSI)
+
+imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI) # p = 0.665
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.RTD.MAP.DSI)
 
 imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                        family = gaussian(),
@@ -1505,9 +2458,33 @@ imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*
                                                        data = imputed.NW.annual.forb.legume)
 
 summary(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI)
+#saveRDS(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI.rds")
+imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI) # p = 0.678
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.SRL.MAP.DSI)
 
 imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                        family = gaussian(),
@@ -1516,72 +2493,33 @@ imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*
 
 summary(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI)
 # MAP
+#saveRDS(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI.rds")
+imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI) # p = 0.631
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
 
-#### imputed traits PERENNIAL FORB NW ####
-
-perennial.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
-                                       SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
-                                     family = gaussian(),
-                                     prior = priors,
-                                     data = imputed.NW.perennial.forb)
-
-summary(perennial.forb.traits.NW.model)
-# nothing significant
-
-saveRDS(perennial.forb.traits.NW.model, file = "./Results/perennial.forb.imputed.traits.no_woody.rds")
-bayes_R2(perennial.forb.traits.NW.model)
-#R2 0.1475479 0.05794628 0.06079698 0.2874462
-
-imputed.NW.perennial.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                    family = gaussian(),
-                                                    prior = priors,
-                                                    data = imputed.NW.perennial.forb)
-
-summary(imputed.NW.perennial.forb.traits.height.leafN)
-# leafN
-
-imputed.NW.perennial.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                family = gaussian(),
-                                                prior = priors,
-                                                data = imputed.NW.perennial.forb)
-
-summary(imputed.NW.perennial.forb.traits.depth.SLA)
-# nothing significant
-
-imputed.NW.perennial.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                   family = gaussian(),
-                                                   prior = priors,
-                                                   data = imputed.NW.perennial.forb)
-
-summary(imputed.NW.perennial.forb.traits.depth.leafN)
-# leafN
-
-imputed.NW.perennial.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                               family = gaussian(),
-                                               prior = priors,
-                                               data = imputed.NW.perennial.forb)
-
-summary(imputed.NW.perennial.forb.traits.RTD.SRL)
-# nothing significant
-
-imputed.NW.perennial.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                               family = gaussian(),
-                                               prior = priors,
-                                               data = imputed.NW.perennial.forb)
-
-summary(imputed.NW.perennial.forb.traits.SLA.RMF)
-# nothing significant
-
-imputed.NW.perennial.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                 family = gaussian(),
-                                                 prior = priors,
-                                                 data = imputed.NW.perennial.forb)
-
-summary(imputed.NW.perennial.forb.traits.leafN.RMF)
-# leafN
+# variance inflation
+check_collinearity(imputed.NW.annual.forb.legume.traits.RMF.MAP.DSI)
 
 #### imputed traits PERENNIAL FORB LEGUME NW ####
 
@@ -1595,10 +2533,35 @@ perennial.forb.legume.traits.NW.model = brm(cover.change ~ leafN.final + height.
 
 summary(perennial.forb.legume.traits.NW.model)
 # RTD significant
-
-saveRDS(perennial.forb.legume.traits.NW.model, file = "./Results/perennial.forb.legume.imputed.traits.no_woody.rds")
+#saveRDS(perennial.forb.legume.traits.NW.model, file = "./Results/perennial.forb.legume.imputed.traits.no_woody.rds")
 bayes_R2(perennial.forb.legume.traits.NW.model)
 #R2 0.1371829 0.05049297 0.05734497 0.2561353
+
+perennial.forb.legume.traits.NW.model = readRDS("./Results/perennial.forb.legume.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(perennial.forb.legume.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(perennial.forb.legume.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(perennial.forb.legume.traits.NW.model) # p = 0.697
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(perennial.forb.legume.traits.NW.model)
 
 imputed.NW.perennial.forb.legume.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                                   family = gaussian(),
@@ -1607,8 +2570,33 @@ imputed.NW.perennial.forb.legume.traits.height.leafN = brm(cover.change ~ height
 
 summary(imputed.NW.perennial.forb.legume.traits.height.leafN)
 # nothing significant
+#saveRDS(imputed.NW.perennial.forb.legume.traits.height.leafN, file = "./Results/perennial.forb.legume.imputed.traits.NW.height.leafN.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.height.leafN, file = "./Results/perennial.forb.legume.imputed.traits.NW.height.leafN.rds")
+imputed.NW.perennial.forb.legume.traits.height.leafN = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.height.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.height.leafN) # p = 0.599
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.height.leafN)
 
 imputed.NW.perennial.forb.legume.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                                  family = gaussian(),
@@ -1616,9 +2604,33 @@ imputed.NW.perennial.forb.legume.traits.depth.leafN = brm(cover.change ~ root.de
                                                                  data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.depth.leafN)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.depth.leafN, file = "./Results/perennial.forb.legume.imputed.traits.NW.depth.leafN.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.depth.leafN, file = "./Results/perennial.forb.legume.imputed.traits.NW.depth.leafN.rds")
+imputed.NW.perennial.forb.legume.traits.depth.leafN = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.depth.leafN.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.depth.leafN) # p = 0.591
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.depth.leafN)
 
 imputed.NW.perennial.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                              family = gaussian(),
@@ -1627,8 +2639,33 @@ imputed.NW.perennial.forb.legume.traits.RTD.SRL = brm(cover.change ~ RTD.final*S
 
 summary(imputed.NW.perennial.forb.legume.traits.RTD.SRL)
 # nothing significant
+#saveRDS(imputed.NW.perennial.forb.legume.traits.RTD.SRL, file = "./Results/perennial.forb.legume.imputed.traits.NW.RTD.SRL.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.RTD.SRL, file = "./Results/perennial.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+imputed.NW.perennial.forb.legume.traits.RTD.SRL = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.RTD.SRL) # p = 0.547
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.RTD.SRL)
 
 imputed.NW.perennial.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                                family = gaussian(),
@@ -1637,9 +2674,33 @@ imputed.NW.perennial.forb.legume.traits.leafN.RMF = brm(cover.change ~ leafN.fin
 
 summary(imputed.NW.perennial.forb.legume.traits.leafN.RMF)
 # nothing significant
+#saveRDS(imputed.NW.perennial.forb.legume.traits.leafN.RMF, file = "./Results/perennial.forb.legume.imputed.traits.NW.leafN.RMF.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.leafN.RMF, file = "./Results/perennial.forb.legume.imputed.traits.NW.leafN.RMF.rds")
+imputed.NW.perennial.forb.legume.traits.leafN.RMF = readRDS("./Results/perennial.forb.legume.imputed.traits.NW.leafN.RMF.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.leafN.RMF) # p = 0.576
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.leafN.RMF)
 
 #### Perennial forb and legume Environment ####
 
@@ -1651,9 +2712,33 @@ imputed.NW.perennial.forb.legume.traits.height.MAP.DSI = brm(cover.change ~ heig
                                                              data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.height.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.height.MAP.DSI.rds")
+imputed.NW.perennial.forb.legume.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.height.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI) # p = 0.668
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.height.MAP.DSI)
 
 imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                             family = gaussian(),
@@ -1661,9 +2746,33 @@ imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI = brm(cover.change ~ leafN
                                                             data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI.rds")
+imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI) # p = 0.584
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.leafN.MAP.DSI)
 
 imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                                  family = gaussian(),
@@ -1671,9 +2780,33 @@ imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI = brm(cover.change ~ 
                                                                  data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.depth.MAP.DSI.rds")
+imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.depth.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI) # p = 0.683
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.root.depth.MAP.DSI)
 
 imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                           family = gaussian(),
@@ -1681,9 +2814,33 @@ imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.fin
                                                           data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI.rds")
+imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI) # p = 0.686
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.RTD.MAP.DSI)
 
 imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                           family = gaussian(),
@@ -1691,9 +2848,33 @@ imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.fin
                                                           data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI.rds")
+imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI) # p = 0.675
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.SRL.MAP.DSI)
 
 imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                           family = gaussian(),
@@ -1701,71 +2882,33 @@ imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.fin
                                                           data = imputed.NW.perennial.forb.legume)
 
 summary(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI)
+#saveRDS(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI.rds")
+imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI) # p = 0.622
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
 
-#### imputed traits PERENNIAL GRASS NW #####
-
-perennial.grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
-                                        SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
-                                      family = gaussian(),
-                                      prior = priors,
-                                      data = imputed.NW.perennial.grass)
-
-summary(perennial.grass.traits.NW.model)
-# nothing significant
-
-saveRDS(perennial.grass.traits.NW.model, file = "./Results/perennial.grass.imputed.traits.no_woody.rds")
-bayes_R2(perennial.grass.traits.NW.model)
-#R2 0.1499307 0.06219888 0.05914333 0.2792502
-
-imputed.NW.perennial.grass.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                     family = gaussian(),
-                                                     prior = priors,
-                                                     data = imputed.NW.perennial.grass)
-
-summary(imputed.NW.perennial.grass.traits.height.leafN)
-# nothing significant
-
-imputed.NW.perennial.grass.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                 family = gaussian(),
-                                                 prior = priors,
-                                                 data = imputed.NW.perennial.grass)
-
-summary(imputed.NW.perennial.grass.traits.depth.SLA)
-# nothing significant
-
-imputed.NW.perennial.grass.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                    family = gaussian(),
-                                                    prior = priors,
-                                                    data = imputed.NW.perennial.grass)
-
-summary(imputed.NW.perennial.grass.traits.depth.leafN)
-# nothing significant
-
-imputed.NW.perennial.grass.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                family = gaussian(),
-                                                prior = priors,
-                                                data = imputed.NW.perennial.grass)
-
-summary(imputed.NW.perennial.grass.traits.RTD.SRL)
-# nothing significant
-
-imputed.NW.perennial.grass.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                family = gaussian(),
-                                                prior = priors,
-                                                data = imputed.NW.perennial.grass)
-
-summary(imputed.NW.perennial.grass.traits.SLA.RMF)
-# nothing significant
-
-imputed.NW.perennial.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
-                                                  family = gaussian(),
-                                                  prior = priors,
-                                                  data = imputed.NW.perennial.grass)
-
-summary(imputed.NW.perennial.grass.traits.leafN.RMF)
+# variance inflation
+check_collinearity(imputed.NW.perennial.forb.legume.traits.RMF.MAP.DSI)
 
 #### imputed traits PERENNIAL GRAMINOID NW #####
 
@@ -1784,6 +2927,32 @@ saveRDS(perennial.graminoid.traits.NW.model, file = "./Results/perennial.gramino
 bayes_R2(perennial.graminoid.traits.NW.model)
 #R2 0.1316797 0.04890526 0.0545399 0.2443937
 
+perennial.graminoid.traits.NW.model = readRDS("./Results/perennial.graminoid.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(perennial.graminoid.traits.NW.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(perennial.graminoid.traits.NW.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(perennial.graminoid.traits.NW.model) # p = 0.936
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(perennial.graminoid.traits.NW.model)
+
 imputed.NW.perennial.graminoid.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                          family = gaussian(),
                                                          prior = priors,
@@ -1791,8 +2960,33 @@ imputed.NW.perennial.graminoid.traits.height.leafN = brm(cover.change ~ height.f
 
 summary(imputed.NW.perennial.graminoid.traits.height.leafN)
 # nothing significant
+#saveRDS(imputed.NW.perennial.graminoid.traits.height.leafN, file = "./Results/perennial.graminoid.imputed.traits.NW.height.leafN.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.height.leafN, file = "./Results/perennial.graminoid.imputed.traits.NW.height.leafN.rds")
+imputed.NW.perennial.graminoid.traits.height.leafN = readRDS("./Results/perennial.graminoid.imputed.traits.NW.height.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.height.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.height.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.height.leafN) # p = 0.885
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.height.leafN)
 
 imputed.NW.perennial.graminoid.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                         family = gaussian(),
@@ -1801,8 +2995,33 @@ imputed.NW.perennial.graminoid.traits.depth.leafN = brm(cover.change ~ root.dept
 
 summary(imputed.NW.perennial.graminoid.traits.depth.leafN)
 # nothing significant
-
 saveRDS(imputed.NW.perennial.graminoid.traits.depth.leafN, file = "./Results/perennial.graminoid.imputed.traits.NW.depth.leafN.rds")
+
+imputed.NW.perennial.graminoid.traits.depth.leafN = readRDS("./Results/perennial.graminoid.imputed.traits.NW.depth.leafN.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.depth.leafN, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.depth.leafN, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.depth.leafN) # p = 0.873
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.depth.leafN)
 
 imputed.NW.perennial.graminoid.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                     family = gaussian(),
@@ -1811,8 +3030,33 @@ imputed.NW.perennial.graminoid.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL
 
 summary(imputed.NW.perennial.graminoid.traits.RTD.SRL)
 # nothing significant
+#saveRDS(imputed.NW.perennial.graminoid.traits.RTD.SRL, file = "./Results/perennial.graminoid.imputed.traits.NW.RTD.SRL.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.RTD.SRL, file = "./Results/perennial.graminoid.imputed.traits.NW.RTD.SRL.rds")
+imputed.NW.perennial.graminoid.traits.RTD.SRL = readRDS("./Results/perennial.graminoid.imputed.traits.NW.RTD.SRL.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.RTD.SRL, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.RTD.SRL, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.RTD.SRL) # p = 0.920
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.RTD.SRL)
 
 imputed.NW.perennial.graminoid.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
                                                       family = gaussian(),
@@ -1820,8 +3064,33 @@ imputed.NW.perennial.graminoid.traits.leafN.RMF = brm(cover.change ~ leafN.final
                                                       data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.leafN.RMF)
-
 saveRDS(imputed.NW.perennial.graminoid.traits.leafN.RMF, file = "./Results/perennial.graminoid.imputed.traits.NW.leafN.RMF.rds")
+
+imputed.NW.perennial.graminoid.traits.leafN.RMF = readRDS("./Results/perennial.graminoid.imputed.traits.NW.leafN.RMF.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.leafN.RMF, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.leafN.RMF, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.leafN.RMF) # p = 0.916
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.leafN.RMF)
 
 #### Perennial graminoid Environment ####
 
@@ -1833,9 +3102,33 @@ imputed.NW.perennial.graminoid.traits.height.MAP.DSI = brm(cover.change ~ height
                                                            data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.height.MAP.DSI)
+#saveRDS(imputed.NW.perennial.graminoid.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.height.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.height.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.height.MAP.DSI.rds")
+imputed.NW.perennial.graminoid.traits.height.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.height.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.height.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.height.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.height.MAP.DSI) # p = 0.916
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.height.MAP.DSI)
 
 imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.final*mean.MAP + leafN.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                           family = gaussian(),
@@ -1843,9 +3136,33 @@ imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI = brm(cover.change ~ leafN.f
                                                           data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI)
+#saveRDS(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI.rds")
+imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI) # p = 0.877
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.leafN.MAP.DSI)
 
 imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI = brm(cover.change ~ root.depth.final*mean.MAP + root.depth.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                                family = gaussian(),
@@ -1853,9 +3170,33 @@ imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI = brm(cover.change ~ ro
                                                                data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI)
+#saveRDS(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.depth.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.depth.MAP.DSI.rds")
+imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.depth.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI) # p = 0.888
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.root.depth.MAP.DSI)
 
 imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final*mean.MAP + RTD.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                         family = gaussian(),
@@ -1863,9 +3204,33 @@ imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI = brm(cover.change ~ RTD.final
                                                         data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI)
+#saveRDS(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI.rds")
+imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI) # p = 0.921
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.RTD.MAP.DSI)
 
 imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final*mean.MAP + SRL.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                         family = gaussian(),
@@ -1873,9 +3238,33 @@ imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI = brm(cover.change ~ SRL.final
                                                         data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI)
+#saveRDS(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI.rds")
+imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI) # p = 0.919
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.SRL.MAP.DSI)
 
 imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final*mean.MAP + RMF.final*mean.DSI + (1|site_code) + (1|Taxon), 
                                                         family = gaussian(),
@@ -1883,9 +3272,33 @@ imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI = brm(cover.change ~ RMF.final
                                                         data = imputed.NW.perennial.graminoid)
 
 summary(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI)
+#saveRDS(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI.rds")
 
-saveRDS(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI, file = "./Results/imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI.rds")
+imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI = readRDS("./Results/imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI.rds")
 
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI) # p = 0.916
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.NW.perennial.graminoid.traits.RMF.MAP.DSI)
 
 #### ALL Backtransform ####
 
@@ -5246,3 +6659,532 @@ species.rf.plot = ggplot(data = species.rf.2,
   theme_classic()+
   labs(y = "",x = "Mean with 95% CI", title = "All-Species")
 species.rf.plot
+
+#### UNUSED Below Here ####
+###### impute FORB traits functional group NW###### 
+
+priors <- c(prior(normal(0, 10), class = b))
+
+forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                             SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                           family = gaussian(),
+                           prior = priors,
+                           data = imputed.NW.forb)
+
+summary(forb.traits.NW.model)
+# leafN significant
+
+saveRDS(forb.traits.NW.model, file = "./Results/forb.imputed.traits.no_woody.rds")
+bayes_R2(forb.traits.NW.model)
+# R2 0.1148149 0.04304049 0.04828436 0.2129581
+
+forb.traits.NW.model = readRDS("./Results/forb.imputed.traits.no_woody.rds")
+
+imputed.NW.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                          family = gaussian(),
+                                          prior = priors,
+                                          data = imputed.NW.forb)
+
+summary(imputed.NW.forb.traits.height.leafN)
+# leafN
+
+imputed.NW.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.NW.forb)
+
+summary(imputed.NW.forb.traits.depth.SLA)
+# nothing significant
+
+imputed.NW.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                         family = gaussian(),
+                                         prior = priors,
+                                         data = imputed.NW.forb)
+
+summary(imputed.NW.forb.traits.depth.leafN)
+# leafN
+
+imputed.NW.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.NW.forb)
+
+summary(imputed.NW.forb.traits.RTD.SRL)
+# RTD x SRL significant, negative
+
+saveRDS(imputed.NW.forb.traits.RTD.SRL, file = "./Results/forb.imputed.traits.NW.RTD.SRL.rds")
+bayes_R2(imputed.NW.forb.traits.RTD.SRL)
+# R2 0.0804646 0.04240653 0.02177166 0.1872374
+
+conditional_effects(imputed.NW.forb.traits.RTD.SRL)
+# higher cover with higher RTD and lower SRL or lower RTD with higher SRL
+
+imputed.NW.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.NW.forb)
+
+summary(imputed.NW.forb.traits.SLA.RMF)
+# nothing significant
+
+imputed.NW.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.forb)
+
+summary(imputed.NW.forb.traits.leafN.RMF)
+# leafN significant positive
+
+###### impute GRASS traits functional group NW ###### 
+grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                              SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                            family = gaussian(),
+                            prior = priors,
+                            data = imputed.NW.grass)
+
+summary(grass.traits.NW.model)
+# nothing significant
+
+saveRDS(grass.traits.NW.model, file = "./Results/grass.imputed.traits.no_woody.rds")
+bayes_R2(grass.traits.NW.model)
+# R2 0.1131223 0.04113157 0.04815195 0.2051698
+
+imputed.NW.grass.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                           family = gaussian(),
+                                           prior = priors,
+                                           data = imputed.NW.grass)
+
+summary(imputed.NW.grass.traits.height.leafN)
+# nothing significant
+
+imputed.NW.grass.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.grass)
+
+summary(imputed.NW.grass.traits.depth.SLA)
+# nothing significant
+
+imputed.NW.grass.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                          family = gaussian(),
+                                          prior = priors,
+                                          data = imputed.NW.grass)
+
+summary(imputed.NW.grass.traits.depth.leafN)
+# MAP is positive, significant
+
+imputed.NW.grass.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.NW.grass)
+
+summary(imputed.NW.grass.traits.RTD.SRL)
+# nothing significant
+
+imputed.NW.grass.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.NW.grass)
+
+summary(imputed.NW.grass.traits.SLA.RMF)
+# nothing significant
+
+imputed.NW.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                        family = gaussian(),
+                                        prior = priors,
+                                        data = imputed.NW.grass)
+
+summary(imputed.NW.grass.traits.leafN.RMF)
+# nothing significant
+
+###### imputed traits ANNUAL FORB NW###### 
+
+priors <- c(prior(normal(0, 10), class = b))
+
+annual.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                    SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                  family = gaussian(),
+                                  prior = priors,
+                                  data = imputed.NW.annual.forb)
+
+summary(annual.forb.traits.NW.model)
+# MAP significant
+
+saveRDS(annual.forb.traits.NW.model, file = "./Results/annual.forb.imputed.traits.no_woody.rds")
+bayes_R2(annual.forb.traits.NW.model)
+# R2 0.2252887 0.0659826 0.1116487 0.3650369
+
+imputed.NW.annual.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                 family = gaussian(),
+                                                 prior = priors,
+                                                 data = imputed.NW.annual.forb)
+
+summary(imputed.NW.annual.forb.traits.height.leafN)
+# nothing significant
+
+imputed.NW.annual.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                             family = gaussian(),
+                                             prior = priors,
+                                             data = imputed.NW.annual.forb)
+
+summary(imputed.NW.annual.forb.traits.depth.SLA)
+# MAP
+
+imputed.NW.annual.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.annual.forb)
+
+summary(imputed.NW.annual.forb.traits.depth.leafN)
+# MAP is positive, significant
+
+imputed.NW.annual.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                            family = gaussian(),
+                                            prior = priors,
+                                            data = imputed.NW.annual.forb)
+
+summary(imputed.NW.annual.forb.traits.RTD.SRL)
+# nothing significant
+
+imputed.NW.annual.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                            family = gaussian(),
+                                            prior = priors,
+                                            data = imputed.NW.annual.forb)
+
+summary(imputed.NW.annual.forb.traits.SLA.RMF)
+# MAP
+
+imputed.NW.annual.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                              family = gaussian(),
+                                              prior = priors,
+                                              data = imputed.NW.annual.forb)
+
+summary(imputed.NW.annual.forb.traits.leafN.RMF)
+# MAP significant positive
+
+###### imputed traits PERENNIAL FORB NW ###### 
+
+perennial.forb.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                       SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                     family = gaussian(),
+                                     prior = priors,
+                                     data = imputed.NW.perennial.forb)
+
+summary(perennial.forb.traits.NW.model)
+# nothing significant
+
+saveRDS(perennial.forb.traits.NW.model, file = "./Results/perennial.forb.imputed.traits.no_woody.rds")
+bayes_R2(perennial.forb.traits.NW.model)
+#R2 0.1475479 0.05794628 0.06079698 0.2874462
+
+imputed.NW.perennial.forb.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                    family = gaussian(),
+                                                    prior = priors,
+                                                    data = imputed.NW.perennial.forb)
+
+summary(imputed.NW.perennial.forb.traits.height.leafN)
+# leafN
+
+imputed.NW.perennial.forb.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.perennial.forb)
+
+summary(imputed.NW.perennial.forb.traits.depth.SLA)
+# nothing significant
+
+imputed.NW.perennial.forb.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                   family = gaussian(),
+                                                   prior = priors,
+                                                   data = imputed.NW.perennial.forb)
+
+summary(imputed.NW.perennial.forb.traits.depth.leafN)
+# leafN
+
+imputed.NW.perennial.forb.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                               family = gaussian(),
+                                               prior = priors,
+                                               data = imputed.NW.perennial.forb)
+
+summary(imputed.NW.perennial.forb.traits.RTD.SRL)
+# nothing significant
+
+imputed.NW.perennial.forb.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                               family = gaussian(),
+                                               prior = priors,
+                                               data = imputed.NW.perennial.forb)
+
+summary(imputed.NW.perennial.forb.traits.SLA.RMF)
+# nothing significant
+
+imputed.NW.perennial.forb.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                 family = gaussian(),
+                                                 prior = priors,
+                                                 data = imputed.NW.perennial.forb)
+
+summary(imputed.NW.perennial.forb.traits.leafN.RMF)
+# leafN
+
+###### imputed traits PERENNIAL GRASS NW ###### 
+
+perennial.grass.traits.NW.model = brm(cover.change ~ leafN.final + height.final + rootN.final + SLA.final + root.depth.final + rootDiam.final +
+                                        SRL.final + RTD.final + RMF.final + mean.DSI + mean.MAP +(1|site_code) + (1|Taxon), 
+                                      family = gaussian(),
+                                      prior = priors,
+                                      data = imputed.NW.perennial.grass)
+
+summary(perennial.grass.traits.NW.model)
+# nothing significant
+
+saveRDS(perennial.grass.traits.NW.model, file = "./Results/perennial.grass.imputed.traits.no_woody.rds")
+bayes_R2(perennial.grass.traits.NW.model)
+#R2 0.1499307 0.06219888 0.05914333 0.2792502
+
+imputed.NW.perennial.grass.traits.height.leafN = brm(cover.change ~ height.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                     family = gaussian(),
+                                                     prior = priors,
+                                                     data = imputed.NW.perennial.grass)
+
+summary(imputed.NW.perennial.grass.traits.height.leafN)
+# nothing significant
+
+imputed.NW.perennial.grass.traits.depth.SLA= brm(cover.change ~ root.depth.final*SLA.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                 family = gaussian(),
+                                                 prior = priors,
+                                                 data = imputed.NW.perennial.grass)
+
+summary(imputed.NW.perennial.grass.traits.depth.SLA)
+# nothing significant
+
+imputed.NW.perennial.grass.traits.depth.leafN = brm(cover.change ~ root.depth.final*leafN.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                    family = gaussian(),
+                                                    prior = priors,
+                                                    data = imputed.NW.perennial.grass)
+
+summary(imputed.NW.perennial.grass.traits.depth.leafN)
+# nothing significant
+
+imputed.NW.perennial.grass.traits.RTD.SRL = brm(cover.change ~ RTD.final*SRL.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.perennial.grass)
+
+summary(imputed.NW.perennial.grass.traits.RTD.SRL)
+# nothing significant
+
+imputed.NW.perennial.grass.traits.SLA.RMF = brm(cover.change ~ SLA.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                family = gaussian(),
+                                                prior = priors,
+                                                data = imputed.NW.perennial.grass)
+
+summary(imputed.NW.perennial.grass.traits.SLA.RMF)
+# nothing significant
+
+imputed.NW.perennial.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF.final + mean.DSI + mean.MAP + (1|site_code) + (1|Taxon), 
+                                                  family = gaussian(),
+                                                  prior = priors,
+                                                  data = imputed.NW.perennial.grass)
+
+summary(imputed.NW.perennial.grass.traits.leafN.RMF)
+
+###### Model with lifespan x functional group ###### 
+
+# remove annual graminoids
+imputed.NW.4 = imputed.NW.3 %>%
+  filter(!(local_lifespan %in% c("ANNUAL") & functional_group %in% c("GRAMINOID")))
+# group names together
+imputed.NW.4$all.cats = paste(imputed.NW.4$local_lifespan, imputed.NW.4$functional_group, sep = "_")
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.all.cats.model = brm(cover.change ~ all.cats + 
+                                         leafN.final*all.cats + height.final*all.cats + 
+                                         rootN.final*all.cats+ SLA.final*all.cats +
+                                         root.depth.final*all.cats + rootDiam.final*all.cats +
+                                         SRL.final*all.cats + RTD.final*all.cats + 
+                                         RMF.final*all.cats + mean.DSI*all.cats + 
+                                         mean.MAP*all.cats + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.4)
+
+summary(imputed.traits.NW.all.cats.model)
+bayes_R2(imputed.traits.NW.all.cats.model)
+# 0.1317751 0.02920505 0.08324678 0.1985978
+#saveRDS(imputed.traits.NW.all.cats.model, file = "./Results/all.cats.imputed.traits.no_woody.rds")
+
+imputed.traits.NW.all.cats.model = readRDS("./Results/all.cats.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.traits.NW.all.cats.model))
+fitted_vals <- as.data.frame(fitted(imputed.traits.NW.all.cats.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+plot(fitted_vals$Estimate, model_residuals$Estimate,
+     xlab = "Fitted values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted")
+abline(h = 0, col = "red", lty = 2)
+
+# test for differences between combinations of lifespan and functional group for each trait
+# also see if any particular group is significant for each trait
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "leafN.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "height.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "rootN.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "SLA.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "root.depth.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "rootDiam.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "SRL.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "RTD.final")
+# perennial forb alone significant, positive
+# contrasts not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "RMF.final")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "mean.DSI")
+# not significant
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "mean.MAP")
+# not significant
+
+###### Model with lifespan groups ###### 
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.lifespan.model = brm(cover.change ~ local_lifespan + 
+                                         leafN.final*local_lifespan + height.final*local_lifespan + 
+                                         rootN.final*local_lifespan + SLA.final*local_lifespan +
+                                         root.depth.final*local_lifespan + rootDiam.final*local_lifespan +
+                                         SRL.final*local_lifespan + RTD.final*local_lifespan + 
+                                         RMF.final*local_lifespan + mean.DSI*local_lifespan + 
+                                         mean.MAP*local_lifespan + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.3)
+
+
+bayes_R2(imputed.traits.NW.lifespan.model)
+# R2 0.09073373 0.02491132 0.04998194 0.1476335
+# saveRDS(imputed.traits.NW.lifespan.model, file = "./Results/lifespan.cats.imputed.traits.no_woody.rds")
+
+imputed.traits.NW.lifespan.model = readRDS("./Results/lifespan.cats.imputed.traits.no_woody.rds")
+
+# test for differences between annuals and perennials for each trait
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "leafN.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "height.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "rootN.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "SLA.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "root.depth.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "rootDiam.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "SRL.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "RTD.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "RMF.final")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "mean.DSI")
+# not significant
+
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "mean.MAP")
+# contrasts not significant
+# annual significant, positive
+
+###### Model with functional groups###### 
+
+imputed.NW.functional.group = imputed.NW %>%
+  select(cover.change,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
+         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
+  drop_na()
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.functional.group.model = brm(cover.change ~ functional_group + 
+                                                 leafN.final*functional_group + height.final*functional_group + 
+                                                 rootN.final*functional_group + SLA.final*functional_group +
+                                                 root.depth.final*functional_group + rootDiam.final*functional_group +
+                                                 SRL.final*functional_group + RTD.final*functional_group + 
+                                                 RMF.final*functional_group + mean.DSI*functional_group + 
+                                                 mean.MAP*functional_group + (1|site_code) + (1|Taxon), 
+                                               family = gaussian(),
+                                               prior = priors,
+                                               data = imputed.NW.functional.group)
+
+summary(imputed.traits.NW.functional.group.model)
+bayesa_R2(imputed.traits.NW.functional.group.model)
+#R2 0.09210356 0.02421696 0.052281 0.1472661
+#saveRDS(imputed.traits.NW.functional.group.model, file = "./Results/functional.group.cats.imputed.traits.no_woody.rds")
+
+imputed.traits.NW.functional.group.model = readRDS("./Results/functional.group.cats.imputed.traits.no_woody.rds")
+
+# test for differences between annuals and perennials for each trait
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "leafN.final")
+# contrasts not significant
+# forb significant, positive
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "height.final")
+# forb and graminoid significantly different
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "rootN.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "SLA.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "root.depth.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "rootDiam.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "SRL.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "RTD.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "RMF.final")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "mean.DSI")
+# not significant
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "mean.MAP")
+# not significant
+

@@ -133,7 +133,7 @@ summary(imputed.traits.leafN.RMF)
 # MAP significant positive
 # leafN:RMF significant positive
 
-saveRDS(imputed.traits.leafN.RMF, file = "./Results/all.imputed.traits.NW.leafN.RMF.rds")
+saveRDS(imputed.traits.leafN.RMF, file = "./Results/all.imputed.traits.leafN.RMF.rds")
 bayes_R2(imputed.traits.leafN.RMF)
 # R2 0.04569436 0.02099302 0.01492096 0.0965261
 
@@ -206,7 +206,7 @@ summary(imputed.annual.traits.leafN.RMF)
 # MAP significant positive
 # leafN:RMF significant positive
 
-saveRDS(imputed.annual.traits.leafN.RMF, file = "./Results/all.imputed.annual.traits.NW.leafN.RMF.rds")
+saveRDS(imputed.annual.traits.leafN.RMF, file = "./Results/all.imputed.annual.traits.leafN.RMF.rds")
 bayes_R2(imputed.annual.traits.leafN.RMF)
 # R2 0.1406763 0.04769004 0.05628005 0.2433342
 
@@ -405,7 +405,7 @@ summary(imputed.grass.traits.leafN.RMF)
 # MAP significant positive
 # leafN:RMF significant positive
 
-saveRDS(imputed.grass.traits.leafN.RMF, file = "./Results/all.imputed.grass.traits.NW.leafN.RMF.rds")
+saveRDS(imputed.grass.traits.leafN.RMF, file = "./Results/all.imputed.grass.traits.leafN.RMF.rds")
 bayes_R2(imputed.grass.traits.leafN.RMF)
 # R2 0.04569436 0.02099302 0.01492096 0.0965261
 
@@ -1058,9 +1058,6 @@ grass.model = brm(cover.change ~ leafN.mg.g + height.m + rootN.mg.g + SLA_m2.kg 
 
 summary(grass.model)
 # nothing significant
-
-
-
 
 #### Load original CC data without woody species ####
 
