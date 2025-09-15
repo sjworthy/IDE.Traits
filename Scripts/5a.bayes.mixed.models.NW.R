@@ -6660,6 +6660,331 @@ species.rf.plot = ggplot(data = species.rf.2,
   labs(y = "",x = "Mean with 95% CI", title = "All-Species")
 species.rf.plot
 
+#### Load imputed data for interaction models ####
+
+# read in environmental data
+enviro = read.csv("./Raw.Data/site.drt.dev.index.csv", row.names = 1)
+
+# imputed traits with woody species
+imputed.NW = read.csv("./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.outliersRM.csv", row.names = 1) %>%
+  left_join(., enviro, by = "site_code") %>%
+  filter(round(cover.change, 5) > -24.50000 & round(cover.change, 5) < 23.52000) %>%
+  mutate_at(vars(26:36),scale)
+
+# change forbs and legumes to just forbs
+# change grass and graminoids to graminoids
+
+imputed.NW$functional_group[imputed.NW$functional_group == "LEGUME"] <- "FORB"
+imputed.NW$functional_group[imputed.NW$functional_group == "GRASS"] <- "GRAMINOID"
+
+# add relative BACI column to other data - for revisions round 2
+#all.cover = read.csv("./Formatted.Data/Revisions/BACI.data.final.csv") %>%
+  #select(site_code,Taxon,relative.cover.change)
+
+# remove whitespace to help merging
+#imputed.NW$site_code <- str_trim(imputed.NW$site_code)
+#all.cover$site_code <- str_trim(all.cover$site_code)
+
+# join together
+#imputed.NW = left_join(imputed.NW,all.cover)
+
+# remove all rows that are not annual or perennial
+imputed.NW.2 = imputed.NW %>%
+  filter(local_lifespan %in% c("ANNUAL","PERENNIAL"))
+# make them factors
+imputed.NW.2$local_lifespan = as.factor(imputed.NW.2$local_lifespan)
+imputed.NW.2$functional_group = as.factor(imputed.NW.2$functional_group)
+
+# subset for columns we need 
+imputed.NW.3 = imputed.NW.2 %>%
+  select(cover.change,local_lifespan,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
+         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
+  drop_na()
+
+###### Model with lifespan groups ###### 
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.lifespan.model = brm(cover.change ~ local_lifespan + mean.MAP + 
+                                         mean.MAP*local_lifespan + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.3)
+
+
+bayes_R2(imputed.traits.NW.lifespan.model)
+# R2 0.03875425 0.02160649 0.009283615 0.09443166
+#saveRDS(imputed.traits.NW.lifespan.model, file = "./Results/lifespan.cats.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.traits.NW.lifespan.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.traits.NW.lifespan.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals: All Species",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.traits.NW.lifespan.model) # p = 0.746
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.traits.NW.lifespan.model)
+
+imputed.traits.NW.lifespan.model = readRDS("./Results/lifespan.cats.imputed.traits.no_woody.rds")
+
+# test for differences between annuals and perennials for MAP
+emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "mean.MAP")
+# significant difference b/t annual and perennial. Annual higher.
+# annual significant, positive
+
+#### Plotting Lifespan Groups ####
+
+MAP.lifespan.group.effect = conditional_effects(imputed.traits.NW.lifespan.model, 
+                                                     effects = "mean.MAP:local_lifespan")$`mean.MAP:local_lifespan`
+
+attr(imputed.NW.3$mean.MAP, "scaled:scale")
+attr(imputed.NW.3$mean.MAP, "scaled:center")
+
+MAP.lifespan.group.effect$MAP.bt = (MAP.lifespan.group.effect$mean.MAP*487.1451) + 691.6107
+
+MAP.x.lifespan.plot = ggplot(data = MAP.lifespan.group.effect, aes(x = MAP.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
+  labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)", color = "Lifespan") +
+  scale_colour_manual(values = c("#979461", "#F1C646"), labels = c("Annuals","Perennials"))+
+  scale_fill_manual(values = c("#979461", "#F1C646"))+
+  theme_classic()
+MAP.x.lifespan.plot
+
+#ggsave("./Plots/Revision.2/MAP.lifespan.pdf", height = 3, width = 3)
+#ggsave("./Plots/Revision.2/MAP.lifespan.legend.pdf", height = 3, width = 3)
+
+
+###### Model with functional groups###### 
+
+imputed.NW.functional.group = imputed.NW %>%
+  select(cover.change,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
+         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
+  drop_na()
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.functional.group.model = brm(cover.change ~ functional_group + leafN.final + 
+                                                 height.final + RTD.final + 
+                                                 leafN.final*functional_group + height.final*functional_group + 
+                                                 RTD.final*functional_group + (1|site_code) + (1|Taxon), 
+                                               family = gaussian(),
+                                               prior = priors,
+                                               data = imputed.NW.functional.group)
+
+summary(imputed.traits.NW.functional.group.model)
+bayes_R2(imputed.traits.NW.functional.group.model)
+#R2 0.05917052 0.02456162 0.02174739 0.1162923
+#saveRDS(imputed.traits.NW.functional.group.model, file = "./Results/functional.group.cats.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.traits.NW.functional.group.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.traits.NW.functional.group.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.traits.NW.functional.group.model) # p = 0.628
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.traits.NW.functional.group.model)
+
+imputed.traits.NW.functional.group.model = readRDS("./Results/functional.group.cats.imputed.traits.no_woody.rds")
+
+# test for differences between functional groups differ
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "leafN.final")
+# contrasts not significant
+# forb significant, positive
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "height.final")
+# forb and graminoid significantly different
+# forb significant, positive
+
+emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "RTD.final")
+# not significant
+
+#### Plotting Functional Groups ####
+
+height.functional.group.effect = conditional_effects(imputed.traits.NW.functional.group.model, 
+                                                     effects = "height.final:functional_group")$`height.final:functional_group`
+
+attr(imputed.NW.functional.group$height.final, "scaled:scale")
+attr(imputed.NW.functional.group$height.final, "scaled:center")
+
+height.functional.group.effect$height.bt = (height.functional.group.effect$height.final*0.2353906) + 0.3476824
+
+height.x.functional.group.plot = ggplot(data = height.functional.group.effect, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
+  geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
+  geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Height (m)", y = "Cover Change (%)", color = "Functional Group") +
+  scale_colour_manual(values = c("#F17236", "#6E687E"), labels = c("Forbs","Graminoids"))+
+  scale_fill_manual(values = c("#F17236", "#6E687E"))+
+  theme_classic()
+height.x.functional.group.plot
+
+#ggsave("./Plots/Revision.2/height.functional.group.pdf", height = 3, width = 3)
+#ggsave("./Plots/Revision.2/height.functional.group.legend.pdf", height = 3, width = 3)
+
+###### Model with lifespan x functional group ###### 
+
+# remove annual graminoids
+imputed.NW.4 = imputed.NW.3 %>%
+  filter(!(local_lifespan %in% c("ANNUAL") & functional_group %in% c("GRAMINOID")))
+# group names together
+imputed.NW.4$all.cats = paste(imputed.NW.4$local_lifespan, imputed.NW.4$functional_group, sep = "_")
+
+priors <- c(prior(normal(0, 10), class = b))
+
+imputed.traits.NW.all.cats.model = brm(cover.change ~ all.cats + RTD.final + 
+                                         RTD.final*all.cats + (1|site_code) + (1|Taxon), 
+                                       family = gaussian(),
+                                       prior = priors,
+                                       data = imputed.NW.4)
+
+summary(imputed.traits.NW.all.cats.model)
+bayes_R2(imputed.traits.NW.all.cats.model)
+# 0.05418933 0.03061809 0.01208369 0.1269852
+# saveRDS(imputed.traits.NW.all.cats.model, file = "./Results/all.cats.imputed.traits.no_woody.rds")
+
+# checking model assumptions
+# plots of residuals, normality of errors
+model_residuals = as.data.frame(residuals(imputed.traits.NW.all.cats.model, summary = TRUE))
+fitted_vals <- as.data.frame(fitted(imputed.traits.NW.all.cats.model, summary = TRUE))
+ggplot(model_residuals, aes(x = Estimate)) +
+  geom_density(fill = "skyblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Density of Model Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+# variance homogeneity
+check_heteroscedasticity(imputed.traits.NW.all.cats.model) # p = 0.591
+ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Residuals vs Fitted values") +
+  theme_minimal()
+
+# variance inflation
+check_collinearity(imputed.traits.NW.all.cats.model)
+
+imputed.traits.NW.all.cats.model = readRDS("./Results/all.cats.imputed.traits.no_woody.rds")
+
+# test for differences between combinations of lifespan and functional group for each trait
+# also see if any particular group is significant for each trait
+
+emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "RTD.final")
+# perennial forb alone significant, positive
+# contrasts not significant
+
+#### Group Interaction Dot Plots ####
+imputed.traits.NW.lifespan.model = readRDS("./Results/lifespan.cats.imputed.traits.no_woody.rds")
+imputed.traits.NW.functional.group.model = readRDS("./Results/functional.group.cats.imputed.traits.no_woody.rds")
+imputed.traits.NW.all.cats.model = readRDS("./Results/all.cats.imputed.traits.no_woody.rds")
+
+sum = summary(imputed.traits.NW.lifespan.model)$fixed
+row.names(sum) = c("Intercept","Local Lifespan\n(Perennial)", "MAP","Local Lifespan*MAP\n(Perennial)")
+sum.2 = sum %>%
+  dplyr::mutate(sum.zero = `l-95% CI`/`u-95% CI` < 0,
+         resp.fill = if_else(sum.zero == TRUE, true = "white", false = "black"))
+
+lifespan.plot = ggplot(data = sum.2,
+                          aes(y = factor(row.names(sum.2), levels = rev(row.names(sum.2))),
+                              x = Estimate,
+                              xmin = `l-95% CI`,
+                              xmax = `u-95% CI`,
+                              fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "black") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Lifespans")
+lifespan.plot
+
+coef = summary(imputed.traits.NW.functional.group.model)$fixed
+row.names(coef) = c("Intercept","Functional Group\n(Graminoid)", "Leaf N","Height","RTD",
+                    "Functional Group*Leaf N\n(Graminoid)","Functional Group*Height\n(Graminoid)",
+                    "Functional Group*RTD\n(Graminoid)")
+coef.2 = coef %>%
+  dplyr::mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
+                resp.fill = if_else(coef.zero == TRUE, true = "white", false = "black"))
+
+functional.plot = ggplot(data = coef.2,
+                       aes(y = factor(row.names(coef.2), levels = rev(row.names(coef.2))),
+                           x = Estimate,
+                           xmin = `l-95% CI`,
+                           xmax = `u-95% CI`,
+                           fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "black") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Functional Groups")
+functional.plot
+
+cat = summary(imputed.traits.NW.all.cats.model)$fixed
+row.names(cat) = c("Intercept","All Groups\n(Perennial Forb)", "All Groups\n(Perennial Graminoid)","RTD",
+                    "All Groups*RTD\n(Perennial Forb)","All Groups*RTD\n(Perennial Graminoid)")
+cat.2 = cat %>%
+  dplyr::mutate(cat.zero = `l-95% CI`/`u-95% CI` < 0,
+                resp.fill = if_else(cat.zero == TRUE, true = "white", false = "black"))
+
+cat.plot = ggplot(data = cat.2,
+                         aes(y = factor(row.names(cat.2), levels = rev(row.names(cat.2))),
+                             x = Estimate,
+                             xmin = `l-95% CI`,
+                             xmax = `u-95% CI`,
+                             fill = resp.fill)) +
+  geom_pointrange(size = 1, shape = 21, color = "black") +
+  geom_vline(xintercept = 0) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  theme_classic(base_size = 15)+
+  labs(y = "",x = "Mean with 95% CI", title = "Lifespans * Functional Groups")
+cat.plot
+
+png(filename = "./Plots/group.interaction.coef.plot.png",  width = 13, 
+    height = 11, units = "in", res = 600)
+
+plot_grid(lifespan.plot,functional.plot,cat.plot)
+
+dev.off()
+
 #### UNUSED Below Here ####
 ###### impute FORB traits functional group NW###### 
 
@@ -6986,205 +7311,4 @@ imputed.NW.perennial.grass.traits.leafN.RMF = brm(cover.change ~ leafN.final*RMF
                                                   data = imputed.NW.perennial.grass)
 
 summary(imputed.NW.perennial.grass.traits.leafN.RMF)
-
-###### Model with lifespan x functional group ###### 
-
-# remove annual graminoids
-imputed.NW.4 = imputed.NW.3 %>%
-  filter(!(local_lifespan %in% c("ANNUAL") & functional_group %in% c("GRAMINOID")))
-# group names together
-imputed.NW.4$all.cats = paste(imputed.NW.4$local_lifespan, imputed.NW.4$functional_group, sep = "_")
-
-priors <- c(prior(normal(0, 10), class = b))
-
-imputed.traits.NW.all.cats.model = brm(cover.change ~ all.cats + 
-                                         leafN.final*all.cats + height.final*all.cats + 
-                                         rootN.final*all.cats+ SLA.final*all.cats +
-                                         root.depth.final*all.cats + rootDiam.final*all.cats +
-                                         SRL.final*all.cats + RTD.final*all.cats + 
-                                         RMF.final*all.cats + mean.DSI*all.cats + 
-                                         mean.MAP*all.cats + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.4)
-
-summary(imputed.traits.NW.all.cats.model)
-bayes_R2(imputed.traits.NW.all.cats.model)
-# 0.1317751 0.02920505 0.08324678 0.1985978
-#saveRDS(imputed.traits.NW.all.cats.model, file = "./Results/all.cats.imputed.traits.no_woody.rds")
-
-imputed.traits.NW.all.cats.model = readRDS("./Results/all.cats.imputed.traits.no_woody.rds")
-
-# checking model assumptions
-# plots of residuals, normality of errors
-model_residuals = as.data.frame(residuals(imputed.traits.NW.all.cats.model))
-fitted_vals <- as.data.frame(fitted(imputed.traits.NW.all.cats.model, summary = TRUE))
-ggplot(model_residuals, aes(x = Estimate)) +
-  geom_density(fill = "skyblue", alpha = 0.5) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
-  labs(title = "Density of Model Residuals",
-       x = "Residuals",
-       y = "Density") +
-  theme_minimal()
-# variance homogeneity
-plot(fitted_vals$Estimate, model_residuals$Estimate,
-     xlab = "Fitted values",
-     ylab = "Residuals",
-     main = "Residuals vs Fitted")
-abline(h = 0, col = "red", lty = 2)
-
-# test for differences between combinations of lifespan and functional group for each trait
-# also see if any particular group is significant for each trait
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "leafN.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "height.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "rootN.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "SLA.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "root.depth.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "rootDiam.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "SRL.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "RTD.final")
-# perennial forb alone significant, positive
-# contrasts not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "RMF.final")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "mean.DSI")
-# not significant
-
-emtrends(imputed.traits.NW.all.cats.model, pairwise ~ all.cats, var = "mean.MAP")
-# not significant
-
-###### Model with lifespan groups ###### 
-
-priors <- c(prior(normal(0, 10), class = b))
-
-imputed.traits.NW.lifespan.model = brm(cover.change ~ local_lifespan + 
-                                         leafN.final*local_lifespan + height.final*local_lifespan + 
-                                         rootN.final*local_lifespan + SLA.final*local_lifespan +
-                                         root.depth.final*local_lifespan + rootDiam.final*local_lifespan +
-                                         SRL.final*local_lifespan + RTD.final*local_lifespan + 
-                                         RMF.final*local_lifespan + mean.DSI*local_lifespan + 
-                                         mean.MAP*local_lifespan + (1|site_code) + (1|Taxon), 
-                                       family = gaussian(),
-                                       prior = priors,
-                                       data = imputed.NW.3)
-
-
-bayes_R2(imputed.traits.NW.lifespan.model)
-# R2 0.09073373 0.02491132 0.04998194 0.1476335
-# saveRDS(imputed.traits.NW.lifespan.model, file = "./Results/lifespan.cats.imputed.traits.no_woody.rds")
-
-imputed.traits.NW.lifespan.model = readRDS("./Results/lifespan.cats.imputed.traits.no_woody.rds")
-
-# test for differences between annuals and perennials for each trait
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "leafN.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "height.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "rootN.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "SLA.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "root.depth.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "rootDiam.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "SRL.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "RTD.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "RMF.final")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "mean.DSI")
-# not significant
-
-emtrends(imputed.traits.NW.lifespan.model, pairwise ~ local_lifespan, var = "mean.MAP")
-# contrasts not significant
-# annual significant, positive
-
-###### Model with functional groups###### 
-
-imputed.NW.functional.group = imputed.NW %>%
-  select(cover.change,functional_group,leafN.final,height.final,rootN.final,SLA.final,root.depth.final,
-         rootDiam.final,SRL.final,RTD.final,RMF.final,mean.DSI,mean.MAP,site_code,Taxon) %>%
-  drop_na()
-
-priors <- c(prior(normal(0, 10), class = b))
-
-imputed.traits.NW.functional.group.model = brm(cover.change ~ functional_group + 
-                                                 leafN.final*functional_group + height.final*functional_group + 
-                                                 rootN.final*functional_group + SLA.final*functional_group +
-                                                 root.depth.final*functional_group + rootDiam.final*functional_group +
-                                                 SRL.final*functional_group + RTD.final*functional_group + 
-                                                 RMF.final*functional_group + mean.DSI*functional_group + 
-                                                 mean.MAP*functional_group + (1|site_code) + (1|Taxon), 
-                                               family = gaussian(),
-                                               prior = priors,
-                                               data = imputed.NW.functional.group)
-
-summary(imputed.traits.NW.functional.group.model)
-bayesa_R2(imputed.traits.NW.functional.group.model)
-#R2 0.09210356 0.02421696 0.052281 0.1472661
-#saveRDS(imputed.traits.NW.functional.group.model, file = "./Results/functional.group.cats.imputed.traits.no_woody.rds")
-
-imputed.traits.NW.functional.group.model = readRDS("./Results/functional.group.cats.imputed.traits.no_woody.rds")
-
-# test for differences between annuals and perennials for each trait
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "leafN.final")
-# contrasts not significant
-# forb significant, positive
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "height.final")
-# forb and graminoid significantly different
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "rootN.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "SLA.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "root.depth.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "rootDiam.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "SRL.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "RTD.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "RMF.final")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "mean.DSI")
-# not significant
-
-emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, var = "mean.MAP")
-# not significant
 
