@@ -6691,6 +6691,7 @@ imputed.NW$functional_group[imputed.NW$functional_group == "GRASS"] <- "GRAMINOI
 # remove all rows that are not annual or perennial
 imputed.NW.2 = imputed.NW %>%
   filter(local_lifespan %in% c("ANNUAL","PERENNIAL"))
+# lose 21 data points
 # make them factors
 imputed.NW.2$local_lifespan = as.factor(imputed.NW.2$local_lifespan)
 imputed.NW.2$functional_group = as.factor(imputed.NW.2$functional_group)
@@ -6711,7 +6712,7 @@ imputed.traits.NW.lifespan.model = brm(cover.change ~ local_lifespan + mean.MAP 
                                        prior = priors,
                                        data = imputed.NW.3)
 
-
+summary(imputed.traits.NW.lifespan.model)
 bayes_R2(imputed.traits.NW.lifespan.model)
 # R2 0.03875425 0.02160649 0.009283615 0.09443166
 #saveRDS(imputed.traits.NW.lifespan.model, file = "./Results/lifespan.cats.imputed.traits.no_woody.rds")
@@ -6728,7 +6729,7 @@ ggplot(model_residuals, aes(x = Estimate)) +
        y = "Density") +
   theme_minimal()
 # variance homogeneity
-check_heteroscedasticity(imputed.traits.NW.lifespan.model) # p = 0.746
+check_heteroscedasticity(imputed.traits.NW.lifespan.model) # p = 0.749
 ggplot(data.frame(fitted = fitted_vals$Estimate, resid = model_residuals$Estimate),
        aes(x = fitted, y = resid)) +
   geom_point(alpha = 0.5) +
@@ -6760,16 +6761,16 @@ MAP.lifespan.group.effect$MAP.bt = (MAP.lifespan.group.effect$mean.MAP*487.1451)
 MAP.x.lifespan.plot = ggplot(data = MAP.lifespan.group.effect, aes(x = MAP.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
   labs(x = "Mean Annual Precipitation (mm)", y = "Cover Change (%)", color = "Lifespan") +
   scale_colour_manual(values = c("#979461", "#F1C646"), labels = c("Annuals","Perennials"))+
   scale_fill_manual(values = c("#979461", "#F1C646"))+
   theme_classic()
 MAP.x.lifespan.plot
 
-#ggsave("./Plots/Revision.2/MAP.lifespan.pdf", height = 3, width = 3)
-#ggsave("./Plots/Revision.2/MAP.lifespan.legend.pdf", height = 3, width = 3)
+#ggsave("./Plots/Revisions.3/MAP.lifespan.pdf", height = 3, width = 3)
+#ggsave("./Plots/Revisions.3/MAP.lifespan.legend.pdf", height = 3, width = 3)
 
 
 ###### Model with functional groups###### 
@@ -6845,16 +6846,16 @@ height.functional.group.effect$height.bt = (height.functional.group.effect$heigh
 height.x.functional.group.plot = ggplot(data = height.functional.group.effect, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
   labs(x = "Height (m)", y = "Cover Change (%)", color = "Functional Group") +
   scale_colour_manual(values = c("#F17236", "#6E687E"), labels = c("Forbs","Graminoids"))+
   scale_fill_manual(values = c("#F17236", "#6E687E"))+
   theme_classic()
 height.x.functional.group.plot
 
-#ggsave("./Plots/Revision.2/height.functional.group.pdf", height = 3, width = 3)
-#ggsave("./Plots/Revision.2/height.functional.group.legend.pdf", height = 3, width = 3)
+#ggsave("./Plots/Revisions.3/height.functional.group.pdf", height = 3, width = 3)
+#ggsave("./Plots/Revisions.3/height.functional.group.legend.pdf", height = 3, width = 3)
 
 ###### Model with lifespan x functional group ###### 
 
@@ -6916,7 +6917,7 @@ imputed.traits.NW.functional.group.model = readRDS("./Results/functional.group.c
 imputed.traits.NW.all.cats.model = readRDS("./Results/all.cats.imputed.traits.no_woody.rds")
 
 sum = summary(imputed.traits.NW.lifespan.model)$fixed
-row.names(sum) = c("Intercept","Local Lifespan\n(Perennial)", "MAP","Local Lifespan*MAP\n(Perennial)")
+row.names(sum) = c("Intercept","Lifespan\n(Perennial)", "MAP","Lifespan*MAP\n(Perennial)")
 sum.2 = sum %>%
   dplyr::mutate(sum.zero = `l-95% CI`/`u-95% CI` < 0,
          resp.fill = if_else(sum.zero == TRUE, true = "white", false = "black"))
