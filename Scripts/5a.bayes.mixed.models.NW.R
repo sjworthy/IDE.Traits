@@ -6835,6 +6835,9 @@ emtrends(imputed.traits.NW.functional.group.model, pairwise ~ functional_group, 
 
 #### Plotting Functional Groups ####
 
+imputed.traits.NW.functional.group.model = readRDS("./Results/functional.group.cats.imputed.traits.no_woody.rds")
+
+
 height.functional.group.effect = conditional_effects(imputed.traits.NW.functional.group.model, 
                                                      effects = "height.final:functional_group")$`height.final:functional_group`
 
@@ -6846,9 +6849,9 @@ height.functional.group.effect$height.bt = (height.functional.group.effect$heigh
 height.x.functional.group.plot = ggplot(data = height.functional.group.effect, aes(x = height.bt, y = estimate__, group = as.factor(effect2__))) +
   geom_line(aes(color = as.factor(effect2__)), size = 1.5,show.legend = FALSE) +  
   geom_ribbon(aes(ymin = lower__, ymax = upper__, fill = as.factor(effect2__)), alpha = 0.5,show.legend = FALSE) +  
-  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) +
-  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2,show.legend = FALSE) + 
-  labs(x = "Height (m)", y = "Cover Change (%)", color = "Functional Group") +
+  geom_line(aes(y = upper__, color = factor(effect2__)), size = 1.2) +
+  geom_line(aes(y = lower__, color = factor(effect2__)), size = 1.2) + 
+  labs(x = "Height (m)", y = "Cover Change (%)", color = "Growth Form") +
   scale_colour_manual(values = c("#F17236", "#6E687E"), labels = c("Forbs","Graminoids"))+
   scale_fill_manual(values = c("#F17236", "#6E687E"))+
   theme_classic()
@@ -6937,9 +6940,9 @@ lifespan.plot = ggplot(data = sum.2,
 lifespan.plot
 
 coef = summary(imputed.traits.NW.functional.group.model)$fixed
-row.names(coef) = c("Intercept","Functional Group\n(Graminoid)", "Leaf N","Height","RTD",
-                    "Functional Group*Leaf N\n(Graminoid)","Functional Group*Height\n(Graminoid)",
-                    "Functional Group*RTD\n(Graminoid)")
+row.names(coef) = c("Intercept","Growth Form\n(Graminoid)", "Leaf N","Height","RTD",
+                    "Growth Form*Leaf N\n(Graminoid)","Growth Form*Height\n(Graminoid)",
+                    "Growth Form*RTD\n(Graminoid)")
 coef.2 = coef %>%
   dplyr::mutate(coef.zero = `l-95% CI`/`u-95% CI` < 0,
                 resp.fill = if_else(coef.zero == TRUE, true = "white", false = "black"))
@@ -6955,7 +6958,7 @@ functional.plot = ggplot(data = coef.2,
   scale_fill_identity() +
   scale_color_identity() +
   theme_classic(base_size = 15)+
-  labs(y = "",x = "Mean with 95% CI", title = "Functional Groups")
+  labs(y = "",x = "Mean with 95% CI", title = "Growth Forms")
 functional.plot
 
 cat = summary(imputed.traits.NW.all.cats.model)$fixed
@@ -6976,7 +6979,7 @@ cat.plot = ggplot(data = cat.2,
   scale_fill_identity() +
   scale_color_identity() +
   theme_classic(base_size = 15)+
-  labs(y = "",x = "Mean with 95% CI", title = "Lifespans * Functional Groups")
+  labs(y = "",x = "Mean with 95% CI", title = "Lifespans * Growth Forms")
 cat.plot
 
 png(filename = "./Plots/group.interaction.coef.plot.png",  width = 13, 
