@@ -14,7 +14,6 @@ library(abind)
 library(ggpubr)
 library(cowplot)
 
-
 #### Make the hierarchy file ####
 
 traits = read.csv("./Formatted.Data/Revisions/final.data.NW.for.impute.csv", row.names = 1)

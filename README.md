@@ -5,8 +5,8 @@
 Folders in this repository:
 
 -   Formatted.Data
--   Raw.Data
 -   Plots
+-   Raw.Data
 -   Results
 -   Scripts
 

@@ -698,7 +698,6 @@ imputed.traits.NW.perennial.graminoid = imputed.traits.NW.2 %>%
 #write.csv(imputed.traits.NW.perennial.forb.legume, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.forb.legume.outliersRM.csv")
 #write.csv(imputed.traits.NW.perennial.graminoid, file = "./Formatted.Data/Revisions/Final.Data/imputed.traits.NW.perennial.graminoid.outliersRM.csv")
 
-
 # how many annual grass species would have been in the model
 imputed.traits.NW.annual.grass = imputed.traits.NW.2 %>%
   filter(local_lifespan == "ANNUAL") %>%
@@ -712,6 +711,3 @@ left_join(., enviro, by = "site_code")
 imputed.traits.NW.annual.grass.3 = imputed.traits.NW.annual.grass.2 %>%
   select(cover.change,site_code,Taxon, leafN.final:mean.MAP) %>%
   drop_na()
-
-
-

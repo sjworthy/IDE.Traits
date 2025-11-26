@@ -1,5 +1,6 @@
 ## Script to evaluate linear mixed effects models of cover change and traits
-# cover outliers removed
+# cover outliers removed, woody populations removed
+# this script matches final analyses and figures in the manuscript
 
 # load libraries 
 library(tidyverse)
