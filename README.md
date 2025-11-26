@@ -1,5 +1,7 @@
 ### Repository for the paper "*Growth form and lifespan of herbaceous species mediate the role of traits in short-term drought response*"
 
+<a href="https://doi.org/10.5281/zenodo.17724111"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17724111.svg" alt="DOI"></a>
+
 ### The files
 
 Folders in this repository:
