@@ -115,10 +115,3 @@ theme_for_the_win_legend = function(){
       #plot.margin = unit(c(t=0,r=0,b=0,l=0), "lines")
     )
 }
-
-
-
-
-
-
-
